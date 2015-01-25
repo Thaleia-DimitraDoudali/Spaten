@@ -1,5 +1,6 @@
 package restaurants;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,10 +15,10 @@ import org.json.simple.parser.ParseException;
 
 
 public class Parse_json {
-
-	public static void main(String[] args) throws JSONException, FileNotFoundException, IOException, ParseException {
-		
-		List<Restaurant> restaurants_list = new ArrayList<Restaurant>();
+	
+	public static List<Restaurant> restaurants_list = new ArrayList<Restaurant>();
+	
+	public void parse_restaurants() throws JSONException, FileNotFoundException, IOException, ParseException {
 		
 		JSONArray arr = new JSONArray(new String(Files.readAllBytes(Paths.get("/home/thaleia/Desktop/items-100.json"))));
 		
@@ -86,6 +87,37 @@ public class Parse_json {
 			System.out.println("\n----------------RESTAURANT " + (i+1)  + "------------------\n");
 			restaurants_list.get(i).print();
 		}
+	}
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException  {
+		Parse_json parser = new Parse_json();
+		/*parse json file with restaurants*/
+		try {
+			parser.parse_restaurants();
+		} catch (Exception e) {}
+		
+		/*serialize each restaurant java object to a byte array*/
+		Serializer ser = new Serializer();
+		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		byte[] bytes;
+		for (int i = 0; i < restaurants_list.size(); i++) {
+			try {
+				bytes = ser.serialize(restaurants_list.get(i));
+				//Restaurant rst = ser.deserialize(bytes);
+				//if (rst.equals(restaurants_list.get(i))) {
+					//System.out.println("ok " + (i+1) + "\n");
+				//}
+				//rst.print();
+				//outputStream.write(bytes);
+			} catch (Exception e) {}
+		}
+		//byte[] serialized_all_rest = outputStream.toByteArray();
+		
+		
+		
+		
+		
+		
 	}
 
 }
