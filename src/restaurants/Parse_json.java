@@ -1,6 +1,5 @@
 package restaurants;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.hbase.client.HTable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,26 +97,25 @@ public class Parse_json {
 		} catch (Exception e) {}
 		
 		/*serialize each restaurant java object to a byte array*/
+		/*Put each serialized restaurant to hbase*/
+		
+		HBase_restaurants hbase_rest = new HBase_restaurants();
+		HTable htable = hbase_rest.construct_HTable();
+		
 		Serializer ser = new Serializer();
-		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		byte[] bytes;
+		
 		for (int i = 0; i < restaurants_list.size(); i++) {
 			try {
-				bytes = ser.serialize(restaurants_list.get(i));
-				//Restaurant rst = ser.deserialize(bytes);
+				byte[] bytes = ser.serialize(restaurants_list.get(i));
+				hbase_rest.put_HTable(i, bytes, htable);
+				byte[] get_bytes = hbase_rest.get_HTable(i, htable);
+				Restaurant rst = ser.deserialize(get_bytes);
 				//if (rst.equals(restaurants_list.get(i))) {
 					//System.out.println("ok " + (i+1) + "\n");
 				//}
 				//rst.print();
-				//outputStream.write(bytes);
 			} catch (Exception e) {}
 		}
-		//byte[] serialized_all_rest = outputStream.toByteArray();
-		
-		
-		
-		
-		
 		
 	}
 
