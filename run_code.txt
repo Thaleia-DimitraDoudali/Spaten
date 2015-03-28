@@ -1,22 +1,29 @@
-Create maven project on eclipse:
+>Create maven project on eclipse:
 	simple
 	group id: reversed url
 	artifact id: name of project
 
-pom.xml:
+>pom.xml:
 	include libraries needed for code. hadoop and hbase libraries should be provided 
 	because the will be customly inserted to classpath
 
-Compile code:
+>Compile code:
 	At initial folder that has the pom.xml file: 
 		mvn clean
 		mvn compile
 		mvn package
 	After package the .jar file should be located inside target/ folder.
 
-Run code:
+>Run code:
+
+RESTAURANTS
+
+   Initial restaurants json file is @scirouter:/various/gmytil/items_restaurants.json
+
+   Parse restaurants file and simply put them to hbase:
+
 	start hbase:
 		cd <hbase root dir>/bin/	
 		./start-hbase.sh
-	export HBASE_CLASSPATH=$(<hbase root dir>/bin/hbase classpath)
+	export HBASE_CLASSPATH=$(/home/thaleia/hbase-0.94.26/bin/hbase classpath)
 	java -cp $HBASE_CLASSPATH:thesis-maven-0.0.1-SNAPSHOT.jar:lib/* restaurants.ParseJson

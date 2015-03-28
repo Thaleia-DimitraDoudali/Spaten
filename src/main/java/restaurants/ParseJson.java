@@ -20,7 +20,7 @@ public class ParseJson {
 	
 	public void parseRestaurants() throws JSONException, FileNotFoundException, IOException, ParseException {
 		
-		JSONArray arr = new JSONArray(new String(Files.readAllBytes(Paths.get("/home/thaleia/Desktop/items-100.json"))));
+		JSONArray arr = new JSONArray(new String(Files.readAllBytes(Paths.get("/home/thaleia/Desktop/thesis/items-100.json"))));
 		
 		/*Iterate through all json objects*/
 		for (int i = 0; i < arr.length(); i++) {
@@ -81,6 +81,7 @@ public class ParseJson {
 			
 			/*create restaurant object*/
 			Restaurant rest = new Restaurant(titleJ, addressJ, ratingJ, rtitleJ, reviewJ, longitude, latitude);
+			//rest.print();
 			restaurantsList.add(rest);
 		}
 	}
