@@ -20,10 +20,24 @@ RESTAURANTS
 
    Initial restaurants json file is @scirouter:/various/gmytil/items_restaurants.json
 
-   Parse restaurants file and simply put them to hbase:
+	Put restaurants.json on localhost HDFS (standalone mode) - when I'll work on the VM I will transfer it from VM to VM's HDFS
+		start hadoop:
+			cd /home/thaleia/hadoop-1.2.1/bin
+			./hadoop namenode -format
+			./start-all.sh
+		copy input file into HDFS:
+			./bin/hadoop dfs -copyFromLocal /home/thaleia/Desktop/thesis/items /user/hduser/hdthaleia/
+			./bin/hadoop dfs -ls /user/hduser/hdthaleia
+			Do not do the following
+			./bin/hadoop fs -put /home/thaleia/Desktop/thesis/items-100.json /tmp/hadoop-thaleia/dfs/items-100.json
+			Confirm put by doing a get
+			./bin/hadoop fs -get /tmp/hadoop-thaleia/dfs/items-100.json /home/thaleia/Desktop/
+			data folder is now the items-100.json file
 
-	start hbase:
-		cd <hbase root dir>/bin/	
-		./start-hbase.sh
-	export HBASE_CLASSPATH=$(/home/thaleia/hbase-0.94.26/bin/hbase classpath)
-	java -cp $HBASE_CLASSPATH:thesis-maven-0.0.1-SNAPSHOT.jar:lib/* restaurants.ParseJson
+	Parse restaurants file and simply put them to hbase:
+		start hbase:
+			cd <hbase root dir>/bin/	
+			./start-hbase.sh
+		export HBASE_CLASSPATH=$(/home/thaleia/hbase-0.94.26/bin/hbase classpath)
+		cd thesis/target
+		java -cp $HBASE_CLASSPATH:thesis-maven-0.0.1-SNAPSHOT.jar:lib/* restaurants.ParseJson
