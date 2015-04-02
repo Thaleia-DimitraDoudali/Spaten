@@ -8,7 +8,10 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+
 
 public class HBaseRestaurants {
 	
@@ -16,6 +19,21 @@ public class HBaseRestaurants {
 		Configuration conf = HBaseConfiguration.create();
 		HTable hTable = new HTable(conf, "restaurantsHTable");
 		return hTable;
+	}
+	
+	public void scanHTable(HTable htable) throws IOException, ClassNotFoundException {
+		Scan scan = new Scan();
+		ResultScanner scanner = htable.getScanner(scan);
+		
+		byte[] resBytes;
+		for (Result result = scanner.next(); result != null; result = scanner.next()) {
+			resBytes = result.getValue(Bytes.toBytes("restaurant"), Bytes.toBytes("rest"));
+			Serializer ser = new Serializer();
+			Restaurant rst = ser.deserialize(resBytes);
+			System.out.println("----Restaurant "+ result.getRow().toString() + " ");
+			rst.print();
+		}
+
 	}
 	
 	public void putHTable(int row, byte[] data, HTable table) throws IOException {

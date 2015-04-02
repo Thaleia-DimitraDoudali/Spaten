@@ -6,4 +6,8 @@
 
 JAR_FILE="target/thesis-maven-0.0.1-SNAPSHOT.jar"
 
-java -cp $HBASE_CLS:$LOCAL_CLS:$JAR_FILE $1
+
+CLASSPATH=$HBASE_CLS:$LOCAL_CLS:$JAR_FILE
+
+echo $CLASSPATH
+java -cp $CLASSPATH $1 $2 
