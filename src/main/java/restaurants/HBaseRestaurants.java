@@ -24,13 +24,13 @@ public class HBaseRestaurants {
 	public void scanHTable(HTable htable) throws IOException, ClassNotFoundException {
 		Scan scan = new Scan();
 		ResultScanner scanner = htable.getScanner(scan);
-		
-		byte[] resBytes;
+		int i=0;
 		for (Result result = scanner.next(); result != null; result = scanner.next()) {
-			resBytes = result.getValue(Bytes.toBytes("restaurant"), Bytes.toBytes("rest"));
+			byte[] resBytes = result.getValue(Bytes.toBytes("restaurant"), Bytes.toBytes("rest"));
 			Serializer ser = new Serializer();
 			Restaurant rst = ser.deserialize(resBytes);
-			System.out.println("----Restaurant "+ result.getRow().toString() + " ");
+			i++;
+			System.out.println("----Restaurant "+ i + " ");
 			rst.print();
 		}
 

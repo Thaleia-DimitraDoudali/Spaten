@@ -26,10 +26,6 @@ public class Restaurant implements Serializable{
 		latitude = latitudeR;
 	}
 	
-	public String getTitle() {
-		return title;
-	}
-	
 	void print() {
 		System.out.println("title = " + this.title + "\n");
 		System.out.println("address = " + this.address + "\n");

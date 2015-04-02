@@ -30,7 +30,12 @@ public class MappersToHBase {
 			double row = r.nextDouble();
 			
 			ParseJson parser = new ParseJson();
-			JSONObject obj = new JSONObject(value);
+			JSONObject obj=null;
+			try {
+				obj = new JSONObject(value.toString());
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+			}
 			Restaurant rest = null;
 			try {
 				rest = parser.returnRestaurant(obj);
@@ -38,15 +43,14 @@ public class MappersToHBase {
 				e.printStackTrace();
 			}		
 			
-			if (!rest.getTitle().isEmpty()) {
-				Serializer ser = new Serializer();
-				byte[] bytes = ser.serialize(rest);
-				Put p = new Put(Bytes.toBytes(row));
-				//Put p = new Put(Bytes.toBytes(key.toString()));
-				p.add(Bytes.toBytes("restaurant"), Bytes.toBytes("rest"), bytes);
+			Serializer ser = new Serializer();
+			byte[] bytes = ser.serialize(rest);					
+			Put p = new Put(Bytes.toBytes(row));
+			//Put p = new Put(Bytes.toBytes(key.toString()));
+			p.add(Bytes.toBytes("restaurant"), Bytes.toBytes("rest"), bytes);
 			
-				context.write(new Text(key.toString()), p);
-			}
+			context.write(new Text(key.toString()), p);
+				
 		}
 		
 	}

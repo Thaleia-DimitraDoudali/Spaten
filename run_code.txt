@@ -41,3 +41,14 @@ RESTAURANTS
 		export HBASE_CLASSPATH=$(/home/thaleia/hbase-0.94.26/bin/hbase classpath)
 		cd thesis/target
 		java -cp $HBASE_CLASSPATH:thesis-maven-0.0.1-SNAPSHOT.jar:lib/* restaurants.ParseJson
+
+
+
+UPDATED run gia to kommati to put sthn hbase:
+	start-all.sh 
+	start-hbase.sh
+	truncate pinaka apo to hbase shell
+	./src/main/scripts/test.sh restaurants.MappersToHBase /data/items-100-new.json >output
+
+DEBUG mapreduce:
+	otan kaneis system.out se kwdika mapper reducer auto tha to vreis sto 50030 -> userlogs -> sugkekrimeno job
