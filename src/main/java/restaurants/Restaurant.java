@@ -2,6 +2,8 @@ package restaurants;
 
 import java.io.Serializable;
 
+import org.apache.hadoop.io.Text;
+
 public class Restaurant implements Serializable{
 
 	private static final long serialVersionUID = 1L;
@@ -24,6 +26,16 @@ public class Restaurant implements Serializable{
 		review = reviewR;
 		longitude = longitudeR;
 		latitude = latitudeR;
+	}
+	
+	public Text getRestText() {
+		return new Text("\ntitle = " + this.title + "\n"
+				+ "address = " + this.address + "\n"
+				+ "rating = " + this.rating + "\n"
+				+ "review title = " + this.reviewTitle + "\n"
+				+ "review = " + this.review + "\n"
+				+ "longitude = " + this.longitude + "\n"
+				+ "latitude = " + this.latitude + "\n");
 	}
 	
 	public void print() {

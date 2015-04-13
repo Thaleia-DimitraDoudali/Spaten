@@ -3,6 +3,7 @@ package examples;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -11,7 +12,8 @@ import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
 
 import restaurants.Restaurant;
@@ -24,14 +26,16 @@ public class InputFromHBase {
 		public void map(ImmutableBytesWritable row, Result value, Context context) 
 				throws InterruptedException, IOException {
 			
+			Serializer ser = new Serializer();
+			Restaurant rst = null;			
 			try {
 				byte[] resBytes = value.getValue(Bytes.toBytes("restaurant"), Bytes.toBytes("rest"));
-				Serializer ser = new Serializer();
-				Restaurant rst = ser.deserialize(resBytes);
-				rst.print();
+				rst = ser.deserialize(resBytes);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			context.write(new Text(row.toString()), rst.getRestText());
 		}
 	}
 	
@@ -40,7 +44,7 @@ public class InputFromHBase {
 		Configuration config = HBaseConfiguration.create();
 		Job job = new Job(config, "InputFromHBase");
 		job.setJarByClass(InputFromHBase.class);    
-
+    	
 		Scan scan = new Scan();
 		scan.setCaching(500);        
 		scan.setCacheBlocks(false);  
@@ -53,9 +57,15 @@ public class InputFromHBase {
 				null,             			// mapper output value
 				job);
 		
-		job.setOutputFormatClass(NullOutputFormat.class);
+    	job.setOutputKeyClass(Text.class);
+    	job.setOutputValueClass(Text.class);
+    	job.setOutputFormatClass(TextOutputFormat.class);
+    	
+        FileOutputFormat.setOutputPath(job, new Path(args[0]));
 
 		job.waitForCompletion(true);
+		
+		//After execution, copyToLocal the args[0] file
 
 	}
 
