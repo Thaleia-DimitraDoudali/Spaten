@@ -33,7 +33,7 @@ public class HBaseRestaurants {
 			System.out.println("----Restaurant "+ i + " ");
 			rst.print();
 		}
-
+		scanner.close();
 	}
 	
 	public void putHTable(int row, byte[] data, HTable table) throws IOException {

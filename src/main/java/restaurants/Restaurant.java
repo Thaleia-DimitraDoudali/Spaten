@@ -26,7 +26,7 @@ public class Restaurant implements Serializable{
 		latitude = latitudeR;
 	}
 	
-	void print() {
+	public void print() {
 		System.out.println("title = " + this.title + "\n");
 		System.out.println("address = " + this.address + "\n");
 		System.out.println("rating = " + this.rating + "\n");

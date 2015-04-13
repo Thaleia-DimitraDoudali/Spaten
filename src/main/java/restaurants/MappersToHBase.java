@@ -23,6 +23,7 @@ import java.util.Random;
 public class MappersToHBase {
 	
 	public static class Map extends Mapper<LongWritable, Text, Text, Put> {
+		
 		public void map(LongWritable key, Text value, Context context)
 				throws IOException, InterruptedException {
 		

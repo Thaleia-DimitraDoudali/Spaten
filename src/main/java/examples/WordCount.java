@@ -1,4 +1,4 @@
-package restaurants;
+package examples;
 
 import java.io.IOException;
 import java.util.Iterator;
