@@ -2,6 +2,7 @@ package restaurants;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -19,8 +20,6 @@ import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 
 public class ParseJson {
-
-	
 	public Restaurant returnRestaurant(JSONObject obj) throws JSONException {
 		
 		JSONArray array;
@@ -93,6 +92,23 @@ public class ParseJson {
 		return rest;
 		
 	}
+	
+	public ArrayList<Restaurant> createRestaurants(String path) throws IOException, JSONException {
+		
+		ArrayList<Restaurant> restaurantsList = new ArrayList<Restaurant>();
+
+		BufferedReader br = new BufferedReader(new FileReader(path));
+		String line;
+        line=br.readLine();
+        while (line != null){
+			JSONObject obj = new JSONObject(line);
+			Restaurant rest = returnRestaurant(obj);
+			restaurantsList.add(rest);
+        	line=br.readLine();
+        }
+        return restaurantsList;
+	}
+	
 	
 	public ArrayList<Restaurant> parseRestaurants() throws JSONException, FileNotFoundException, IOException, ParseException {
 		
