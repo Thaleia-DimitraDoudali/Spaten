@@ -1,8 +1,10 @@
 package checkIns;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import restaurants.ParseJson;
 import restaurants.Restaurant;
@@ -25,13 +27,43 @@ public class CreateCheckIn {
 			//create check-in's
 			for (int j = 0; j < checkNum; j++){
 				//choose a random restaurant from the list of restaurants
-				int restNo = createUniformRandom(restaurants.size());
-				System.out.println("  restaurant chosen: " + restNo);
+				int restNo = createUniformIntRandom(restaurants.size());
+				long timestamp = createRandomTime();
+				String date = getDate(timestamp);
+				System.out.println("\t restaurant chosen: " + restNo + "\t timestamp: " + timestamp + "\t date: "
+						+ date);
 			}
 		}
 	}
 	
-	public int createUniformRandom(int range) {
+	public String getDate(long millis) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(millis);
+				
+		int mYear = calendar.get(Calendar.YEAR);
+		int mMonth = calendar.get(Calendar.MONTH); 
+		if (mMonth == 0)
+			mMonth ++;
+		int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+		
+		String res = mMonth + "/" + mDay + "/" + mYear;
+		return res;
+	}
+	
+	public long createRandomTime() {
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		calendar.clear();
+		calendar.set(2015, Calendar.JANUARY, 1);
+		long fromMillis = calendar.getTimeInMillis();
+		calendar.clear();
+		calendar.set(2015, Calendar.MAY, 30);
+		long toMillis = calendar.getTimeInMillis();
+		long range = toMillis - fromMillis + 1;
+		long res = fromMillis + (long)(Math.random() * range);
+		return res;
+	}
+	
+	public int createUniformIntRandom(int range) {
 		Random r = new Random();
 		int res = r.nextInt(range);
 		return res;
