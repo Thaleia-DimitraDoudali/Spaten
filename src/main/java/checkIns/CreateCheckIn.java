@@ -17,6 +17,7 @@ public class CreateCheckIn {
 	public CreateCheckIn(String file, int userNum, int mean, int dev) {
 		
 		createRestaurants(file);
+		printRsts();
 		
 		for (int i = 1; i <= userNum; i++) {
 			User usr = new User(i);
@@ -27,9 +28,12 @@ public class CreateCheckIn {
 			for (int j = 0; j < checkNum; j++){
 				//choose a random restaurant from the list of restaurants
 				int restNo = createUniformIntRandom(restaurants.size());
+				Restaurant rst = restaurants.get(restNo);
 				long timestamp = createRandomTime();
-				CheckIn chk = new CheckIn(usr.getUserId(), restaurants.get(restNo), timestamp);
+				CheckIn chk = new CheckIn(usr.getUserId(), rst, timestamp);
 				usr.addCheckIn(chk);
+				//add check-in on Restaurant obj
+				rst.addCheckIn(chk);
 			}
 		}
 	}
@@ -39,6 +43,12 @@ public class CreateCheckIn {
 			System.out.println("User no." + usr.getUserId() + ":");
 			System.out.println(" number of check-ins: " + usr.getCheckIns().size());
 			usr.print();
+		}
+	}
+	
+	public void printRsts() {
+		for (Restaurant rst: restaurants) {
+			rst.print();
 		}
 	}
 	
@@ -111,14 +121,19 @@ public class CreateCheckIn {
 		//args[2], args[3]: mean and standard deviation for the gaussian that determines that determines the number
 		//of check-in's per user
 		
-		//creates list of users, each user has a list of check-in's
+		/*creates list of users, each user has a list of check-in's*/
 		CreateCheckIn chkin = new CreateCheckIn(args[0], Integer.parseInt(args[1]), 
 				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-		chkin.printUsers();
-		//get all check-in's ever
+		//chkin.printUsers();
+		
+		/*get all check-in's ever*/
 		List<CheckIn> chks = chkin.getAllCheckIns();
-		for (CheckIn chk: chks) {
+		/*for (CheckIn chk: chks) {
 			chk.print();
-		}
+		}*/
+		
+		/*Each Restaurant now has all his check-in's*/
+		chkin.printRsts();
+		
 	}
 }
