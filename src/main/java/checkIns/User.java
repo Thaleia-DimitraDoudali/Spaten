@@ -13,8 +13,6 @@ public class User {
 	}
 	
 	public void print() {
-		System.out.println("User no." + userId + ":");
-		System.out.println(" number of check-ins: " + checkIns.size());
 		for (CheckIn chk: checkIns) {
 			chk.print();
 		}

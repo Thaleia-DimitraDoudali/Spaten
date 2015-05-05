@@ -8,14 +8,16 @@ public class CheckIn {
 
 	private Restaurant restaurant;
 	private long timestamp;
+	private int userId;
 	
-	public CheckIn(Restaurant rst, long time) {
+	public CheckIn(int id, Restaurant rst, long time) {
+		this.userId = id;
 		this.restaurant = rst;
 		this.timestamp = time;
 	}
 
 	public void print() {
-		String out = "\t restaurant chosen: " + restaurant.getRestId() + "\t timestamp: " + timestamp + "\t date: "
+		String out = "User no." + userId + "\t restaurant chosen: " + restaurant.getRestId() + "\t timestamp: " + timestamp + "\t date: "
 				+ getDate(timestamp); 
 		System.out.println(out);
 	}
@@ -48,6 +50,14 @@ public class CheckIn {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 	
 }
