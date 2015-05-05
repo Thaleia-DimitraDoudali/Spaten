@@ -17,15 +17,27 @@ public class CreateCheckIn {
 		createRestaurants(file);
 		
 		for (int i = 1; i <= userNum; i++) {
-			System.out.print("User no." + i + ":");
+			System.out.println("User no." + i + ":");
 			users.add(i);
 			//how many check-in's per user?
-			int checkNum = createGaussian(mean, dev);
-			System.out.println("\tnumber of check-ins: " + checkNum);
+			int checkNum = createGaussianRandom(mean, dev);
+			System.out.println(" number of check-ins: " + checkNum);
+			//create check-in's
+			for (int j = 0; j < checkNum; j++){
+				//choose a random restaurant from the list of restaurants
+				int restNo = createUniformRandom(restaurants.size());
+				System.out.println("  restaurant chosen: " + restNo);
+			}
 		}
 	}
 	
-	public int createGaussian(int mean, int dev) {
+	public int createUniformRandom(int range) {
+		Random r = new Random();
+		int res = r.nextInt(range);
+		return res;
+	}
+	
+	public int createGaussianRandom(int mean, int dev) {
 		Random r = new Random();
 		double val = r.nextGaussian()*dev + mean;
 		int res = (int) Math.round(val);
