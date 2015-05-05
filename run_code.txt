@@ -52,3 +52,9 @@ UPDATED run gia to kommati to put sthn hbase:
 
 DEBUG mapreduce:
 	otan kaneis system.out se kwdika mapper reducer auto tha to vreis sto 50030 -> userlogs -> sugkekrimeno job
+
+
+
+
+------------------CHECK-IN'S------------------------
+./src/main/scripts/test.sh checkIns.CreateCheckIn items/items-100-new.json 10 170 30
