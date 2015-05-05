@@ -13,13 +13,11 @@ public class Restaurant implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private List<CheckIn> checkIns = new ArrayList<CheckIn>();
+	private List<Review> reviews = new ArrayList<Review>();
 	
 	private int restId;
 	private String title;
 	private String address;
-	private String rating;
-	private String reviewTitle;
-	private String review;
 	private String longitude;
 	private String latitude;
 
@@ -29,24 +27,21 @@ public class Restaurant implements Serializable{
 		restId = id;
 		title = titleR;
 		address = addressR;
-		rating = ratingR;
-		reviewTitle = reviewTitleR;
-		review = reviewR;
 		longitude = longitudeR;
 		latitude = latitudeR;
+		Review rev = new Review(ratingR, reviewTitleR, reviewR);
+		reviews.add(rev);
 	}
 	
 	public void addCheckIn(CheckIn chk) {
 		checkIns.add(chk);
 	}
 	
+	//restructure it!!
 	public Text getRestText() {
 		return new Text("\nid = " + this.restId + "\n"  
 				+ "title = " + this.title + "\n"
 				+ "address = " + this.address + "\n"
-				+ "rating = " + this.rating + "\n"
-				+ "review title = " + this.reviewTitle + "\n"
-				+ "review = " + this.review + "\n"
 				+ "longitude = " + this.longitude + "\n"
 				+ "latitude = " + this.latitude + "\n");
 	}
@@ -55,11 +50,11 @@ public class Restaurant implements Serializable{
 		System.out.println("----------------Restaurant no." + restId + "-------------------");
 		System.out.print("title = " + this.title + "\t");
 		System.out.print("address = " + this.address + "\t");
-		System.out.print("rating = " + this.rating + "\t");
-		System.out.print("review title = " + this.reviewTitle + "\t");
-		System.out.print("review = " + this.review + "\t");
 		System.out.print("longitude = " + this.longitude + "\t");
 		System.out.print("latitude = " + this.latitude + "\n");
+		for (Review rev: reviews) {
+			rev.print();
+		}
 		for (CheckIn chk: checkIns) {
 			chk.print();
 		}
@@ -89,30 +84,6 @@ public class Restaurant implements Serializable{
 		this.address = address;
 	}
 
-	public String getRating() {
-		return rating;
-	}
-
-	public void setRating(String rating) {
-		this.rating = rating;
-	}
-
-	public String getReviewTitle() {
-		return reviewTitle;
-	}
-
-	public void setReviewTitle(String reviewTitle) {
-		this.reviewTitle = reviewTitle;
-	}
-
-	public String getReview() {
-		return review;
-	}
-
-	public void setReview(String review) {
-		this.review = review;
-	}
-
 	public String getLongitude() {
 		return longitude;
 	}
@@ -135,5 +106,13 @@ public class Restaurant implements Serializable{
 
 	public void setCheckIns(List<CheckIn> checkIns) {
 		this.checkIns = checkIns;
+	}
+
+	public List<Review> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
 	}
 }

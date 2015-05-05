@@ -104,9 +104,14 @@ public class ParseJson {
         while (line != null){
 			JSONObject obj = new JSONObject(line);
 			Restaurant rest = returnRestaurant(i, obj);
-			restaurantsList.add(rest);
+			//Add only those that are an actual poi
+			if ((rest.getLatitude() != "") && (rest.getLongitude() != "")) {
+				//TODO: search into the list to see if a rest with that title exists, so as to merge them
+				//Maybe hashmap for easy find?
+				restaurantsList.add(rest);
+	        	i++;
+			}
         	line=br.readLine();
-        	i++;
         }
         return restaurantsList;
 	}

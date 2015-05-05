@@ -133,7 +133,7 @@ public class CreateCheckIn {
 		}*/
 		
 		/*Each Restaurant now has all his check-in's*/
-		chkin.printRsts();
+		//chkin.printRsts();
 		
 	}
 }
