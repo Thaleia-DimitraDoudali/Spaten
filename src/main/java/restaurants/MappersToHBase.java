@@ -39,7 +39,7 @@ public class MappersToHBase {
 			}
 			Restaurant rest = null;
 			try {
-				rest = parser.returnRestaurant(obj);
+				rest = parser.returnRestaurant(Integer.parseInt(key.toString()), obj);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}		

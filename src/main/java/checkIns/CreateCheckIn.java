@@ -12,42 +12,32 @@ import restaurants.Restaurant;
 public class CreateCheckIn {
 	
 	private List<Restaurant> restaurants = new ArrayList<Restaurant>();
-	private List<Integer> users = new ArrayList<Integer>();
+	private List<User> users = new ArrayList<User>();
 
 	public CreateCheckIn(String file, int userNum, int mean, int dev) {
 		
 		createRestaurants(file);
 		
 		for (int i = 1; i <= userNum; i++) {
-			System.out.println("User no." + i + ":");
-			users.add(i);
+			User usr = new User(i);
+			users.add(usr);
 			//how many check-in's per user?
 			int checkNum = createGaussianRandom(mean, dev);
-			System.out.println(" number of check-ins: " + checkNum);
 			//create check-in's
 			for (int j = 0; j < checkNum; j++){
 				//choose a random restaurant from the list of restaurants
 				int restNo = createUniformIntRandom(restaurants.size());
 				long timestamp = createRandomTime();
-				String date = getDate(timestamp);
-				System.out.println("\t restaurant chosen: " + restNo + "\t timestamp: " + timestamp + "\t date: "
-						+ date);
+				CheckIn chk = new CheckIn(restaurants.get(restNo), timestamp);
+				usr.addCheckIn(chk);
 			}
 		}
 	}
 	
-	public String getDate(long millis) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(millis);
-				
-		int mYear = calendar.get(Calendar.YEAR);
-		int mMonth = calendar.get(Calendar.MONTH); 
-		if (mMonth == 0)
-			mMonth ++;
-		int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-		
-		String res = mMonth + "/" + mDay + "/" + mYear;
-		return res;
+	public void printUsers() {
+		for (User usr : users) {
+			usr.print();
+		}
 	}
 	
 	public long createRandomTime() {
@@ -94,13 +84,23 @@ public class CreateCheckIn {
 	public void setRestaurants(List<Restaurant> restaurants) {
 		this.restaurants = restaurants;
 	}
+	
+	public List<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<User> users) {
+		this.users = users;
+	}
 
 	public static void main(String[] args) {
 		//args[0]: json file with restaurants
 		//args[1]: number of users
 		//args[2], args[3]: mean and standard deviation for the gaussian that determines that determines the number
 		//of check-in's per user
-		new CreateCheckIn(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+		CreateCheckIn chkin = new CreateCheckIn(args[0], Integer.parseInt(args[1]), 
+				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+		chkin.printUsers();
 	}
 
 }

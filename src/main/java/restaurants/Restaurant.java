@@ -8,6 +8,7 @@ public class Restaurant implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	
+	private int restId;
 	private String title;
 	private String address;
 	private String rating;
@@ -17,8 +18,9 @@ public class Restaurant implements Serializable{
 	private String latitude;
 
 
-	Restaurant(String titleR, String addressR, String ratingR, String reviewTitleR, String reviewR, String longitudeR, 
+	Restaurant(int id, String titleR, String addressR, String ratingR, String reviewTitleR, String reviewR, String longitudeR, 
 			String latitudeR) {
+		restId = id;
 		title = titleR;
 		address = addressR;
 		rating = ratingR;
@@ -46,5 +48,13 @@ public class Restaurant implements Serializable{
 		System.out.println("review = " + this.review + "\n");
 		System.out.println("longitude = " + this.longitude + "\n");
 		System.out.println("latitude = " + this.latitude + "\n");
+	}
+
+	public int getRestId() {
+		return restId;
+	}
+
+	public void setRestId(int restId) {
+		this.restId = restId;
 	}
 }

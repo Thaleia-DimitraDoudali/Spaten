@@ -20,7 +20,7 @@ import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 
 public class ParseJson {
-	public Restaurant returnRestaurant(JSONObject obj) throws JSONException {
+	public Restaurant returnRestaurant(int id, JSONObject obj) throws JSONException {
 		
 		JSONArray array;
 		String titleJ   = "";
@@ -87,7 +87,7 @@ public class ParseJson {
 		}
 		
 		/*create restaurant object*/
-		Restaurant rest = new Restaurant(titleJ, addressJ, ratingJ, rtitleJ, reviewJ, longitude, latitude);
+		Restaurant rest = new Restaurant(id, titleJ, addressJ, ratingJ, rtitleJ, reviewJ, longitude, latitude);
 		
 		return rest;
 		
@@ -100,11 +100,13 @@ public class ParseJson {
 		BufferedReader br = new BufferedReader(new FileReader(path));
 		String line;
         line=br.readLine();
+        int i = 1;
         while (line != null){
 			JSONObject obj = new JSONObject(line);
-			Restaurant rest = returnRestaurant(obj);
+			Restaurant rest = returnRestaurant(i, obj);
 			restaurantsList.add(rest);
         	line=br.readLine();
+        	i++;
         }
         return restaurantsList;
 	}
@@ -124,12 +126,14 @@ public class ParseJson {
             BufferedReader br=new BufferedReader(new InputStreamReader(fs.open(pt)));
             String line;
             line=br.readLine();
+            int i = 1;
             while (line != null){
 				JSONObject obj = new JSONObject(line);
-				Restaurant rest = returnRestaurant(obj);
+				Restaurant rest = returnRestaurant(i, obj);
 				//rest.print();
 				restaurantsList.add(rest);
             	line=br.readLine();
+            	i ++;
             }
 		} catch(Exception e){
 			e.printStackTrace();
