@@ -38,8 +38,8 @@ public class TransformJSONFile {
 	
 	public static void main(String[] args) {
 		
-		String source = "/home/thaleia/Desktop/thesis/items/items-100.json";
-		String dest = "/home/thaleia/Desktop/thesis/items/items-100-new.json";
+		String source = "/home/thaleia/Desktop/thesis/items/items-1k.json";
+		String dest = "/home/thaleia/Desktop/thesis/items/items-1k-new.json";
 		
 		try {
 			new TransformJSONFile(source, dest);

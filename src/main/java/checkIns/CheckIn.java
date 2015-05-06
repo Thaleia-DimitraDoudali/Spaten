@@ -1,6 +1,7 @@
 package checkIns;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import restaurants.Restaurant;
 import restaurants.Review;
@@ -27,18 +28,13 @@ public class CheckIn {
 		System.out.println();
 	}
 	
-	public String getDate(long millis) {
+	public Date getDate(long millis) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(millis);
-				
-		int mYear = calendar.get(Calendar.YEAR);
-		int mMonth = calendar.get(Calendar.MONTH); 
-		if (mMonth == 0)
-			mMonth ++;
-		int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+		Date dt = calendar.getTime();
 		
-		String res = mMonth + "/" + mDay + "/" + mYear;
-		return res;
+		return dt;
 	}
 	
 	public Restaurant getRestaurant() {

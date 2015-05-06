@@ -21,6 +21,7 @@ public class CreateCheckIn {
 		
 		createRestaurants(file);
 		//printRsts();
+		System.out.println(restaurantsMap.size());
 		
 		for (int i = 1; i <= userNum; i++) {
 			User usr = new User(i);
@@ -130,7 +131,6 @@ public class CreateCheckIn {
 		CreateCheckIn chkin = new CreateCheckIn(args[0], Integer.parseInt(args[1]), 
 				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 		chkin.printUsers();
-		
 		/*get all check-in's ever*/
 		List<CheckIn> chks = chkin.getAllCheckIns();
 		/*for (CheckIn chk: chks) {
