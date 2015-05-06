@@ -1,6 +1,7 @@
 package checkIns;
 
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 
 import restaurants.Restaurant;
@@ -22,7 +23,7 @@ public class CheckIn {
 
 	public void print() {
 		String out = "User no." + userId + "\t restaurant chosen: " + restaurant.getRestId() + "\t timestamp: " + timestamp + "\t date: "
-				+ getDate(timestamp) + "\t review: "; 
+				+ getDate(timestamp) + "\t "; 
 		System.out.print(out);
 		review.print();
 		System.out.println();

@@ -2,6 +2,8 @@ package checkIns;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,8 +46,12 @@ public class CreateCheckIn {
 				} else { //else the user looses that check-in
 					//System.out.println("No review available" + restNo);
 				}
-				
 			}
+		}
+		//Sort user's check-in's according to date
+		for (User usr: users) {
+			Comparator<CheckIn> comparator = new ComparatorCheckIn();
+			Collections.sort(usr.getCheckIns(), comparator);
 		}
 	}
 	
