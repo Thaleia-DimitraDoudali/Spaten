@@ -37,6 +37,14 @@ public class Restaurant implements Serializable{
 		checkIns.add(chk);
 	}
 	
+	public void addReview(Review rev) {
+		reviews.add(rev);
+	}
+	
+	public void removeReview() {
+		reviews.remove(0);
+	}
+	
 	//restructure it!!
 	public Text getRestText() {
 		return new Text("\nid = " + this.restId + "\n"  

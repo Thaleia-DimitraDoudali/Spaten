@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -93,9 +94,10 @@ public class ParseJson {
 		
 	}
 	
-	public ArrayList<Restaurant> createRestaurants(String path) throws IOException, JSONException {
+	public HashMap<Integer, Restaurant> createRestaurants(String path) throws IOException, JSONException {
 		
-		ArrayList<Restaurant> restaurantsList = new ArrayList<Restaurant>();
+		HashMap<String, Restaurant> restaurantsMap = new HashMap<String, Restaurant>();
+		HashMap<Integer, Restaurant> restRetMap = new HashMap<Integer, Restaurant>();
 
 		BufferedReader br = new BufferedReader(new FileReader(path));
 		String line;
@@ -106,14 +108,19 @@ public class ParseJson {
 			Restaurant rest = returnRestaurant(i, obj);
 			//Add only those that are an actual poi
 			if ((rest.getLatitude() != "") && (rest.getLongitude() != "")) {
-				//TODO: search into the list to see if a rest with that title exists, so as to merge them
-				//Maybe hashmap for easy find?
-				restaurantsList.add(rest);
-	        	i++;
+				//If the restaurant already exists on the HashMap, merge their reviews
+				if (restaurantsMap.containsKey(rest.getTitle())) {
+					Restaurant rst = restaurantsMap.get(rest.getTitle());
+					rst.addReview(rest.getReviews().get(0));
+				} else {
+					restaurantsMap.put(rest.getTitle(), rest);
+					restRetMap.put(i, rest);
+					i++;
+				}
 			}
         	line=br.readLine();
         }
-        return restaurantsList;
+        return restRetMap;
 	}
 	
 	

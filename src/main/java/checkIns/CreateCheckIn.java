@@ -2,22 +2,25 @@ package checkIns;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
 
 import restaurants.ParseJson;
 import restaurants.Restaurant;
+import restaurants.Review;
 
 public class CreateCheckIn {
 	
-	private List<Restaurant> restaurants = new ArrayList<Restaurant>();
+	HashMap<Integer, Restaurant> restaurantsMap = new HashMap<Integer, Restaurant>();
 	private List<User> users = new ArrayList<User>();
 
 	public CreateCheckIn(String file, int userNum, int mean, int dev) {
 		
 		createRestaurants(file);
-		printRsts();
+		//printRsts();
 		
 		for (int i = 1; i <= userNum; i++) {
 			User usr = new User(i);
@@ -27,13 +30,20 @@ public class CreateCheckIn {
 			//create check-in's
 			for (int j = 0; j < checkNum; j++){
 				//choose a random restaurant from the list of restaurants
-				int restNo = createUniformIntRandom(restaurants.size());
-				Restaurant rst = restaurants.get(restNo);
-				long timestamp = createRandomTime();
-				CheckIn chk = new CheckIn(usr.getUserId(), rst, timestamp);
-				usr.addCheckIn(chk);
-				//add check-in on Restaurant obj
-				rst.addCheckIn(chk);
+				int restNo = createUniformIntRandom(restaurantsMap.size());
+				Restaurant rst = restaurantsMap.get(restNo);
+				//If the restaurant has available reviews, then assign it to a user
+				if (rst.getReviews().size() != 0) {
+					Review review = rst.getReviews().get(0);
+					long timestamp = createRandomTime();
+					CheckIn chk = new CheckIn(usr.getUserId(), rst, timestamp, review);
+					usr.addCheckIn(chk);
+					rst.addCheckIn(chk);
+					rst.removeReview();
+				} else { //else the user looses that check-in
+					//System.out.println("No review available" + restNo);
+				}
+				
 			}
 		}
 	}
@@ -47,8 +57,11 @@ public class CreateCheckIn {
 	}
 	
 	public void printRsts() {
-		for (Restaurant rst: restaurants) {
-			rst.print();
+		Iterator<Integer> keySetIterator = restaurantsMap.keySet().iterator();
+		while(keySetIterator.hasNext()){
+			  Integer key = keySetIterator.next();
+			  System.out.println("key: " + key + " value: ");
+			  restaurantsMap.get(key).print();
 		}
 	}
 	
@@ -67,7 +80,7 @@ public class CreateCheckIn {
 	
 	public int createUniformIntRandom(int range) {
 		Random r = new Random();
-		int res = r.nextInt(range);
+		int res = r.nextInt(range) + 1;
 		return res;
 	}
 	
@@ -83,7 +96,7 @@ public class CreateCheckIn {
 		ParseJson parser = new ParseJson();
 		//parse json file with restaurants
 		try {
-			restaurants = parser.createRestaurants(file);
+			restaurantsMap = parser.createRestaurants(file);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -97,14 +110,6 @@ public class CreateCheckIn {
 			}
 		}
 		return chks;
-	}
-
-	public List<Restaurant> getRestaurants() {
-		return restaurants;
-	}
-
-	public void setRestaurants(List<Restaurant> restaurants) {
-		this.restaurants = restaurants;
 	}
 	
 	public List<User> getUsers() {
@@ -124,7 +129,7 @@ public class CreateCheckIn {
 		/*creates list of users, each user has a list of check-in's*/
 		CreateCheckIn chkin = new CreateCheckIn(args[0], Integer.parseInt(args[1]), 
 				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-		//chkin.printUsers();
+		chkin.printUsers();
 		
 		/*get all check-in's ever*/
 		List<CheckIn> chks = chkin.getAllCheckIns();
