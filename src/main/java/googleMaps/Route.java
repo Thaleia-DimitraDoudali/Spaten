@@ -5,6 +5,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import checkIns.CheckIn;
+import checkIns.User;
+
 public class Route {
 	
 	public Route() {
@@ -43,6 +46,23 @@ public class Route {
 		}	
 	    
 	    return res;
+	}
+	
+	public void createRoutes(User usr) {
+		int N = usr.getCheckIns().size();
+		usr.print();
+		for (int i = 0; i < N-1; i++) {
+			CheckIn chkFrom = usr.getCheckIns().get(i);
+			String longFrom = chkFrom.getRestaurant().getLongitude();
+			String latFrom = chkFrom.getRestaurant().getLatitude();
+			CheckIn chkTo = usr.getCheckIns().get(i+1);
+			String longTo = chkTo.getRestaurant().getLongitude();
+			String latTo = chkTo.getRestaurant().getLatitude();
+			String jsonRoute = getRoute(longFrom, latFrom, longTo, latTo);
+			usr.addRoute(jsonRoute);
+			System.out.println(longFrom + ", " + latFrom + " " + longTo + ", " + latTo);
+			//System.out.println(jsonRoute.substring(0, 30));
+		}
 	}
 
 	public static void main(String[] args) {

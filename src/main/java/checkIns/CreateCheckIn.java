@@ -1,5 +1,7 @@
 package checkIns;
 
+import googleMaps.Route;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -23,7 +25,7 @@ public class CreateCheckIn {
 		
 		createRestaurants(file);
 		//printRsts();
-		System.out.println(restaurantsMap.size());
+		//System.out.println(restaurantsMap.size());
 		
 		for (int i = 1; i <= userNum; i++) {
 			User usr = new User(i);
@@ -119,6 +121,13 @@ public class CreateCheckIn {
 		return chks;
 	}
 	
+	public void createUserRoutes() {
+		for (User usr: users) {
+			Route rt = new Route();
+			rt.createRoutes(usr);
+		}
+	}
+	
 	public List<User> getUsers() {
 		return users;
 	}
@@ -136,10 +145,15 @@ public class CreateCheckIn {
 		/*creates list of users, each user has a list of check-in's*/
 		CreateCheckIn chkin = new CreateCheckIn(args[0], Integer.parseInt(args[1]), 
 				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-		chkin.printUsers();
+		//chkin.printUsers();
+		
+		//For each user take the list of his check-in's and create the intermediate routes from google maps api
+		chkin.createUserRoutes();
+
+		
 		/*get all check-in's ever*/
-		List<CheckIn> chks = chkin.getAllCheckIns();
-		/*for (CheckIn chk: chks) {
+		/*List<CheckIn> chks = chkin.getAllCheckIns();
+		for (CheckIn chk: chks) {
 			chk.print();
 		}*/
 		

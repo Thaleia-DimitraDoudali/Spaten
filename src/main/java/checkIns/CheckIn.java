@@ -22,7 +22,11 @@ public class CheckIn {
 	}
 
 	public void print() {
-		String out = "User no." + userId + "\t restaurant chosen: " + restaurant.getRestId() + "\t timestamp: " + timestamp + "\t date: "
+		String out = "User no." + userId + "\t restaurant chosen: " + restaurant.getRestId() 
+				+ " (" + restaurant.getLongitude()
+				+ ", " + restaurant.getLatitude() + ") "
+				+ "adress: " + restaurant.getAddress()
+				+ "\t timestamp: " + timestamp + "\t date: "
 				+ getDate(timestamp) + "\t "; 
 		System.out.print(out);
 		review.print();
