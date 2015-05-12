@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import pois.Poi;
+import pois.Review;
+
 public class DBconnector {
 
 	private Connection connection = null;
@@ -40,12 +43,54 @@ public class DBconnector {
 		}
 		System.out.println("Created table 'pois'...");
 	}
+	
+	public void createPoiTable() {
+		try {
+			statement = connection.createStatement();
+			String sql = "CREATE TABLE pois(poisId SERIAL,"
+					+ " location GEOGRAPHY(POINT,4326),"
+					+ "title TEXT, adress TEXT);";
+			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void createRevTable() {
+		try {
+			statement = connection.createStatement();
+			String sql = "CREATE TABLE reviews(revId INT NOT NULL,"
+					+ " rating TEXT, reviewTitle TEXT, review TEXT);";
+			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void dropTable() {
 		try {
 			statement = connection.createStatement();
 			String sql = "DROP TABLE pois;";
 			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void insertPoi(Poi p) {
+		try {
+			statement = connection.createStatement();
+			String sql = "INSERT INTO pois (poisId, location, title, adress) VALUES (" + p.getPoiId()  
+					+ ", ST_GeographyFromText('SRID=4326;POINT(" + p.getLongitude() + " " + p.getLatitude() + ")')"
+							+ ", '" + p.getTitle() + "', '" + p.getAddress()
+					+ "');";
+			statement.executeUpdate(sql);
+			for (Review r: p.getReviews()) {
+				sql = "INSERT INTO reviews (revId, rating, reviewTitle, review) VALUES ("
+					+ p.getPoiId() + ", '" + r.getRating() + "', '" + r.getReviewTitle()
+					+ "', '" + r.getReview() + "')";
+				statement.executeUpdate(sql);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
