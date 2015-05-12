@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +33,7 @@ public class CreateChkIn {
 		// We assign a random review
 		int revNo = createUniformIntRandom(p.getReviews().size()) - 1;
 		Review review = p.getReviews().get(revNo);
-		long timestamp = createTimestamp();
+		long timestamp = createTimestamp(9,0,0);
 		CheckIn chk = new CheckIn(usr.getUserId(), p, timestamp, review);
 		usr.addCheckIn(chk);
 		p.addCheckIn(chk);
@@ -40,16 +41,16 @@ public class CreateChkIn {
 		// for (int i = 1; i < chkNum; i++) {
 		// Find the next poi, it will be random but in range of parameter km, it shouldnt be one it went that day
 		//TODO: store the pois he visited
-		System.out.println("Finding in range from poi " + p.getTitle());
+		//System.out.println("Finding in range from poi " + p.getTitle());
 		poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
 				p.getLatitude(), dist);
 		if (!poisInRange.isEmpty()) {
 			for (Poi poi : poisInRange)
-				System.out.println(poi.getTitle());
+				//System.out.println(poi.getTitle());
 			// Choose one random between those!!
 			restNo = createUniformIntRandom(poisInRange.size()) - 1;
 			Poi newP = poisInRange.get(restNo);
-			System.out.println("Chose poi " + newP.getTitle());
+			//System.out.println("Chose poi " + newP.getTitle());
 			// TODO: create the next check-in, google api, get duration, set
 			// timestamp
 			Route rt = new Route();
@@ -58,13 +59,24 @@ public class CreateChkIn {
 			// System.out.println(jsonRoute);
 			//TODO: get from json the duration so as to set the timestamp
 			//TODO: get and store the intermediate long lats - store somehow all gps traces he went by
+			double duration = 0;
 			try {
-				double duration = rt.getDuration(jsonRoute);
+				duration = rt.getDuration(jsonRoute);
 				System.out.println(duration);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			//TODO: set the check-in's timestamp
+			//He stays for 2 hours at each place
+			long timeBefore = usr.getCheckIns().get(0).getTimestamp();
+			long time = timeBefore + 2*3600*1000 + (long)duration*1000;
+			
+			revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
+			review = newP.getReviews().get(revNo);
+			chk = new CheckIn(usr.getUserId(), newP, time, review);
+			usr.addCheckIn(chk);
+			newP.addCheckIn(chk);
 		}
 	}
 
@@ -77,10 +89,10 @@ public class CreateChkIn {
 		}
 	}
 
-	public long createTimestamp() {
+	public long createTimestamp(int hour, int min, int sec) {
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		// TODO: date as parameter
-		calendar.set(2015, Calendar.FEBRUARY, 1, 9 - 2, 0, 0);
+		calendar.set(2015, Calendar.FEBRUARY, 1, hour -2, min, sec);
 		return calendar.getTimeInMillis();
 	}
 
