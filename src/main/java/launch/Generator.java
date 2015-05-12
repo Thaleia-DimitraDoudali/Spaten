@@ -29,6 +29,7 @@ public class Generator {
 				+ "that determines the number of a user's check-in's per day");
 		options.addOption("chkNumStDev", true, "Standard Deviation of Gauss "
 				+ "that determines the number of a user's check-in's per day");
+		options.addOption("dist", true, "Number of maximum diastance a user can walk between check-in's");
 		
 		//Parse command line parameters
 		CommandLineParser parser = new GnuParser();
@@ -41,22 +42,23 @@ public class Generator {
 		Integer userNum = Integer.parseInt(cmd.getOptionValue("userNum"));
 		Integer chkNumMean = Integer.parseInt(cmd.getOptionValue("chkNumMean"));
 		Integer chkNumStDev = Integer.parseInt(cmd.getOptionValue("chkNumStDev"));
+		Double dist = Double.parseDouble(cmd.getOptionValue("dist"));
 		
 		//Number of pois in DB
 		DBconnector db = new DBconnector();
 		db.connect();
 		int poisNum = db.getPoisNum();
-
+		
 		//For each user create their check-in's
 		for (int i = 1; i <= userNum; i++) {
 			
 			User usr = new User(i);
 			users.add(usr);
-			
+			System.out.println("-------------User no." + i + "-------------");
 			CreateChkIn crChk = new CreateChkIn();
 			//how many check-in's per day?
 			int checkNum = crChk.createGaussianRandom(chkNumMean, chkNumStDev);
-			crChk.createDailyCheckIn(usr, checkNum, poisNum, db);
+			crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist);
 		}
 	}
 

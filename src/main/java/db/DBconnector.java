@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import pois.Poi;
 import pois.Review;
@@ -164,7 +165,8 @@ public class DBconnector {
 		System.out.println("Inserted record on 'pois'...");
 	}
 	
-	public void findInRange(String lng, String lat, double dist) {
+	public ArrayList<Poi> findInRange(int id, String lng, String lat, double dist) {
+		ArrayList<Poi> pois = new ArrayList<Poi>();
 		try {
 			statement = connection.createStatement();
 			String sql = "SELECT * FROM pois WHERE ("
@@ -174,18 +176,25 @@ public class DBconnector {
 					+ ");";
 			ResultSet rs = statement.executeQuery(sql);
 			Statement st = connection.createStatement();
+			int i = 1;
+			//Return a list with all pois found in range, except itself
 			while (rs.next()) {
-				//System.out.println(rs.getString("location"));
 				sql = " SELECT ST_X(location::geometry), ST_Y(location::geometry) FROM pois WHERE poisId = "
 						+ rs.getInt("poisId") + ";";
 				ResultSet res = st.executeQuery(sql);
 				if (res.next()) {
-					System.out.println(res.getDouble("st_x") + " " + res.getDouble("st_y"));
+					//System.out.println(i + " " + res.getDouble("st_x") + " " + res.getDouble("st_y"));
+				}
+				i++;
+				int pId = rs.getInt("poisId");
+				if (pId != id) {
+					pois.add(getPoi(pId));
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return pois;
 	}
 
 
@@ -195,7 +204,7 @@ public class DBconnector {
 		db.createTable();
 		db.insert(4, "37.975500", "23.784756");
 		db.insert(5, "37.975600", "23.784786");
-		db.findInRange("37.974908", "23.782941", 300);
+		//db.findInRange("37.974908", "23.782941", 300);
 		// db.dropTable();
 	}
 
