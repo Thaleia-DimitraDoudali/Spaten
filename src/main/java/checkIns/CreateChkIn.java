@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 
+import org.json.JSONException;
+
 import pois.Poi;
 import pois.Review;
 import db.DBconnector;
@@ -36,17 +38,33 @@ public class CreateChkIn {
 		p.addCheckIn(chk);
 		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
 		// for (int i = 1; i < chkNum; i++) {
-		// Find the next poi, it will be random but in range of parameter km
+		// Find the next poi, it will be random but in range of parameter km, it shouldnt be one it went that day
+		//TODO: store the pois he visited
 		System.out.println("Finding in range from poi " + p.getTitle());
 		poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
 				p.getLatitude(), dist);
-		if (!poisInRange.isEmpty()){
+		if (!poisInRange.isEmpty()) {
 			for (Poi poi : poisInRange)
 				System.out.println(poi.getTitle());
-			//Choose one random between those!!
+			// Choose one random between those!!
 			restNo = createUniformIntRandom(poisInRange.size()) - 1;
-			p = poisInRange.get(restNo);
-			System.out.println("Chose poi " + p.getTitle());
+			Poi newP = poisInRange.get(restNo);
+			System.out.println("Chose poi " + newP.getTitle());
+			// TODO: create the next check-in, google api, get duration, set
+			// timestamp
+			Route rt = new Route();
+			String jsonRoute = rt.getRoute(p.getLongitude(), p.getLatitude(),
+					newP.getLongitude(), newP.getLatitude());
+			// System.out.println(jsonRoute);
+			//TODO: get from json the duration so as to set the timestamp
+			//TODO: get and store the intermediate long lats - store somehow all gps traces he went by
+			try {
+				double duration = rt.getDuration(jsonRoute);
+				System.out.println(duration);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

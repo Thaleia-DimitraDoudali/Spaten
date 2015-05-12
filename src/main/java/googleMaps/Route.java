@@ -9,6 +9,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import checkIns.CheckIn;
 import checkIns.User;
 
@@ -29,7 +33,8 @@ public class Route {
 					+ "&destination="
 					+ longTo
 					+ ","
-					+ latTo;
+					+ latTo
+					+ "&mode=walking";
 
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -75,6 +80,19 @@ public class Route {
 		}
 	}
 
+	public double getDuration(String json) throws JSONException {
+		JSONObject obj = new JSONObject(json);
+		JSONArray jsonRoutes = obj.getJSONArray("routes");
+		JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
+		JSONArray jsonLegs = jsonRoute.getJSONArray("legs");
+		JSONObject jsonLeg = jsonLegs.getJSONObject(0);
+		JSONObject jsonDuration = jsonLeg.getJSONObject("duration");
+
+		//duration in seconds
+		double value = jsonDuration.getDouble("value");
+		return value;
+	}
+	
 	public void createRoutes(User usr) {
 		int N = usr.getCheckIns().size();
 		usr.print();
