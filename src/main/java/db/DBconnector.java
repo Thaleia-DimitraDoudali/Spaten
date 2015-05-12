@@ -77,6 +77,61 @@ public class DBconnector {
 		}
 	}
 	
+	public int getPoisNum() {
+		int res = 0;
+		try {
+			statement = connection.createStatement();
+			String sql = "SELECT COUNT(*) AS total FROM pois;";
+			ResultSet rs = statement.executeQuery(sql);
+			if (rs.next())
+				res = rs.getInt("total");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return res; 
+	}
+	
+	public Poi getPoi(int id) {
+		Poi p = null;
+		try {
+			statement = connection.createStatement();
+			Statement st = connection.createStatement();
+			String title = "", adress = "", lng = "", lat = "", rating = "", rev = "", rTitle = "";
+			String sql = "SELECT * FROM pois WHERE poisId = " + id + ";";
+			ResultSet rs = statement.executeQuery(sql);
+			if (rs.next()) {
+				title = rs.getString("title");
+				adress = rs.getString("adress");
+				sql = " SELECT ST_X(location::geometry), ST_Y(location::geometry) FROM pois WHERE poisId = "
+						+ id + ";";
+				ResultSet res = st.executeQuery(sql);
+				if (res.next()) {
+					lng = res.getString("st_x");
+					lat = res.getString("st_y");
+				}
+				sql = " SELECT * FROM reviews WHERE revId = "
+						+ id + ";";
+				res = st.executeQuery(sql);
+				if (res.next()){
+					rating = res.getString("rating");
+					rTitle = res.getString("reviewTitle");
+					rev = res.getString("review");
+				}
+				p = new Poi(id, title, adress, rating, rTitle, rev, lng, lat);
+				while (res.next()){
+					rating = res.getString("rating");
+					rTitle = res.getString("reviewTitle");
+					rev = res.getString("review");
+					Review r = new Review(rating, rTitle, rev);
+					p.addReview(r);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return p;
+	}
+	
 	public void insertPoi(Poi p) {
 		try {
 			statement = connection.createStatement();
