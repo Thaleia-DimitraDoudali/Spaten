@@ -80,11 +80,11 @@ public class Route {
 		usr.print();
 		for (int i = 0; i < N - 1; i++) {
 			CheckIn chkFrom = usr.getCheckIns().get(i);
-			String longFrom = chkFrom.getRestaurant().getLongitude();
-			String latFrom = chkFrom.getRestaurant().getLatitude();
+			String longFrom = chkFrom.getPoi().getLongitude();
+			String latFrom = chkFrom.getPoi().getLatitude();
 			CheckIn chkTo = usr.getCheckIns().get(i + 1);
-			String longTo = chkTo.getRestaurant().getLongitude();
-			String latTo = chkTo.getRestaurant().getLatitude();
+			String longTo = chkTo.getPoi().getLongitude();
+			String latTo = chkTo.getPoi().getLatitude();
 			String jsonRoute = getRoute(longFrom, latFrom, longTo, latTo);
 			usr.addRoute(jsonRoute);
 			System.out.println(longFrom + ", " + latFrom + " " + longTo + ", "

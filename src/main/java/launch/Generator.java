@@ -56,7 +56,7 @@ public class Generator {
 			CreateChkIn crChk = new CreateChkIn();
 			//how many check-in's per day?
 			int checkNum = crChk.createGaussianRandom(chkNumMean, chkNumStDev);
-			crChk.createCheckIn(usr, checkNum, poisNum, db);
+			crChk.createDailyCheckIn(usr, checkNum, poisNum, db);
 		}
 	}
 

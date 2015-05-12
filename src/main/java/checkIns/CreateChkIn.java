@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.TimeZone;
 
 import pois.Poi;
+import pois.Review;
 import db.DBconnector;
 
 
@@ -21,11 +22,21 @@ public class CreateChkIn {
 	
 	private List<User> users = new ArrayList<User>();
 
-	public void createCheckIn(User usr, int chkNum, int poisNum, DBconnector db) {
+	public void createDailyCheckIn(User usr, int chkNum, int poisNum, DBconnector db) {
 		//First poi will be random
 		int restNo = createUniformIntRandom(poisNum);
 		Poi p = db.getPoi(restNo);
-		p.print();
+		//User starts-off his day at 9am and will stay 2h at the first poi
+		//We assign a random review
+		int revNo = createUniformIntRandom(p.getReviews().size()) - 1;
+		Review review = p.getReviews().get(revNo);
+		long timestamp = createTimestamp();
+		CheckIn chk = new CheckIn(usr.getUserId(), p, timestamp, review);
+		usr.addCheckIn(chk);
+		p.addCheckIn(chk);
+		for (int i = 1; i < chkNum; i++) {
+			//Find the next poi, it will be random but in range of parameter km
+		}
 	}
 	
 	public void printUsers() {
@@ -36,6 +47,12 @@ public class CreateChkIn {
 		}
 	}
 	
+	public long createTimestamp() {
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		//TODO: date as parameter
+		calendar.set(2015, Calendar.FEBRUARY, 1, 9-2, 0, 0);
+		return calendar.getTimeInMillis();
+	}
 	
 	public long createRandomTime() {
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

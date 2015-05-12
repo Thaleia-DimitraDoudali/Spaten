@@ -4,28 +4,28 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 
-import restaurants.Restaurant;
-import restaurants.Review;
+import pois.Poi;
+import pois.Review;
 
 public class CheckIn {
 
-	private Restaurant restaurant;
+	private Poi poi;
 	private Review review;
 	private long timestamp;
 	private int userId;
 	
-	public CheckIn(int id, Restaurant rst, long time, Review rev) {
+	public CheckIn(int id, Poi rst, long time, Review rev) {
 		this.userId = id;
-		this.restaurant = rst;
+		this.poi = rst;
 		this.timestamp = time;
 		this.review = rev;
 	}
 
 	public void print() {
-		String out = "User no." + userId + "\t restaurant chosen: " + restaurant.getRestId() 
-				+ " (" + restaurant.getLongitude()
-				+ ", " + restaurant.getLatitude() + ") "
-				+ "adress: " + restaurant.getAddress()
+		String out = "User no." + userId + "\t poi chosen: " + poi.getPoiId() 
+				+ " (" + poi.getLongitude()
+				+ ", " + poi.getLatitude() + ") "
+				+ "adress: " + poi.getAddress()
 				+ "\t timestamp: " + timestamp + "\t date: "
 				+ getDate(timestamp) + "\t "; 
 		System.out.print(out);
@@ -42,12 +42,12 @@ public class CheckIn {
 		return dt;
 	}
 	
-	public Restaurant getRestaurant() {
-		return restaurant;
+	public Poi getPoi() {
+		return poi;
 	}
 
-	public void setRestaurant(Restaurant restaurant) {
-		this.restaurant = restaurant;
+	public void setpoi(Poi poi) {
+		this.poi = poi;
 	}
 
 	public long getTimestamp() {

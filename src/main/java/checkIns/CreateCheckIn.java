@@ -41,9 +41,9 @@ public class CreateCheckIn {
 				if (rst.getReviews().size() != 0) {
 					Review review = rst.getReviews().get(0);
 					long timestamp = createRandomTime();
-					CheckIn chk = new CheckIn(usr.getUserId(), rst, timestamp, review);
-					usr.addCheckIn(chk);
-					rst.addCheckIn(chk);
+					//CheckIn chk = new CheckIn(usr.getUserId(), rst, timestamp, review);
+					//usr.addCheckIn(chk);
+					//rst.addCheckIn(chk);
 					rst.removeReview();
 				} else { //else the user looses that check-in
 					//System.out.println("No review available" + restNo);
