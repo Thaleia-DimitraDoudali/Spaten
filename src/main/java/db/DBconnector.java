@@ -169,17 +169,28 @@ public class DBconnector {
 		String res = "";
 		try {
 			statement = connection.createStatement();
-			String sql = "SELECT ST_AsText(ST_EndPoint(ST_Line_SubString(ST_Makeline(ST_GeomFromText"
+			String sql = "CREATE TABLE endPoint(g text);";
+			statement.executeUpdate(sql);
+			sql = "INSERT INTO endPoint(g) VALUES(ST_EndPoint(ST_Line_SubString(ST_Makeline(ST_GeomFromText"
 					+ "('POINT(" + lngFrom 
 					+ " " + latFrom
 					+ ")'), St_GeomFromText('POINT(" + lngTo
 					+ " " + latTo
 					+ ")')), " + from
 					+ ", " + to
-					+ "))) AS endPoint;";
+					+ ")));";
+			statement.executeUpdate(sql);
+			sql = "SELECT * FROM endPoint";
 			ResultSet rs = statement.executeQuery(sql);
 			if (rs.next())
-				System.out.println(rs.getString("endPoint"));
+				System.out.println(rs.getString("g"));
+			sql = " SELECT ST_X(g::geometry), ST_Y(g::geometry) FROM endPoint;";
+			rs = statement.executeQuery(sql);
+			if (rs.next()) {
+				System.out.println(rs.getDouble("st_x") + " " + rs.getDouble("st_y"));
+			}
+			sql = "DROP TABLE endPoint;";
+			statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

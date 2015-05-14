@@ -105,11 +105,11 @@ public class Route {
 				JSONObject jsonStart = jsonStep.getJSONObject("start_location");
 				String lngFrom = jsonStart.getString("lng");
 				String latFrom = jsonStart.getString("lat");
-				System.out.println("(" + lngFrom + ", " + latFrom + ")");
+				//System.out.println("(" + lngFrom + ", " + latFrom + ")");
 				JSONObject jsonEnd = jsonStep.getJSONObject("end_location");
 				String lngTo = jsonEnd.getString("lng");
 				String latTo = jsonEnd.getString("lat");
-				System.out.println("(" + lngFrom + ", " + latFrom + ")");
+				//System.out.println("(" + lngFrom + ", " + latFrom + ")");
 				JSONObject jsonDist = jsonStep.getJSONObject("distance");
 				String dist = jsonDist.getString("value");
 				int d = Integer.parseInt(dist);
@@ -117,12 +117,13 @@ public class Route {
 				// If a step is more than threshold then make and split line
 				if (d > threshold) {
 					int split = Integer.parseInt(dist) / threshold;
-					int from = 0;
-					int to = 1 / split;
+					double from = 0;
+					double to = 1.0 / split;
+					System.out.println("split = " + split + " from = " + from + " to = " + to);
 					for (i = 1; i <= split; i++) {
 						db.getBetween(lngFrom, latFrom, lngTo, latTo, from, to);
 						from = to;
-						to += 1 / split;
+						to += 1.0 / split;
 					}
 				}
 			}
