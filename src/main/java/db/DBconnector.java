@@ -165,6 +165,27 @@ public class DBconnector {
 		System.out.println("Inserted record on 'pois'...");
 	}
 	
+	public String getBetween(String lngFrom, String latFrom, String lngTo, String latTo, double from, double to) {
+		String res = "";
+		try {
+			statement = connection.createStatement();
+			String sql = "SELECT ST_AsText(ST_EndPoint(ST_Line_SubString(ST_Makeline(ST_GeomFromText"
+					+ "('POINT(" + lngFrom 
+					+ " " + latFrom
+					+ ")'), St_GeomFromText('POINT(" + lngTo
+					+ " " + latTo
+					+ ")')), " + from
+					+ ", " + to
+					+ "))) AS endPoint;";
+			ResultSet rs = statement.executeQuery(sql);
+			if (rs.next())
+				System.out.println(rs.getString("endPoint"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
 	public ArrayList<Poi> findInRange(int id, String lng, String lat, double dist) {
 		ArrayList<Poi> pois = new ArrayList<Poi>();
 		try {

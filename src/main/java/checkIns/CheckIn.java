@@ -1,5 +1,6 @@
 package checkIns;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -13,12 +14,17 @@ public class CheckIn {
 	private Review review;
 	private long timestamp;
 	private int userId;
+	private ArrayList<Poi> poisBetween = new ArrayList<Poi>();
 	
 	public CheckIn(int id, Poi rst, long time, Review rev) {
 		this.userId = id;
 		this.poi = rst;
 		this.timestamp = time;
 		this.review = rev;
+	}
+	
+	public void addPoiBetween(Poi p) {
+		poisBetween.add(p);
 	}
 
 	public void print() {
@@ -72,6 +78,14 @@ public class CheckIn {
 
 	public void setReview(Review review) {
 		this.review = review;
+	}
+
+	public ArrayList<Poi> getPoisBetween() {
+		return poisBetween;
+	}
+
+	public void setPoisBetween(ArrayList<Poi> poisBetween) {
+		this.poisBetween = poisBetween;
 	}
 	
 }

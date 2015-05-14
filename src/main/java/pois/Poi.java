@@ -113,4 +113,12 @@ public class Poi {
 	public void setReviews(List<Review> reviews) {
 		this.reviews = reviews;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (poiId == ((Poi) obj).getPoiId()) {
+			return true;
+		}
+		return false;
+	}
 }

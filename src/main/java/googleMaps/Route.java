@@ -8,13 +8,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import pois.Poi;
 import checkIns.CheckIn;
 import checkIns.User;
+import db.DBconnector;
 
 public class Route {
 
@@ -23,6 +26,13 @@ public class Route {
 
 	public String getRoute(String longFrom, String latFrom, String longTo,
 			String latTo) {
+
+		// Sleep for half a second
+		try {
+			Thread.sleep(500); // 1000 milliseconds is one second.
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
 
 		String res = "";
 		try {
@@ -33,15 +43,14 @@ public class Route {
 					+ "&destination="
 					+ longTo
 					+ ","
-					+ latTo
-					+ "&mode=walking";
+					+ latTo + "&mode=walking";
 
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("GET");
 			int responseCode = con.getResponseCode();
 			System.out.println("\nSending 'GET' request to URL : " + url);
-			System.out.println("Response Code : " + responseCode);
+			// System.out.println("Response Code : " + responseCode);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					con.getInputStream()));
@@ -66,8 +75,8 @@ public class Route {
 			String longTo, String latTo) {
 		try {
 			String workingDir = System.getProperty("user.dir");
-			File file = new File(workingDir + "/" + longFrom + "-" + latFrom + 
-					"_" + longTo + "-" + latTo + ".json");
+			File file = new File(workingDir + "/" + longFrom + "-" + latFrom
+					+ "_" + longTo + "-" + latTo + ".json");
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -80,6 +89,49 @@ public class Route {
 		}
 	}
 
+	public ArrayList<Poi> getPoisBetween(String json, DBconnector db) {
+		ArrayList<Poi> res = new ArrayList<Poi>();
+		int threshold = 50;
+		try {
+			JSONObject obj = new JSONObject(json);
+			JSONArray jsonRoutes = obj.getJSONArray("routes");
+			JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
+			JSONArray jsonLegs = jsonRoute.getJSONArray("legs");
+			JSONObject jsonLeg = jsonLegs.getJSONObject(0);
+			JSONArray jsonSteps = jsonLeg.getJSONArray("steps");
+
+			for (int i = 0; i < jsonSteps.length(); i++) {
+				JSONObject jsonStep = jsonSteps.getJSONObject(i);
+				JSONObject jsonStart = jsonStep.getJSONObject("start_location");
+				String lngFrom = jsonStart.getString("lng");
+				String latFrom = jsonStart.getString("lat");
+				System.out.println("(" + lngFrom + ", " + latFrom + ")");
+				JSONObject jsonEnd = jsonStep.getJSONObject("end_location");
+				String lngTo = jsonEnd.getString("lng");
+				String latTo = jsonEnd.getString("lat");
+				System.out.println("(" + lngFrom + ", " + latFrom + ")");
+				JSONObject jsonDist = jsonStep.getJSONObject("distance");
+				String dist = jsonDist.getString("value");
+				int d = Integer.parseInt(dist);
+				System.out.println(dist + "m");
+				// If a step is more than threshold then make and split line
+				if (d > threshold) {
+					int split = Integer.parseInt(dist) / threshold;
+					int from = 0;
+					int to = 1 / split;
+					for (i = 1; i <= split; i++) {
+						db.getBetween(lngFrom, latFrom, lngTo, latTo, from, to);
+						from = to;
+						to += 1 / split;
+					}
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+
 	public double getDuration(String json) throws JSONException {
 		JSONObject obj = new JSONObject(json);
 		JSONArray jsonRoutes = obj.getJSONArray("routes");
@@ -88,11 +140,11 @@ public class Route {
 		JSONObject jsonLeg = jsonLegs.getJSONObject(0);
 		JSONObject jsonDuration = jsonLeg.getJSONObject("duration");
 
-		//duration in seconds
+		// duration in seconds
 		double value = jsonDuration.getDouble("value");
 		return value;
 	}
-	
+
 	public void createRoutes(User usr) {
 		int N = usr.getCheckIns().size();
 		usr.print();

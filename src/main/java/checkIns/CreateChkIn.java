@@ -4,13 +4,7 @@ import googleMaps.Route;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 
@@ -26,57 +20,72 @@ public class CreateChkIn {
 
 	public void createDailyCheckIn(User usr, int chkNum, int poisNum,
 			DBconnector db, double dist) {
-		// First poi will be random
+
+		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
+		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
+		Route rt = new Route();
+
+		/* Step 1: First poi will be random - starts 9am - random review as well */
 		int restNo = createUniformIntRandom(poisNum);
 		Poi p = db.getPoi(restNo);
-		// User starts-off his day at 9am and will stay 2h at the first poi
-		// We assign a random review
 		int revNo = createUniformIntRandom(p.getReviews().size()) - 1;
 		Review review = p.getReviews().get(revNo);
-		long timestamp = createTimestamp(9,0,0);
+		long timestamp = createTimestamp(9, 0, 0);
 		CheckIn chk = new CheckIn(usr.getUserId(), p, timestamp, review);
 		usr.addCheckIn(chk);
 		p.addCheckIn(chk);
-		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
-		// for (int i = 1; i < chkNum; i++) {
-		// Find the next poi, it will be random but in range of parameter km, it shouldnt be one it went that day
-		//TODO: store the pois he visited
-		//System.out.println("Finding in range from poi " + p.getTitle());
-		poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
-				p.getLatitude(), dist);
-		if (!poisInRange.isEmpty()) {
-			for (Poi poi : poisInRange)
-				//System.out.println(poi.getTitle());
-			// Choose one random between those!!
-			restNo = createUniformIntRandom(poisInRange.size()) - 1;
-			Poi newP = poisInRange.get(restNo);
-			//System.out.println("Chose poi " + newP.getTitle());
-			// TODO: create the next check-in, google api, get duration, set
-			// timestamp
-			Route rt = new Route();
-			String jsonRoute = rt.getRoute(p.getLongitude(), p.getLatitude(),
-					newP.getLongitude(), newP.getLatitude());
-			// System.out.println(jsonRoute);
-			//TODO: get from json the duration so as to set the timestamp
-			//TODO: get and store the intermediate long lats - store somehow all gps traces he went by
-			double duration = 0;
-			try {
-				duration = rt.getDuration(jsonRoute);
-				System.out.println(duration);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		poisVisited.add(p);
+
+		/*
+		 * Step 2: Every other poi will have to be in range from the previous
+		 * (random choice), it should not be a poi he already visited that day,
+		 * he will stay at each poi for 2h.
+		 */
+
+		for (int i = 1; i < chkNum; i++) {
+			System.out.println("Check in no." + i);
+			System.out.println("Finding pois in range of " + dist + " km from poi " + p.getTitle());
+			poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
+					p.getLatitude(), dist);
+			for (Poi poi : poisVisited) {
+				poisInRange.remove(poi);
 			}
-			//TODO: set the check-in's timestamp
-			//He stays for 2 hours at each place
-			long timeBefore = usr.getCheckIns().get(0).getTimestamp();
-			long time = timeBefore + 2*3600*1000 + (long)duration*1000;
-			
-			revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
-			review = newP.getReviews().get(revNo);
-			chk = new CheckIn(usr.getUserId(), newP, time, review);
-			usr.addCheckIn(chk);
-			newP.addCheckIn(chk);
+			if (!poisInRange.isEmpty()) {
+				restNo = createUniformIntRandom(poisInRange.size()) - 1;
+				Poi newP = poisInRange.get(restNo);
+				String jsonRoute = rt.getRoute(p.getLongitude(),
+						p.getLatitude(), newP.getLongitude(),
+						newP.getLatitude());
+				rt.getPoisBetween(jsonRoute, db);
+				double duration = 0;
+				try {
+					duration = rt.getDuration(jsonRoute);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				long timeBefore = usr.getCheckIns().get(0).getTimestamp();
+				long time = timeBefore + 2 * 3600 * 1000 + (long) duration
+						* 1000;
+
+				revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
+				review = newP.getReviews().get(revNo);
+				chk = new CheckIn(usr.getUserId(), newP, time, review);
+				usr.addCheckIn(chk);
+				newP.addCheckIn(chk);
+				poisVisited.add(newP);
+				p = newP;
+				// TODO: get and store the intermediate long lats - store
+				// somehow all gps traces he went by
+			} else {
+				/* If no pois found in range, that means the user cannot go anywhere else,
+				 * so the day ends there 
+				 */
+				break;
+			}
+		}
+		System.out.println("\nPois visited are: ");
+		for (Poi poi: poisVisited) {
+			System.out.println(poi.getTitle());
 		}
 	}
 
@@ -92,7 +101,7 @@ public class CreateChkIn {
 	public long createTimestamp(int hour, int min, int sec) {
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		// TODO: date as parameter
-		calendar.set(2015, Calendar.FEBRUARY, 1, hour -2, min, sec);
+		calendar.set(2015, Calendar.FEBRUARY, 1, hour - 2, min, sec);
 		return calendar.getTimeInMillis();
 	}
 
