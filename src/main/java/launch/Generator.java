@@ -23,14 +23,22 @@ public class Generator {
 
 		// Create command line parameters
 		Options options = new Options();
+		//Number of users created
 		options.addOption("userNum", true, "Number of users created");
+		//Gauss parameters for check-in's per day
 		options.addOption("chkNumMean", true, "Mean of Gauss "
 				+ "that determines the number of a user's check-in's per day");
 		options.addOption("chkNumStDev", true, "Standard Deviation of Gauss "
 				+ "that determines the number of a user's check-in's per day");
+		//Max distance between check-in's
 		options.addOption("dist", true,
 				"Number of maximum diastance a user can walk between check-in's");
-
+		//How many hours will the user stay at each poi?
+		options.addOption("chkDurMean", true, "Mean of Gauss "
+				+ "that determines the duration of each user's check-in per day");
+		options.addOption("chkDurStDev", true, "Standard Deviation of Gauss "
+				+ "that determines the duration of each user's check-in per day");
+		
 		// Parse command line parameters
 		CommandLineParser parser = new GnuParser();
 		CommandLine cmd = null;
@@ -44,6 +52,8 @@ public class Generator {
 		Integer chkNumStDev = Integer.parseInt(cmd
 				.getOptionValue("chkNumStDev"));
 		Double dist = Double.parseDouble(cmd.getOptionValue("dist"));
+		Double chkDurMean = Double.parseDouble(cmd.getOptionValue("chkDurMean"));
+		Double chkDurStDev = Double.parseDouble(cmd.getOptionValue("chkDurStDev"));
 
 		// Number of pois in DB
 		DBconnector db = new DBconnector();
@@ -60,7 +70,7 @@ public class Generator {
 			// how many check-in's per day?
 			int checkNum = crChk.createGaussianRandom(chkNumMean, chkNumStDev);
 			// Create daily check-in
-			crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist);
+			crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, chkDurMean, chkDurStDev);
 			//Print check-in's
 			for (CheckIn chk : usr.getCheckIns()) {
 				chk.print();

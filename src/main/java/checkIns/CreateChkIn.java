@@ -20,7 +20,7 @@ public class CreateChkIn {
 	private List<User> users = new ArrayList<User>();
 
 	public void createDailyCheckIn(User usr, int chkNum, int poisNum,
-			DBconnector db, double dist) {
+			DBconnector db, double dist, double chkDurMean, double chkDurStDev) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
@@ -65,8 +65,13 @@ public class CreateChkIn {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				long time = timeBefore + 2 * 3600 * 1000 + (long) duration
+				long checkDur = (long)createDoubleGaussianRandom(chkDurMean, chkDurStDev);
+				long time = timeBefore + checkDur * 3600 * 1000 + (long) duration
 						* 1000;
+				if (time > createTimestamp(23, 0, 0)) {
+					System.out.println("Exceeded the time available for today's check-in's");
+					break;
+				}
 				timeBefore = time;
 				rt.getPoisBetween(jsonRoute, db, time, usr);
 				revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
@@ -76,8 +81,6 @@ public class CreateChkIn {
 				newP.addCheckIn(chk);
 				poisVisited.add(newP);
 				p = newP;
-				// TODO: get and store the intermediate long lats - store
-				// somehow all gps traces he went by
 			} else {
 				/* If no pois found in range, that means the user cannot go anywhere else,
 				 * so the day ends there 
@@ -127,6 +130,12 @@ public class CreateChkIn {
 		double val = r.nextGaussian() * dev + mean;
 		int res = (int) Math.round(val);
 		return res;
+	}
+	
+	public double createDoubleGaussianRandom(double mean, double dev) {
+		Random r = new Random();
+		double val = r.nextGaussian() * dev + mean;
+		return val;
 	}
 
 	public List<CheckIn> getAllCheckIns() {
