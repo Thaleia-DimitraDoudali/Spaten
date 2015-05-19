@@ -6,54 +6,57 @@ import java.util.List;
 import checkIns.CheckIn;
 
 public class Poi {
-	
+
 	private List<CheckIn> checkIns = new ArrayList<CheckIn>();
 	private List<Review> reviews = new ArrayList<Review>();
-	
+
 	private int poiId;
 	private String title;
 	private String address;
-	private String longitude;
-	private String latitude;
+	private double longitude;
+	private double latitude;
 
+	public Poi(int id, String titleR, String addressR, String ratingR,
+			String reviewTitleR, String reviewR, double latitudeR, double longitudeR) {
 
-	public Poi(int id, String titleR, String addressR, String ratingR, String reviewTitleR, String reviewR, String longitudeR, 
-			String latitudeR) {
 		poiId = id;
 		if (titleR.contains("'"))
 			title = titleR.replace("'", "''");
-		else title = titleR;
+		else
+			title = titleR;
 		if (addressR.contains("'"))
 			address = addressR.replace("'", "''");
-		else address = addressR;
+		else
+			address = addressR;
 		longitude = longitudeR;
 		latitude = latitudeR;
 		Review rev = new Review(ratingR, reviewTitleR, reviewR);
 		reviews.add(rev);
 	}
-	
+
 	public void addCheckIn(CheckIn chk) {
 		checkIns.add(chk);
 	}
-	
+
 	public void addReview(Review rev) {
 		reviews.add(rev);
 	}
-	
+
 	public void removeReview() {
 		reviews.remove(0);
 	}
-	
+
 	public void print() {
-		System.out.println("----------------Poi no." + poiId + "-------------------");
+		System.out.println("----------------Poi no." + poiId
+				+ "-------------------");
 		System.out.print("title = " + this.title + "\t");
 		System.out.print("address = " + this.address + "\t");
-		System.out.print("longitude = " + this.longitude + "\t");
 		System.out.print("latitude = " + this.latitude + "\n");
-		for (Review rev: reviews) {
+		System.out.print("longitude = " + this.longitude + "\t");
+		for (Review rev : reviews) {
 			rev.print();
 		}
-		for (CheckIn chk: checkIns) {
+		for (CheckIn chk : checkIns) {
 			chk.print();
 		}
 	}
@@ -82,19 +85,19 @@ public class Poi {
 		this.address = address;
 	}
 
-	public String getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(String longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 
-	public String getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(String latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 

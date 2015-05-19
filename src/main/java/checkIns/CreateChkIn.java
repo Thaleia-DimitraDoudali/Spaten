@@ -10,6 +10,7 @@ import java.util.TimeZone;
 
 import org.json.JSONException;
 
+import pois.GPSTrace;
 import pois.Poi;
 import pois.Review;
 import db.DBconnector;
@@ -35,7 +36,8 @@ public class CreateChkIn {
 		usr.addCheckIn(chk);
 		p.addCheckIn(chk);
 		poisVisited.add(p);
-
+		long timeBefore = usr.getCheckIns().get(0).getTimestamp();
+		usr.getTraces().add(new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp, usr.getUserId()));
 		/*
 		 * Step 2: Every other poi will have to be in range from the previous
 		 * (random choice), it should not be a poi he already visited that day,
@@ -44,7 +46,6 @@ public class CreateChkIn {
 
 		for (int i = 1; i < chkNum; i++) {
 			System.out.println("Check in no." + i);
-			System.out.println("Finding pois in range of " + dist + " km from poi " + p.getTitle());
 			poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
 					p.getLatitude(), dist);
 			for (Poi poi : poisVisited) {
@@ -53,20 +54,21 @@ public class CreateChkIn {
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
 				Poi newP = poisInRange.get(restNo);
+				System.out.println("Route: (" + p.getLatitude() + ", " + p.getLongitude()
+						+ ") -> (" + newP.getLatitude() + ", " + newP.getLongitude() + ")");
 				String jsonRoute = rt.getRoute(p.getLongitude(),
 						p.getLatitude(), newP.getLongitude(),
 						newP.getLatitude());
-				rt.getPoisBetween(jsonRoute, db);
 				double duration = 0;
 				try {
 					duration = rt.getDuration(jsonRoute);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				long timeBefore = usr.getCheckIns().get(0).getTimestamp();
 				long time = timeBefore + 2 * 3600 * 1000 + (long) duration
 						* 1000;
-
+				timeBefore = time;
+				rt.getPoisBetween(jsonRoute, db, time, usr);
 				revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
 				review = newP.getReviews().get(revNo);
 				chk = new CheckIn(usr.getUserId(), newP, time, review);
@@ -82,10 +84,6 @@ public class CreateChkIn {
 				 */
 				break;
 			}
-		}
-		System.out.println("\nPois visited are: ");
-		for (Poi poi: poisVisited) {
-			System.out.println(poi.getTitle());
 		}
 	}
 

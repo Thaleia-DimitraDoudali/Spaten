@@ -26,7 +26,9 @@ public class PoisToDB {
 		//Step 2: Store each poi to PostgreSQL Database
 		DBconnector db = new DBconnector();
 		db.connect();
+		db.dropPoiTable();
 		db.createPoiTable();
+		db.dropRevTable();
 		db.createRevTable();
 		for (Map.Entry<Integer, Poi> entry : pois.entrySet()) {		
 		    System.out.println(entry.getKey() + "/");

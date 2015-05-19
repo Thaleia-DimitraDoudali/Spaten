@@ -29,8 +29,9 @@ public class CheckIn {
 
 	public void print() {
 		String out = "User no." + userId + "\t poi chosen: " + poi.getPoiId() 
-				+ " (" + poi.getLongitude()
-				+ ", " + poi.getLatitude() + ") "
+				+ " title: " + poi.getTitle()
+				+ " (" + poi.getLatitude()
+				+ ", " + poi.getLongitude() + ") "
 				+ "adress: " + poi.getAddress()
 				+ "\t timestamp: " + timestamp + "\t date: "
 				+ getDate(timestamp) + "\t "; 

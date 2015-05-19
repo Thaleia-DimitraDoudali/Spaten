@@ -22,8 +22,8 @@ public class Parser {
 	    String ratingJ  = "";
 	    String rtitleJ  = "";
 	    String reviewJ  = "";
-		String longitude = "";
-		String latitude  = "";
+		double longitude = -1;
+		double latitude  = -1;
 		
 		/*get title*/				
 		if (obj.has("title")) {
@@ -70,18 +70,18 @@ public class Parser {
 			reviewJ = reviewJ.replaceAll("\n", "");
 		}
 	
-		/*get longitude*/
+		/*get longitude - REVERSED*/
 		if (obj.has("longitude")) {
-			longitude = obj.getString("longitude");
+			latitude = obj.getDouble("longitude");
 		}
 		
-		/*get latitude*/
+		/*get latitude - REVERSED*/
 		if (obj.has("latitude")) {
-			latitude = obj.getString("latitude");
+			longitude = obj.getDouble("latitude");
 		}
 		
 		/*create restaurant object*/
-		Poi p = new Poi(id, titleJ, addressJ, ratingJ, rtitleJ, reviewJ, longitude, latitude);
+		Poi p = new Poi(id, titleJ, addressJ, ratingJ, rtitleJ, reviewJ, latitude, longitude);
 		
 		return p;
 		
@@ -100,7 +100,7 @@ public class Parser {
 			JSONObject obj = new JSONObject(line);
 			Poi p = returnPoi(i, obj);
 			//Add only those that are an actual poi
-			if ((p.getLatitude() != "") && (p.getLongitude() != "")) {
+			if ((p.getLatitude() != -1) && (p.getLongitude() != -1)) {
 				//If the restaurant already exists on the HashMap, merge their reviews
 				if (restaurantsMap.containsKey(p.getTitle())) {
 					Poi pp = restaurantsMap.get(p.getTitle());

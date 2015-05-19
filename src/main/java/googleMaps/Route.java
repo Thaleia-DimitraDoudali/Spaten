@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import pois.GPSTrace;
 import pois.Poi;
 import checkIns.CheckIn;
 import checkIns.User;
@@ -24,8 +25,8 @@ public class Route {
 	public Route() {
 	}
 
-	public String getRoute(String longFrom, String latFrom, String longTo,
-			String latTo) {
+	public String getRoute(double longFrom, double latFrom, double longTo,
+			double latTo) {
 
 		// Sleep for half a second
 		try {
@@ -37,18 +38,18 @@ public class Route {
 		String res = "";
 		try {
 			String url = "http://maps.googleapis.com/maps/api/directions/json?origin="
-					+ longFrom
-					+ ","
 					+ latFrom
-					+ "&destination="
-					+ longTo
 					+ ","
-					+ latTo + "&mode=walking";
+					+ longFrom
+					+ "&destination="
+					+ latTo
+					+ ","
+					+ longTo + "&mode=walking";
 
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("GET");
-			int responseCode = con.getResponseCode();
+			//int responseCode = con.getResponseCode();
 			System.out.println("\nSending 'GET' request to URL : " + url);
 			// System.out.println("Response Code : " + responseCode);
 
@@ -71,8 +72,8 @@ public class Route {
 		return res;
 	}
 
-	public void saveRouteToFile(String rt, String longFrom, String latFrom,
-			String longTo, String latTo) {
+	public void saveRouteToFile(String rt, double longFrom, double latFrom,
+			double longTo, double latTo) {
 		try {
 			String workingDir = System.getProperty("user.dir");
 			File file = new File(workingDir + "/" + longFrom + "-" + latFrom
@@ -89,9 +90,11 @@ public class Route {
 		}
 	}
 
-	public ArrayList<Poi> getPoisBetween(String json, DBconnector db) {
-		ArrayList<Poi> res = new ArrayList<Poi>();
-		int threshold = 50;
+	public ArrayList<GPSTrace> getPoisBetween(String json, DBconnector db, long time, User usr) {
+		ArrayList<GPSTrace> res = new ArrayList<GPSTrace>();
+		int threshold = 100;
+		GPSTrace tr;
+		double lngFrom = -1, latFrom = -1, lngTo = -1, latTo = -1;
 		try {
 			JSONObject obj = new JSONObject(json);
 			JSONArray jsonRoutes = obj.getJSONArray("routes");
@@ -103,17 +106,30 @@ public class Route {
 			for (int i = 0; i < jsonSteps.length(); i++) {
 				JSONObject jsonStep = jsonSteps.getJSONObject(i);
 				JSONObject jsonStart = jsonStep.getJSONObject("start_location");
-				String lngFrom = jsonStart.getString("lng");
-				String latFrom = jsonStart.getString("lat");
-				//System.out.println("(" + lngFrom + ", " + latFrom + ")");
+				lngFrom = jsonStart.getDouble("lng");
+				latFrom = jsonStart.getDouble("lat");
+				System.out.println("(" + latFrom + ", " + lngFrom + ")");
 				JSONObject jsonEnd = jsonStep.getJSONObject("end_location");
-				String lngTo = jsonEnd.getString("lng");
-				String latTo = jsonEnd.getString("lat");
-				//System.out.println("(" + lngFrom + ", " + latFrom + ")");
+				lngTo = jsonEnd.getDouble("lng");
+				latTo = jsonEnd.getDouble("lat");
+				System.out.println("(" + latTo + ", " + lngTo + ")");
+				
+				if (i == 0) {
+					tr = new GPSTrace(latFrom, lngFrom, time, usr.getUserId());
+					res.add(tr);
+					usr.getTraces().add(tr);
+				} 
+				
 				JSONObject jsonDist = jsonStep.getJSONObject("distance");
 				String dist = jsonDist.getString("value");
 				int d = Integer.parseInt(dist);
 				System.out.println(dist + "m");
+				JSONObject jsonDur = jsonStep.getJSONObject("duration");
+				String dur = jsonDur.getString("value");
+				double du = Double.parseDouble(dur);
+				System.out.println(du + "s");
+				String durat = jsonDur.getString("text");
+				System.out.println(durat);
 				// If a step is more than threshold then make and split line
 				if (d > threshold) {
 					int split = Integer.parseInt(dist) / threshold;
@@ -121,10 +137,19 @@ public class Route {
 					double to = 1.0 / split;
 					System.out.println("split = " + split + " from = " + from + " to = " + to);
 					for (i = 1; i <= split; i++) {
-						db.getBetween(lngFrom, latFrom, lngTo, latTo, from, to);
+						time += du*from;
+						//System.out.println("Splitting " + "(" + latFrom + ", " + lngFrom
+							//	+ ") -> (" + latTo + ", " + lngTo + ")");
+						tr = db.getBetween(lngFrom, latFrom, lngTo, latTo, from, to, time, usr);
+						res.add(tr);
 						from = to;
 						to += 1.0 / split;
 					}
+					//TODO: timestamp each intermediate gps trace
+				} else {
+					tr = new GPSTrace(latTo, lngTo, time, usr.getUserId());
+					res.add(tr);
+					usr.getTraces().add(tr);
 				}
 			}
 		} catch (JSONException e) {
@@ -151,11 +176,11 @@ public class Route {
 		usr.print();
 		for (int i = 0; i < N - 1; i++) {
 			CheckIn chkFrom = usr.getCheckIns().get(i);
-			String longFrom = chkFrom.getPoi().getLongitude();
-			String latFrom = chkFrom.getPoi().getLatitude();
+			double longFrom = chkFrom.getPoi().getLongitude();
+			double latFrom = chkFrom.getPoi().getLatitude();
 			CheckIn chkTo = usr.getCheckIns().get(i + 1);
-			String longTo = chkTo.getPoi().getLongitude();
-			String latTo = chkTo.getPoi().getLatitude();
+			double longTo = chkTo.getPoi().getLongitude();
+			double latTo = chkTo.getPoi().getLatitude();
 			String jsonRoute = getRoute(longFrom, latFrom, longTo, latTo);
 			usr.addRoute(jsonRoute);
 			System.out.println(longFrom + ", " + latFrom + " " + longTo + ", "
@@ -164,12 +189,5 @@ public class Route {
 
 			// System.out.println(jsonRoute.substring(0, 30));
 		}
-	}
-
-	public static void main(String[] args) {
-		Route rt = new Route();
-		String jsonRoute = rt.getRoute("33.30333", "44.35416", "32.0876",
-				"34.8612");
-		System.out.println(jsonRoute);
 	}
 }
