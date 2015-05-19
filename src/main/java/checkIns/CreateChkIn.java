@@ -4,6 +4,7 @@ import googleMaps.Route;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
@@ -21,7 +22,7 @@ public class CreateChkIn {
 
 	public void createDailyCheckIn(User usr, int chkNum, int poisNum,
 			DBconnector db, double dist, double chkDurMean, double chkDurStDev,
-			int startTime, int endTime) {
+			int startTime, int endTime, long date) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
@@ -32,7 +33,7 @@ public class CreateChkIn {
 		Poi p = db.getPoi(restNo);
 		int revNo = createUniformIntRandom(p.getReviews().size()) - 1;
 		Review review = p.getReviews().get(revNo);
-		long timestamp = createTimestamp(startTime, 0, 0);
+		long timestamp = date + startTime*3600*1000;
 		CheckIn chk = new CheckIn(usr.getUserId(), p, timestamp, review);
 		usr.addCheckIn(chk);
 		p.addCheckIn(chk);
@@ -69,7 +70,7 @@ public class CreateChkIn {
 				long checkDur = (long)createDoubleGaussianRandom(chkDurMean, chkDurStDev);
 				long time = timeBefore + checkDur * 3600 * 1000 + (long) duration
 						* 1000;
-				if (time > createTimestamp(endTime, 0, 0)) {
+				if (time > (date + endTime*3600*1000)) {
 					System.out.println("Exceeded the time available for today's check-in's");
 					break;
 				}
@@ -99,12 +100,31 @@ public class CreateChkIn {
 			usr.print();
 		}
 	}
+	
+	public long convertToTimestamp(String date) {
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		//date will be in the format e.g. 04/29/1992
+		int month = Integer.parseInt(date.substring(0, 2)) - 1;
+		int day = Integer.parseInt(date.substring(3, 5));
+		int year = Integer.parseInt(date.substring(6, 10));
+		System.out.println(month + " " +  day + " " + year);
+		calendar.set(year, month, day, -2, 0, 0);
+		return calendar.getTimeInMillis();
+	}
 
 	public long createTimestamp(int hour, int min, int sec) {
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		// TODO: date as parameter
 		calendar.set(2015, Calendar.FEBRUARY, 1, hour - 2, min, sec);
 		return calendar.getTimeInMillis();
+	}
+	
+	public Date getDate(long millis) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(millis);
+
+		Date dt = calendar.getTime();
+		
+		return dt;
 	}
 
 	public long createRandomTime() {
