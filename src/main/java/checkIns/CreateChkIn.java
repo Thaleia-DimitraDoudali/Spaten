@@ -20,7 +20,8 @@ public class CreateChkIn {
 	private List<User> users = new ArrayList<User>();
 
 	public void createDailyCheckIn(User usr, int chkNum, int poisNum,
-			DBconnector db, double dist, double chkDurMean, double chkDurStDev) {
+			DBconnector db, double dist, double chkDurMean, double chkDurStDev,
+			int startTime, int endTime) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
@@ -31,7 +32,7 @@ public class CreateChkIn {
 		Poi p = db.getPoi(restNo);
 		int revNo = createUniformIntRandom(p.getReviews().size()) - 1;
 		Review review = p.getReviews().get(revNo);
-		long timestamp = createTimestamp(9, 0, 0);
+		long timestamp = createTimestamp(startTime, 0, 0);
 		CheckIn chk = new CheckIn(usr.getUserId(), p, timestamp, review);
 		usr.addCheckIn(chk);
 		p.addCheckIn(chk);
@@ -68,7 +69,7 @@ public class CreateChkIn {
 				long checkDur = (long)createDoubleGaussianRandom(chkDurMean, chkDurStDev);
 				long time = timeBefore + checkDur * 3600 * 1000 + (long) duration
 						* 1000;
-				if (time > createTimestamp(23, 0, 0)) {
+				if (time > createTimestamp(endTime, 0, 0)) {
 					System.out.println("Exceeded the time available for today's check-in's");
 					break;
 				}

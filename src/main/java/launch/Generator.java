@@ -38,6 +38,9 @@ public class Generator {
 				+ "that determines the duration of each user's check-in per day");
 		options.addOption("chkDurStDev", true, "Standard Deviation of Gauss "
 				+ "that determines the duration of each user's check-in per day");
+		//Start and end time of day
+		options.addOption("startTime", true, "Time for the first check-in of the day ");
+		options.addOption("endTime", true, "Time for the last check-in of the day ");
 		
 		// Parse command line parameters
 		CommandLineParser parser = new GnuParser();
@@ -54,6 +57,8 @@ public class Generator {
 		Double dist = Double.parseDouble(cmd.getOptionValue("dist"));
 		Double chkDurMean = Double.parseDouble(cmd.getOptionValue("chkDurMean"));
 		Double chkDurStDev = Double.parseDouble(cmd.getOptionValue("chkDurStDev"));
+		Integer startTime = Integer.parseInt(cmd.getOptionValue("startTime"));
+		Integer endTime = Integer.parseInt(cmd.getOptionValue("endTime"));
 
 		// Number of pois in DB
 		DBconnector db = new DBconnector();
@@ -70,7 +75,7 @@ public class Generator {
 			// how many check-in's per day?
 			int checkNum = crChk.createGaussianRandom(chkNumMean, chkNumStDev);
 			// Create daily check-in
-			crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, chkDurMean, chkDurStDev);
+			crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, chkDurMean, chkDurStDev, startTime, endTime);
 			//Print check-in's
 			for (CheckIn chk : usr.getCheckIns()) {
 				chk.print();
