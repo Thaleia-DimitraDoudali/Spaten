@@ -2,6 +2,7 @@ package launch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -89,8 +90,11 @@ public class Generator {
 		long edate = crChk.convertToTimestamp(endDate);
 	    long milPerDay = 1000*60*60*24; 
 		int days = (int) ((edate - sdate) / milPerDay) + 1;
+		System.out.println("days = " + days);
+		long travelDays = Math.round(0.1*days); // travel days will be the 10% of check-in's
 		boolean home = true, travel = false;
-		int travelDays = -1;
+		int travelCount = 0, trDays = 0;
+		System.out.println("travel days = " + travelDays);
 
 		// For each user create their check-in's
 		for (int i = 1; i <= userNum; i++) {
@@ -103,22 +107,35 @@ public class Generator {
 				System.out.println(">DAY: " + crChk.getDate(time));
 				//Determine whether he will travel or not
 				if (!travel) {
-					double pr = Math.random();
+					Random r = new Random();
+					int pr = r.nextInt(2); // coin toss
 					System.out.println(pr);
-					//Travel days is 10% of the total number of check-in's
-					if (pr < 0.02*days) {
+					if (pr == 1) {
 						travel = true;
 						//for how many days he will travel?
-						travelDays = crChk.createGaussianRandom(7, 3);
-						System.out.println("TRAVELLLLL " + travelDays);
+						trDays = crChk.createGaussianRandom(5, 2);
+						System.out.println("TRAVELLLLL " + trDays);
+						if (trDays > travelDays) {
+							travel = false;
+						}
+						travelCount = 0;
 					}
 				}
 				// how many check-in's per day?
 				int checkNum = crChk.createGaussianRandom(chkNumMean,
 						chkNumStDev);
 				// Create daily check-in
+				if (travel) {
+					travelCount++;
+					System.out.println("Travel Day no." + travelCount);
+				}
 				crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, maxDist,
 						chkDurMean, chkDurStDev, startTime, endTime, time, home);
+				if (travel && (travelCount == trDays)) {
+					travel = false;
+					travelDays -= trDays;
+					System.out.println("travel days = " + travelDays);
+				}
 				home = false;
 			}
 			// Print check-in's
