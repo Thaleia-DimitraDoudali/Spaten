@@ -93,7 +93,7 @@ public class Generator {
 		System.out.println("days = " + days);
 		long travelDays = Math.round(0.1*days); // travel days will be the 10% of check-in's
 		boolean home = true, travel = false;
-		int travelCount = 0, trDays = 0;
+		long travelCount = 0, trDays = 0;
 		System.out.println("travel days = " + travelDays);
 
 		// For each user create their check-in's
@@ -109,14 +109,14 @@ public class Generator {
 				if (!travel) {
 					Random r = new Random();
 					int pr = r.nextInt(2); // coin toss
-					System.out.println(pr);
-					if (pr == 1) {
+					System.out.println("travel days = " + travelDays + travel);
+					if ((travelDays != 0) && (pr == 1)) {
 						travel = true;
 						//for how many days he will travel?
 						trDays = crChk.createGaussianRandom(5, 2);
 						System.out.println("TRAVELLLLL " + trDays);
 						if (trDays > travelDays) {
-							travel = false;
+							trDays = travelDays;
 						}
 						travelCount = 0;
 					}
@@ -130,7 +130,7 @@ public class Generator {
 					System.out.println("Travel Day no." + travelCount);
 				}
 				crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, maxDist,
-						chkDurMean, chkDurStDev, startTime, endTime, time, home);
+						chkDurMean, chkDurStDev, startTime, endTime, time, home, travel, travelCount);
 				if (travel && (travelCount == trDays)) {
 					travel = false;
 					travelDays -= trDays;
