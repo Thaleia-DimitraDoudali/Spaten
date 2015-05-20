@@ -49,7 +49,7 @@ public class Route {
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("GET");
-			//int responseCode = con.getResponseCode();
+			// int responseCode = con.getResponseCode();
 			System.out.println("\nSending 'GET' request to URL : " + url);
 			// System.out.println("Response Code : " + responseCode);
 
@@ -90,7 +90,8 @@ public class Route {
 		}
 	}
 
-	public ArrayList<GPSTrace> getPoisBetween(String json, DBconnector db, long time, User usr) {
+	public ArrayList<GPSTrace> getPoisBetween(String json, DBconnector db,
+			long time, User usr) {
 		ArrayList<GPSTrace> res = new ArrayList<GPSTrace>();
 		int threshold = 100;
 		GPSTrace tr;
@@ -113,13 +114,13 @@ public class Route {
 				lngTo = jsonEnd.getDouble("lng");
 				latTo = jsonEnd.getDouble("lat");
 				System.out.println("(" + latTo + ", " + lngTo + ")");
-				
+
 				if (i == 0) {
 					tr = new GPSTrace(latFrom, lngFrom, time, usr.getUserId());
 					res.add(tr);
 					usr.getTraces().add(tr);
-				} 
-				
+				}
+
 				JSONObject jsonDist = jsonStep.getJSONObject("distance");
 				String dist = jsonDist.getString("value");
 				int d = Integer.parseInt(dist);
@@ -131,21 +132,26 @@ public class Route {
 				String durat = jsonDur.getString("text");
 				System.out.println(durat);
 				// If a step is more than threshold then make and split line
-				if (d > threshold) {
+				if (d > 2*threshold) {
 					int split = Integer.parseInt(dist) / threshold;
 					double from = 0;
 					double to = 1.0 / split;
-					System.out.println("split = " + split + " from = " + from + " to = " + to);
+					System.out.println("split = " + split + " from = " + from
+							+ " to = " + to);
 					for (i = 1; i <= split; i++) {
-						time += du*from;
-						//System.out.println("Splitting " + "(" + latFrom + ", " + lngFrom
-							//	+ ") -> (" + latTo + ", " + lngTo + ")");
-						tr = db.getBetween(lngFrom, latFrom, lngTo, latTo, from, to, time, usr);
-						res.add(tr);
-						from = to;
-						to += 1.0 / split;
+						if (to < 1) {
+							time += du * from;
+							// System.out.println("Splitting " + "(" + latFrom +
+							// ", " + lngFrom
+							// + ") -> (" + latTo + ", " + lngTo + ")");
+							tr = db.getBetween(lngFrom, latFrom, lngTo, latTo,
+									from, to, time, usr);
+							res.add(tr);
+							from = to;
+							to += 1.0 / split;
+						}
 					}
-					//TODO: timestamp each intermediate gps trace
+					// TODO: timestamp each intermediate gps trace
 				} else {
 					tr = new GPSTrace(latTo, lngTo, time, usr.getUserId());
 					res.add(tr);

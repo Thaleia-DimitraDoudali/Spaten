@@ -21,25 +21,58 @@ public class CreateChkIn {
 	private List<User> users = new ArrayList<User>();
 
 	public void createDailyCheckIn(User usr, int chkNum, int poisNum,
-			DBconnector db, double dist, double chkDurMean, double chkDurStDev,
-			int startTime, int endTime, long date) {
+			DBconnector db, double dist, double maxDist, double chkDurMean,
+			double chkDurStDev, int startTime, int endTime, long date,
+			boolean home) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
 		Route rt = new Route();
+		int restNo = -1, revNo = -1;
+		long timeBefore = -1;
+		Review review;
+		CheckIn chk;
+		Poi p = null;
 
 		/* Step 1: First poi will be random - starts 9am - random review as well */
-		int restNo = createUniformIntRandom(poisNum);
-		Poi p = db.getPoi(restNo);
-		int revNo = createUniformIntRandom(p.getReviews().size()) - 1;
-		Review review = p.getReviews().get(revNo);
-		long timestamp = date + startTime*3600*1000;
-		CheckIn chk = new CheckIn(usr.getUserId(), p, timestamp, review);
-		usr.addCheckIn(chk);
-		p.addCheckIn(chk);
-		poisVisited.add(p);
-		long timeBefore = usr.getCheckIns().get(0).getTimestamp();
-		usr.getTraces().add(new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp, usr.getUserId()));
+		// First poi of the day must be in maxDist range from his home
+		// Determine hometown - the first check-in is his home
+		if (home) { //if it is the home to be determined it should be totally random
+			restNo = createUniformIntRandom(poisNum);
+			p = db.getPoi(restNo);
+			revNo = createUniformIntRandom(p.getReviews().size()) - 1;
+			review = p.getReviews().get(revNo);
+			long timestamp = date + startTime * 3600 * 1000;
+			chk = new CheckIn(usr.getUserId(), p, timestamp, review);
+			usr.addCheckIn(chk);
+			p.addCheckIn(chk);
+			poisVisited.add(p);
+			timeBefore = usr.getCheckIns().get(0).getTimestamp();
+			usr.getTraces().add(
+					new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
+							usr.getUserId()));
+			usr.setHome(p);
+		} else { //if home is determined - all other check-in's should be in maxDist range from home
+			Poi h = usr.getHome();
+			poisInRange = db.findInRange(h.getPoiId(), h.getLongitude(),
+					h.getLatitude(), maxDist);
+			if (!poisInRange.isEmpty()) {
+					restNo = createUniformIntRandom(poisInRange.size()) - 1;
+					p = poisInRange.get(restNo);
+					revNo = createUniformIntRandom(p.getReviews().size()) - 1;
+					review = p.getReviews().get(revNo);
+					long timestamp = date + startTime * 3600 * 1000;
+					chk = new CheckIn(usr.getUserId(), p, timestamp, review);
+					usr.addCheckIn(chk);
+					p.addCheckIn(chk);
+					poisVisited.add(p);
+					timeBefore = usr.getCheckIns().get(0).getTimestamp();
+					usr.getTraces().add(
+							new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
+									usr.getUserId()));
+			}
+		}
+
 		/*
 		 * Step 2: Every other poi will have to be in range from the previous
 		 * (random choice), it should not be a poi he already visited that day,
@@ -56,8 +89,9 @@ public class CreateChkIn {
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
 				Poi newP = poisInRange.get(restNo);
-				System.out.println("Route: (" + p.getLatitude() + ", " + p.getLongitude()
-						+ ") -> (" + newP.getLatitude() + ", " + newP.getLongitude() + ")");
+				System.out.println("Route: (" + p.getLatitude() + ", "
+						+ p.getLongitude() + ") -> (" + newP.getLatitude()
+						+ ", " + newP.getLongitude() + ")");
 				String jsonRoute = rt.getRoute(p.getLongitude(),
 						p.getLatitude(), newP.getLongitude(),
 						newP.getLatitude());
@@ -67,11 +101,13 @@ public class CreateChkIn {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				long checkDur = (long)createDoubleGaussianRandom(chkDurMean, chkDurStDev);
-				long time = timeBefore + checkDur * 3600 * 1000 + (long) duration
-						* 1000;
-				if (time > (date + endTime*3600*1000)) {
-					System.out.println("Exceeded the time available for today's check-in's");
+				long checkDur = (long) createDoubleGaussianRandom(chkDurMean,
+						chkDurStDev);
+				long time = timeBefore + checkDur * 3600 * 1000
+						+ (long) duration * 1000;
+				if (time > (date + endTime * 3600 * 1000)) {
+					System.out
+							.println("Exceeded the time available for today's check-in's");
 					break;
 				}
 				timeBefore = time;
@@ -84,8 +120,9 @@ public class CreateChkIn {
 				poisVisited.add(newP);
 				p = newP;
 			} else {
-				/* If no pois found in range, that means the user cannot go anywhere else,
-				 * so the day ends there 
+				/*
+				 * If no pois found in range, that means the user cannot go
+				 * anywhere else, so the day ends there
 				 */
 				break;
 			}
@@ -100,14 +137,14 @@ public class CreateChkIn {
 			usr.print();
 		}
 	}
-	
+
 	public long convertToTimestamp(String date) {
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		//date will be in the format e.g. 04/29/1992
+		// date will be in the format e.g. 04/29/1992
 		int month = Integer.parseInt(date.substring(0, 2)) - 1;
 		int day = Integer.parseInt(date.substring(3, 5));
 		int year = Integer.parseInt(date.substring(6, 10));
-		System.out.println(month + " " +  day + " " + year);
+		System.out.println(month + " " + day + " " + year);
 		calendar.set(year, month, day, -2, 0, 0);
 		return calendar.getTimeInMillis();
 	}
@@ -117,13 +154,13 @@ public class CreateChkIn {
 		calendar.set(2015, Calendar.FEBRUARY, 1, hour - 2, min, sec);
 		return calendar.getTimeInMillis();
 	}
-	
+
 	public Date getDate(long millis) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(millis);
 
 		Date dt = calendar.getTime();
-		
+
 		return dt;
 	}
 
@@ -152,7 +189,7 @@ public class CreateChkIn {
 		int res = (int) Math.round(val);
 		return res;
 	}
-	
+
 	public double createDoubleGaussianRandom(double mean, double dev) {
 		Random r = new Random();
 		double val = r.nextGaussian() * dev + mean;

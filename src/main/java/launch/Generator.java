@@ -33,6 +33,9 @@ public class Generator {
 		// Max distance between check-in's
 		options.addOption("dist", true,
 				"Number of maximum diastance a user can walk between check-in's");
+		// Max distance between daily check-in's - user stays in the same country
+		options.addOption("maxDist", true,
+				"Number of maximum diastance a user can be between different days");
 		// How many hours will the user stay at each poi?
 		options.addOption(
 				"chkDurMean",
@@ -66,6 +69,7 @@ public class Generator {
 		Integer chkNumStDev = Integer.parseInt(cmd
 				.getOptionValue("chkNumStDev"));
 		Double dist = Double.parseDouble(cmd.getOptionValue("dist"));
+		Double maxDist = Double.parseDouble(cmd.getOptionValue("maxDist"));
 		Double chkDurMean = Double
 				.parseDouble(cmd.getOptionValue("chkDurMean"));
 		Double chkDurStDev = Double.parseDouble(cmd
@@ -83,22 +87,24 @@ public class Generator {
 		CreateChkIn crChk = new CreateChkIn();
 		long sdate = crChk.convertToTimestamp(startDate);
 		long edate = crChk.convertToTimestamp(endDate);
-
+		boolean home = true;
+		
 		// For each user create their check-in's
 		for (int i = 1; i <= userNum; i++) {
 
 			User usr = new User(i);
 			users.add(usr);
 			System.out.println("-------------User no." + i + "-------------");
-
+			home = true;
 			for (long time = sdate; time <= edate; time += 86400000) {
 				System.out.println(">DAY: " + crChk.getDate(time));
 				// how many check-in's per day?
 				int checkNum = crChk.createGaussianRandom(chkNumMean,
 						chkNumStDev);
 				// Create daily check-in
-				crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist,
-						chkDurMean, chkDurStDev, startTime, endTime, time);
+				crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, maxDist,
+						chkDurMean, chkDurStDev, startTime, endTime, time, home);
+				home = false;
 			}
 			// Print check-in's
 			for (CheckIn chk : usr.getCheckIns()) {

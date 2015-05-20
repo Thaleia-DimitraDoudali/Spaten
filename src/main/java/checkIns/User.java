@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pois.GPSTrace;
+import pois.Poi;
 
 public class User {
 
@@ -11,6 +12,7 @@ public class User {
 	private List<CheckIn> checkIns = new ArrayList<CheckIn>();
 	private List<String> routes = new ArrayList<String>();
 	private List<GPSTrace> traces = new ArrayList<GPSTrace>();
+	private Poi home;
 	
 	public User(int id) {
 		this.userId = id;
@@ -65,6 +67,14 @@ public class User {
 
 	public void setTraces(List<GPSTrace> traces) {
 		this.traces = traces;
+	}
+
+	public Poi getHome() {
+		return home;
+	}
+
+	public void setHome(Poi home) {
+		this.home = home;
 	}
 
 }
