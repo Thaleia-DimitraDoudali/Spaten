@@ -165,6 +165,15 @@ public class CreateChkIn {
 				break;
 			}
 		}
+		/*
+		 * Create map for the daily traversal - poisVisited
+		 * TODO: see path for intermediate gps traces!
+		 */
+		String url = "https://maps.googleapis.com/maps/api/staticmap?&zoom=13&size=1000x1000";
+		for (Poi poi: poisVisited) {
+			url += "&markers=" + poi.getLatitude() + "," + poi.getLongitude(); 
+		}
+		System.out.println(url);
 	}
 
 	public void printUsers() {

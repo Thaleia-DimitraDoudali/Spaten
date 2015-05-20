@@ -137,6 +137,8 @@ public class Generator {
 					System.out.println("travel days = " + travelDays);
 				}
 				home = false;
+				
+				
 			}
 			// Print check-in's
 			for (CheckIn chk : usr.getCheckIns()) {
