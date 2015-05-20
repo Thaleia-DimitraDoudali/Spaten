@@ -87,8 +87,11 @@ public class Generator {
 		CreateChkIn crChk = new CreateChkIn();
 		long sdate = crChk.convertToTimestamp(startDate);
 		long edate = crChk.convertToTimestamp(endDate);
-		boolean home = true;
-		
+	    long milPerDay = 1000*60*60*24; 
+		int days = (int) ((edate - sdate) / milPerDay) + 1;
+		boolean home = true, travel = false;
+		int travelDays = -1;
+
 		// For each user create their check-in's
 		for (int i = 1; i <= userNum; i++) {
 
@@ -98,6 +101,18 @@ public class Generator {
 			home = true;
 			for (long time = sdate; time <= edate; time += 86400000) {
 				System.out.println(">DAY: " + crChk.getDate(time));
+				//Determine whether he will travel or not
+				if (!travel) {
+					double pr = Math.random();
+					System.out.println(pr);
+					//Travel days is 10% of the total number of check-in's
+					if (pr < 0.02*days) {
+						travel = true;
+						//for how many days he will travel?
+						travelDays = crChk.createGaussianRandom(7, 3);
+						System.out.println("TRAVELLLLL " + travelDays);
+					}
+				}
 				// how many check-in's per day?
 				int checkNum = crChk.createGaussianRandom(chkNumMean,
 						chkNumStDev);
