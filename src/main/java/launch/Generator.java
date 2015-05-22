@@ -106,7 +106,7 @@ public class Generator {
 			for (long time = sdate; time <= edate; time += 86400000) {
 				System.out.println(">DAY: " + crChk.getDate(time));
 				//Determine whether he will travel or not
-				if (!travel) {
+				if (!travel && !home) {
 					Random r = new Random();
 					int pr = r.nextInt(2); // coin toss
 					System.out.println("travel days = " + travelDays + travel);
@@ -129,6 +129,7 @@ public class Generator {
 					travelCount++;
 					System.out.println("Travel Day no." + travelCount);
 				}
+				System.out.println("home = " + home + " travel = " + travel);
 				crChk.createDailyCheckIn(usr, checkNum, poisNum, db, dist, maxDist,
 						chkDurMean, chkDurStDev, startTime, endTime, time, home, travel, travelCount);
 				if (travel && (travelCount == trDays)) {

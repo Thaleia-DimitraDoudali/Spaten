@@ -38,78 +38,54 @@ public class CreateChkIn {
 		/* Step 1: First poi will be random - starts 9am - random review as well */
 		// First poi of the day must be in maxDist range from his home
 		// Determine hometown - the first check-in is his home
-		if (travel && (travelDay == 1)) { //pick sthn tuxi, determine start of the trip
+		if (travel && (travelDay == 1) && !home) { // pick sthn tuxi, determine
+													// start of the trip
 			System.out.println("1");
 			restNo = createUniformIntRandom(poisNum);
 			travelPoi = db.getPoi(restNo);
-			revNo = createUniformIntRandom(travelPoi.getReviews().size()) - 1;
-			review = travelPoi.getReviews().get(revNo);
-			long timestamp = date + startTime * 3600 * 1000;
-			chk = new CheckIn(usr.getUserId(), travelPoi, timestamp, review);
-			usr.addCheckIn(chk);
-			travelPoi.addCheckIn(chk);
-			poisVisited.add(travelPoi);
-			timeBefore = usr.getCheckIns().get(0).getTimestamp();
-			usr.getTraces().add(
-					new GPSTrace(travelPoi.getLatitude(), travelPoi.getLongitude(), timestamp,
-							usr.getUserId()));
 			p = travelPoi;
-		} else if (travel && travelDay != 1) { //first poi should be in maxDist range from travelPoi
+		} else if (travel && travelDay != 1 && !home) { // first poi should be
+														// in maxDist range from
+														// travelPoi
 			System.out.println("2");
-			poisInRange = db.findInRange(travelPoi.getPoiId(), travelPoi.getLongitude(),
-					travelPoi.getLatitude(), maxDist);
+			poisInRange = db.findInRange(travelPoi.getPoiId(),
+					travelPoi.getLongitude(), travelPoi.getLatitude(), maxDist);
 			if (!poisInRange.isEmpty()) {
-					restNo = createUniformIntRandom(poisInRange.size()) - 1;
-					p = poisInRange.get(restNo);
-					revNo = createUniformIntRandom(p.getReviews().size()) - 1;
-					review = p.getReviews().get(revNo);
-					long timestamp = date + startTime * 3600 * 1000;
-					chk = new CheckIn(usr.getUserId(), p, timestamp, review);
-					usr.addCheckIn(chk);
-					p.addCheckIn(chk);
-					poisVisited.add(p);
-					timeBefore = usr.getCheckIns().get(0).getTimestamp();
-					usr.getTraces().add(
-							new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
-									usr.getUserId()));
+				restNo = createUniformIntRandom(poisInRange.size()) - 1;
+				p = poisInRange.get(restNo);
 			}
-		} else if (home) { //if it is the home to be determined it should be totally random
+		}
+		// TODO: what if it starts with travel
+		else if (!travel && home) { // if it is the home to be determined it
+									// should be totally random
 			System.out.println("3");
 			restNo = createUniformIntRandom(poisNum);
 			p = db.getPoi(restNo);
-			revNo = createUniformIntRandom(p.getReviews().size()) - 1;
-			review = p.getReviews().get(revNo);
-			long timestamp = date + startTime * 3600 * 1000;
-			chk = new CheckIn(usr.getUserId(), p, timestamp, review);
-			usr.addCheckIn(chk);
-			p.addCheckIn(chk);
-			poisVisited.add(p);
-			timeBefore = usr.getCheckIns().get(0).getTimestamp();
-			usr.getTraces().add(
-					new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
-							usr.getUserId()));
 			usr.setHome(p);
-		} else { //if home is determined - all other check-in's should be in maxDist range from home
+		} else if (!travel && !home) { // if home is determined - all other
+										// check-in's should be in maxDist range
+										// from home
 			System.out.println("4");
 			Poi h = usr.getHome();
 			poisInRange = db.findInRange(h.getPoiId(), h.getLongitude(),
 					h.getLatitude(), maxDist);
 			if (!poisInRange.isEmpty()) {
-					restNo = createUniformIntRandom(poisInRange.size()) - 1;
-					p = poisInRange.get(restNo);
-					revNo = createUniformIntRandom(p.getReviews().size()) - 1;
-					review = p.getReviews().get(revNo);
-					long timestamp = date + startTime * 3600 * 1000;
-					chk = new CheckIn(usr.getUserId(), p, timestamp, review);
-					usr.addCheckIn(chk);
-					p.addCheckIn(chk);
-					poisVisited.add(p);
-					timeBefore = usr.getCheckIns().get(0).getTimestamp();
-					usr.getTraces().add(
-							new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
-									usr.getUserId()));
+				restNo = createUniformIntRandom(poisInRange.size()) - 1;
+				p = poisInRange.get(restNo);
 			}
 		}
+		
+		revNo = createUniformIntRandom(p.getReviews().size()) - 1;
+		review = p.getReviews().get(revNo);
+		long timestamp = date + startTime * 3600 * 1000;
+		chk = new CheckIn(usr.getUserId(), p, timestamp, review);
+		usr.addCheckIn(chk);
+		p.addCheckIn(chk);
+		poisVisited.add(p);
+		timeBefore = usr.getCheckIns().get(0).getTimestamp();
+		usr.getTraces().add(
+				new GPSTrace(p.getLatitude(), p.getLongitude(),
+						timestamp, usr.getUserId()));
 
 		/*
 		 * Step 2: Every other poi will have to be in range from the previous
@@ -119,6 +95,10 @@ public class CreateChkIn {
 
 		for (int i = 1; i < chkNum; i++) {
 			System.out.println("Check in no." + i);
+			//if p is null, that means no pois where found in range from home or travelPoi
+			//so break
+			if (p == null)
+				break;
 			poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
 					p.getLatitude(), dist);
 			for (Poi poi : poisVisited) {
@@ -166,12 +146,12 @@ public class CreateChkIn {
 			}
 		}
 		/*
-		 * Create map for the daily traversal - poisVisited
-		 * TODO: see path for intermediate gps traces!
+		 * Create map for the daily traversal - poisVisited TODO: see path for
+		 * intermediate gps traces!
 		 */
 		String url = "https://maps.googleapis.com/maps/api/staticmap?&zoom=13&size=1000x1000";
-		for (Poi poi: poisVisited) {
-			url += "&markers=" + poi.getLatitude() + "," + poi.getLongitude(); 
+		for (Poi poi : poisVisited) {
+			url += "&markers=" + poi.getLatitude() + "," + poi.getLongitude();
 		}
 		System.out.println(url);
 	}
