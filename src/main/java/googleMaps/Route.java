@@ -91,82 +91,84 @@ public class Route {
 	}
 
 	public ArrayList<GPSTrace> getPoisBetween(String json, DBconnector db,
-			long time, User usr) {
+			long time, User usr) throws JSONException {
 		ArrayList<GPSTrace> res = new ArrayList<GPSTrace>();
 		int threshold = 100;
 		GPSTrace tr;
 		double lngFrom = -1, latFrom = -1, lngTo = -1, latTo = -1;
-		try {
-			JSONObject obj = new JSONObject(json);
-			JSONArray jsonRoutes = obj.getJSONArray("routes");
-			JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
-			JSONArray jsonLegs = jsonRoute.getJSONArray("legs");
-			JSONObject jsonLeg = jsonLegs.getJSONObject(0);
-			JSONArray jsonSteps = jsonLeg.getJSONArray("steps");
 
-			for (int i = 0; i < jsonSteps.length(); i++) {
-				JSONObject jsonStep = jsonSteps.getJSONObject(i);
-				JSONObject jsonStart = jsonStep.getJSONObject("start_location");
-				lngFrom = jsonStart.getDouble("lng");
-				latFrom = jsonStart.getDouble("lat");
-				System.out.println("(" + latFrom + ", " + lngFrom + ")");
-				JSONObject jsonEnd = jsonStep.getJSONObject("end_location");
-				lngTo = jsonEnd.getDouble("lng");
-				latTo = jsonEnd.getDouble("lat");
-				System.out.println("(" + latTo + ", " + lngTo + ")");
+		JSONObject obj = new JSONObject(json);
+		JSONArray jsonRoutes = obj.getJSONArray("routes");
+		JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
+		JSONArray jsonLegs = jsonRoute.getJSONArray("legs");
+		JSONObject jsonLeg = jsonLegs.getJSONObject(0);
+		JSONArray jsonSteps = jsonLeg.getJSONArray("steps");
 
-				if (i == 0) {
-					tr = new GPSTrace(latFrom, lngFrom, time, usr.getUserId());
-					res.add(tr);
-					usr.getTraces().add(tr);
-				}
+		for (int i = 0; i < jsonSteps.length(); i++) {
+			System.out.println("i = " + i + " vs. " + jsonSteps.length());
+			JSONObject jsonStep = jsonSteps.getJSONObject(i);
+			JSONObject jsonStart = jsonStep.getJSONObject("start_location");
+			lngFrom = jsonStart.getDouble("lng");
+			latFrom = jsonStart.getDouble("lat");
+			System.out.println("(" + latFrom + ", " + lngFrom + ")");
+			JSONObject jsonEnd = jsonStep.getJSONObject("end_location");
+			lngTo = jsonEnd.getDouble("lng");
+			latTo = jsonEnd.getDouble("lat");
+			System.out.println("(" + latTo + ", " + lngTo + ")");
 
-				JSONObject jsonDist = jsonStep.getJSONObject("distance");
-				String dist = jsonDist.getString("value");
-				int d = Integer.parseInt(dist);
-				System.out.println(dist + "m");
-				JSONObject jsonDur = jsonStep.getJSONObject("duration");
-				String dur = jsonDur.getString("value");
-				double du = Double.parseDouble(dur);
-				System.out.println(du + "s");
-				String durat = jsonDur.getString("text");
-				System.out.println(durat);
-				// If a step is more than threshold then make and split line
-				if (d > 2*threshold) {
-					int split = Integer.parseInt(dist) / threshold;
-					double from = 0;
-					double to = 1.0 / split;
-					System.out.println("split = " + split + " from = " + from
-							+ " to = " + to);
-					for (i = 1; i <= split; i++) {
-						if (to < 1) {
-							time += du * from;
-							// System.out.println("Splitting " + "(" + latFrom +
-							// ", " + lngFrom
-							// + ") -> (" + latTo + ", " + lngTo + ")");
-							tr = db.getBetween(lngFrom, latFrom, lngTo, latTo,
-									from, to, time, usr);
-							res.add(tr);
-							from = to;
-							to += 1.0 / split;
-						}
-					}
-					// TODO: timestamp each intermediate gps trace
-				} else {
-					tr = new GPSTrace(latTo, lngTo, time, usr.getUserId());
-					res.add(tr);
-					usr.getTraces().add(tr);
-				}
+			if (i == 0) {
+				tr = new GPSTrace(latFrom, lngFrom, time, usr.getUserId());
+				res.add(tr);
+				usr.getTraces().add(tr);
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+
+			JSONObject jsonDist = jsonStep.getJSONObject("distance");
+			String dist = jsonDist.getString("value");
+			int d = Integer.parseInt(dist);
+			System.out.println(dist + "m");
+			JSONObject jsonDur = jsonStep.getJSONObject("duration");
+			String dur = jsonDur.getString("value");
+			double du = Double.parseDouble(dur);
+			System.out.println(du + "s");
+			String durat = jsonDur.getString("text");
+			System.out.println(durat);
+			// If a step is more than threshold then make and split line
+			if (d > 2 * threshold) {
+				int split = Integer.parseInt(dist) / threshold;
+				double from = 0;
+				double to = 1.0 / split;
+				System.out.println("split = " + split + " from = " + from
+						+ " to = " + to);
+				for (int j = 1; j <= split; j++) {
+					if (to < 1) {
+						time += du * from;
+						// System.out.println("Splitting " + "(" + latFrom +
+						// ", " + lngFrom
+						// + ") -> (" + latTo + ", " + lngTo + ")");
+						tr = db.getBetween(lngFrom, latFrom, lngTo, latTo,
+								from, to, time, usr);
+						res.add(tr);
+						from = to;
+						to += 1.0 / split;
+					}
+				}
+				// TODO: timestamp each intermediate gps trace
+			} else {
+				tr = new GPSTrace(latTo, lngTo, time, usr.getUserId());
+				res.add(tr);
+				usr.getTraces().add(tr);
+			}
 		}
+
 		return res;
 	}
 
 	public double getDuration(String json) throws JSONException {
 		JSONObject obj = new JSONObject(json);
 		JSONArray jsonRoutes = obj.getJSONArray("routes");
+		if (jsonRoutes.isNull(0)) {
+			return -1;
+		}
 		JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
 		JSONArray jsonLegs = jsonRoute.getJSONArray("legs");
 		JSONObject jsonLeg = jsonLegs.getJSONObject(0);

@@ -74,19 +74,20 @@ public class CreateChkIn {
 				p = poisInRange.get(restNo);
 			}
 		}
-		
-		revNo = createUniformIntRandom(p.getReviews().size()) - 1;
-		review = p.getReviews().get(revNo);
-		long timestamp = date + startTime * 3600 * 1000;
-		chk = new CheckIn(usr.getUserId(), p, timestamp, review);
-		usr.addCheckIn(chk);
-		p.addCheckIn(chk);
-		poisVisited.add(p);
-		timeBefore = usr.getCheckIns().get(0).getTimestamp();
-		usr.getTraces().add(
-				new GPSTrace(p.getLatitude(), p.getLongitude(),
-						timestamp, usr.getUserId()));
 
+		if (p != null) {
+			revNo = createUniformIntRandom(p.getReviews().size()) - 1;
+			review = p.getReviews().get(revNo);
+			long timestamp = date + startTime * 3600 * 1000;
+			chk = new CheckIn(usr.getUserId(), p, timestamp, review);
+			usr.addCheckIn(chk);
+			p.addCheckIn(chk);
+			poisVisited.add(p);
+			timeBefore = usr.getCheckIns().get(0).getTimestamp();
+			usr.getTraces().add(
+					new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
+							usr.getUserId()));
+		}
 		/*
 		 * Step 2: Every other poi will have to be in range from the previous
 		 * (random choice), it should not be a poi he already visited that day,
@@ -95,8 +96,9 @@ public class CreateChkIn {
 
 		for (int i = 1; i < chkNum; i++) {
 			System.out.println("Check in no." + i);
-			//if p is null, that means no pois where found in range from home or travelPoi
-			//so break
+			// if p is null, that means no pois where found in range from home
+			// or travelPoi
+			// so break
 			if (p == null)
 				break;
 			poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
@@ -119,24 +121,31 @@ public class CreateChkIn {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				long checkDur = (long) createDoubleGaussianRandom(chkDurMean,
-						chkDurStDev);
-				long time = timeBefore + checkDur * 3600 * 1000
-						+ (long) duration * 1000;
-				if (time > (date + endTime * 3600 * 1000)) {
-					System.out
-							.println("Exceeded the time available for today's check-in's");
-					break;
+				if (duration != -1) {
+					long checkDur = (long) createDoubleGaussianRandom(
+							chkDurMean, chkDurStDev);
+					long time = timeBefore + checkDur * 3600 * 1000
+							+ (long) duration * 1000;
+					if (time > (date + endTime * 3600 * 1000)) {
+						System.out
+								.println("Exceeded the time available for today's check-in's");
+						break;
+					}
+					timeBefore = time;
+					try {
+						rt.getPoisBetween(jsonRoute, db, time, usr);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
+					review = newP.getReviews().get(revNo);
+					chk = new CheckIn(usr.getUserId(), newP, time, review);
+					usr.addCheckIn(chk);
+					newP.addCheckIn(chk);
+					poisVisited.add(newP);
+					p = newP;
 				}
-				timeBefore = time;
-				rt.getPoisBetween(jsonRoute, db, time, usr);
-				revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
-				review = newP.getReviews().get(revNo);
-				chk = new CheckIn(usr.getUserId(), newP, time, review);
-				usr.addCheckIn(chk);
-				newP.addCheckIn(chk);
-				poisVisited.add(newP);
-				p = newP;
 			} else {
 				/*
 				 * If no pois found in range, that means the user cannot go
