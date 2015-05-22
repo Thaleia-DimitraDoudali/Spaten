@@ -28,13 +28,16 @@ public class CheckIn {
 	}
 
 	public void print() {
-		String out = "User no." + userId + "\t poi chosen: " + poi.getPoiId() 
+		String out = "User no." + userId
+				+ "\t date: "
+				+ getDate(timestamp)
+				+ "\t poi chosen: " + poi.getPoiId() 
 				+ " title: " + poi.getTitle()
 				+ " (" + poi.getLatitude()
 				+ ", " + poi.getLongitude() + ") "
+				
 				+ "adress: " + poi.getAddress()
-				+ "\t timestamp: " + timestamp + "\t date: "
-				+ getDate(timestamp) + "\t "; 
+				+ "\t timestamp: " + timestamp  + "\t "; 
 		System.out.print(out);
 		review.print();
 		System.out.println();

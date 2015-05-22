@@ -93,7 +93,7 @@ public class Route {
 	public ArrayList<GPSTrace> getPoisBetween(String json, DBconnector db,
 			long time, User usr) throws JSONException {
 		ArrayList<GPSTrace> res = new ArrayList<GPSTrace>();
-		int threshold = 100;
+		int threshold = 200;
 		GPSTrace tr;
 		double lngFrom = -1, latFrom = -1, lngTo = -1, latTo = -1;
 

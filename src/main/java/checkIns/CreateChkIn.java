@@ -28,6 +28,7 @@ public class CreateChkIn {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
+		ArrayList<GPSTrace> tracesVisited = new ArrayList<GPSTrace>();
 		Route rt = new Route();
 		int restNo = -1, revNo = -1;
 		long timeBefore = -1;
@@ -83,9 +84,11 @@ public class CreateChkIn {
 			usr.addCheckIn(chk);
 			p.addCheckIn(chk);
 			poisVisited.add(p);
-			timeBefore = usr.getCheckIns().get(0).getTimestamp();
+			timeBefore = timestamp;
 			usr.getTraces().add(
 					new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
+							usr.getUserId()));
+			tracesVisited.add(new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
 							usr.getUserId()));
 		}
 		/*
@@ -133,7 +136,7 @@ public class CreateChkIn {
 					}
 					timeBefore = time;
 					try {
-						rt.getPoisBetween(jsonRoute, db, time, usr);
+						tracesVisited.addAll(rt.getPoisBetween(jsonRoute, db, time, usr));
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -158,9 +161,15 @@ public class CreateChkIn {
 		 * Create map for the daily traversal - poisVisited TODO: see path for
 		 * intermediate gps traces!
 		 */
-		String url = "https://maps.googleapis.com/maps/api/staticmap?&zoom=13&size=1000x1000";
+		String url = "https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000";
+		char letter = 'A';
 		for (Poi poi : poisVisited) {
-			url += "&markers=" + poi.getLatitude() + "," + poi.getLongitude();
+			url += "&markers=label:" + letter + "|" + poi.getLatitude() + "," + poi.getLongitude();
+			letter ++;
+		}
+		url += "&path=color:blue";
+		for (GPSTrace tr: tracesVisited) {
+			url += "|" + tr.getLatitude() +"," + tr.getLongitude();
 		}
 		System.out.println(url);
 	}
