@@ -8,12 +8,18 @@ public class Review {
 	
 	public Review(String rate, String rTitle, String rev) {
 		rating = rate;
-		if (rTitle.contains("'"))
-			reviewTitle = rTitle.replace("'", "''");
-		else reviewTitle = rTitle;
-		if (rev.contains("'"))
-			review = rev.replace("'", "''");
-		else review = rev;				
+		
+		reviewTitle = rTitle;
+		if (reviewTitle.contains("'"))
+			reviewTitle = reviewTitle.replace("'", "''");
+		if (reviewTitle.contains("\""))
+			reviewTitle = reviewTitle.replace("\"", "");
+		
+		review = rev;	
+		if (review.contains("'"))
+			review = review.replace("'", "''");
+		if (review.contains("\""))
+			review = review.replace("\"", "");
 	}
 
 	public void print() {

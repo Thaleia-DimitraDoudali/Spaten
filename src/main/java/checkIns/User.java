@@ -1,5 +1,7 @@
 package checkIns;
 
+import googleMaps.MapURL;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ public class User {
 	private List<String> routes = new ArrayList<String>();
 	private List<GPSTrace> traces = new ArrayList<GPSTrace>();
 	private Poi home;
+	private List<MapURL> dailyMap = new ArrayList<MapURL>();
 	
 	public User(int id) {
 		this.userId = id;
@@ -23,6 +26,10 @@ public class User {
 			chk.print();
 		}
 
+	}
+	
+	public void addDailyMap(MapURL mp) {
+		dailyMap.add(mp);
 	}
 	
 	public void addGPSTrace(GPSTrace tr) {
@@ -75,6 +82,14 @@ public class User {
 
 	public void setHome(Poi home) {
 		this.home = home;
+	}
+
+	public List<MapURL> getDailyMap() {
+		return dailyMap;
+	}
+
+	public void setDailyMap(List<MapURL> dailyMap) {
+		this.dailyMap = dailyMap;
 	}
 
 }

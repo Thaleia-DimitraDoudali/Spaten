@@ -1,5 +1,6 @@
 package checkIns;
 
+import googleMaps.MapURL;
 import googleMaps.Route;
 
 import java.util.ArrayList;
@@ -172,6 +173,7 @@ public class CreateChkIn {
 			url += "|" + tr.getLatitude() +"," + tr.getLongitude();
 		}
 		System.out.println(url);
+		usr.addDailyMap(new MapURL(usr.getUserId(), getDate(date), url));
 	}
 
 	public void printUsers() {

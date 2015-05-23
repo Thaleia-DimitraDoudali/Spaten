@@ -141,6 +141,13 @@ public class Generator {
 				
 				
 			}
+			
+			//Export output to CSV files
+			GenerateCSV gen = new GenerateCSV();
+			gen.GenerateCheckInsCSV(users);
+			gen.GenerateDailyMapCSV(users);
+			gen.GenerateGPSTraceCSV(users);
+			
 			// Print check-in's
 			for (CheckIn chk : usr.getCheckIns()) {
 				chk.print();
