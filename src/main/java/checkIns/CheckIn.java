@@ -2,7 +2,6 @@ package checkIns;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 
 import pois.Poi;
@@ -15,6 +14,7 @@ public class CheckIn {
 	private long timestamp;
 	private int userId;
 	private ArrayList<Poi> poisBetween = new ArrayList<Poi>();
+	private boolean travel;
 	
 	public CheckIn(int id, Poi rst, long time, Review rev) {
 		this.userId = id;
@@ -29,6 +29,7 @@ public class CheckIn {
 
 	public void print() {
 		String out = "User no." + userId
+				+ "\t travel: " + travel
 				+ "\t date: "
 				+ getDate(timestamp)
 				+ "\t poi chosen: " + poi.getPoiId() 
@@ -90,6 +91,14 @@ public class CheckIn {
 
 	public void setPoisBetween(ArrayList<Poi> poisBetween) {
 		this.poisBetween = poisBetween;
+	}
+
+	public boolean isTravel() {
+		return travel;
+	}
+
+	public void setTravel(boolean travel) {
+		this.travel = travel;
 	}
 	
 }

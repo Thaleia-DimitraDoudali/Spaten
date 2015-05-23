@@ -77,7 +77,7 @@ public class GenerateCSV {
 	public void GenerateCheckInsCSV(List<User> users) {
 
 		BufferedWriter bw = createWriter("check-ins.json");
-		String header = "UserNo,\t Poi,\t Date,\t Title,\t Address,\t Timestamp,\t"
+		String header = "UserNo,\t Poi,\t Date,\t Travel,\t Title,\t Address,\t Timestamp,\t"
 				+ "RevRating,\t RevTitle,\t RevText\n";
 		String content = "";
 		try {
@@ -89,6 +89,7 @@ public class GenerateCSV {
 							+ chk.getPoi().getLatitude() + ", "
 							+ chk.getPoi().getLongitude() + ")\",\t " + "\""
 							+ chk.getDate(chk.getTimestamp()) + "\",\t " + "\""
+							+ chk.isTravel() + "\",\t " + "\"" 
 							+ chk.getPoi().getTitle() + "\",\t " + "\""
 							+ chk.getPoi().getAddress() + "\",\t " + "\""
 							+ chk.getTimestamp() + "\",\t " + "\""

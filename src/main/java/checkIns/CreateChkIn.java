@@ -82,6 +82,7 @@ public class CreateChkIn {
 			review = p.getReviews().get(revNo);
 			long timestamp = date + startTime * 3600 * 1000;
 			chk = new CheckIn(usr.getUserId(), p, timestamp, review);
+			chk.setTravel(travel);
 			usr.addCheckIn(chk);
 			p.addCheckIn(chk);
 			poisVisited.add(p);
@@ -145,6 +146,7 @@ public class CreateChkIn {
 					revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
 					review = newP.getReviews().get(revNo);
 					chk = new CheckIn(usr.getUserId(), newP, time, review);
+					chk.setTravel(travel);
 					usr.addCheckIn(chk);
 					newP.addCheckIn(chk);
 					poisVisited.add(newP);
