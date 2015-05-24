@@ -144,13 +144,41 @@ public class DBconnector {
 		}
 		return p;
 	}
+	
+	public int getPoiTitle(String title) {
+		try {
+			statement = connection.createStatement();
+			String sql = "SELECT * FROM pois WHERE title = '" + title + "';";
+			ResultSet rs = statement.executeQuery(sql);
+			if (rs.next()) {
+				return rs.getInt("poisId");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	public void addReview(int id, Review rev) {
+		try {
+			statement = connection.createStatement();
+			String sql = "INSERT INTO reviews (revId, rating, reviewTitle, review) VALUES ("
+					+ id
+					+ ", '"
+					+ rev.getRating()
+					+ "', '"
+					+ rev.getReviewTitle() + "', '" + rev.getReview() + "')";
+			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void insertPoi(Poi p) {
 		try {
 			statement = connection.createStatement();
-			String sql = "INSERT INTO pois (poisId, location, title, adress) VALUES ("
-					+ p.getPoiId()
-					+ ", ST_GeographyFromText('SRID=4326;POINT("
+			String sql = "INSERT INTO pois (location, title, adress) VALUES ("
+					+ "ST_GeographyFromText('SRID=4326;POINT("
 					+ p.getLatitude()
 					+ " "
 					+ p.getLongitude()

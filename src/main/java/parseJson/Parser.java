@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import db.DBconnector;
 import pois.Poi;
 
 
@@ -87,6 +88,32 @@ public class Parser {
 		
 	}
 	
+	public void parseStorePois(DBconnector db, String path) throws IOException, JSONException {
+		
+		BufferedReader br = new BufferedReader(new FileReader(path));
+		String line;
+        line = br.readLine();
+        int i = 1;
+        while (line != null){
+			JSONObject obj = new JSONObject(line);
+			Poi p = returnPoi(i, obj);
+			//Add only those that are an actual poi
+			if ((p.getLatitude() != -1) && (p.getLongitude() != -1)) {
+				//If poi with that title, already exists on DB, merge their reviews
+				int id = db.getPoiTitle(p.getTitle());
+				if (id != -1) {
+					db.addReview(id, p.getReviews().get(0));
+				} else {
+					//Insert Poi to DB
+					db.insertPoi(p);
+					i++;
+				}
+			}
+        	line=br.readLine();
+        }
+        br.close();
+	}
+	
 	public HashMap<Integer, Poi> createPois(String path) throws IOException, JSONException {
 		
 		HashMap<String, Poi> restaurantsMap = new HashMap<String, Poi>();
@@ -97,6 +124,7 @@ public class Parser {
         line = br.readLine();
         int i = 1;
         while (line != null){
+        	//System.out.println(line);
 			JSONObject obj = new JSONObject(line);
 			Poi p = returnPoi(i, obj);
 			//Add only those that are an actual poi

@@ -32,7 +32,7 @@ public class GenerateCSV {
 	}
 
 	public void GenerateDailyMapCSV(List<User> users) {
-		BufferedWriter bw = createWriter("daily-map.json");
+		BufferedWriter bw = createWriter("daily-map.csv");
 		String header = "UserNo,\t Date,\t URL\n";
 		String content = "";
 		try {
@@ -53,8 +53,8 @@ public class GenerateCSV {
 	}
 
 	public void GenerateGPSTraceCSV(List<User> users) {
-		BufferedWriter bw = createWriter("gps-traces.json");
-		String header = "UserNo,\t Date,\t LatLong,\t Timestamp\n";
+		BufferedWriter bw = createWriter("gps-traces.csv");
+		String header = "UserNo,\t Date,\t LatLong\n";
 		String content = "";
 		try {
 			bw.write(header);
@@ -76,7 +76,7 @@ public class GenerateCSV {
 	
 	public void GenerateCheckInsCSV(List<User> users) {
 
-		BufferedWriter bw = createWriter("check-ins.json");
+		BufferedWriter bw = createWriter("check-ins.csv");
 		String header = "UserNo,\t Poi,\t Date,\t Travel,\t Title,\t Address,\t Timestamp,\t"
 				+ "RevRating,\t RevTitle,\t RevText\n";
 		String content = "";
