@@ -2,6 +2,7 @@ package checkIns;
 
 import googleMaps.MapURL;
 import googleMaps.Route;
+import googleMaps.ShortenURL;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -177,22 +178,10 @@ public class CreateChkIn {
 			url += "|" + tr.getLatitude() +"," + tr.getLongitude();
 		}
 		System.out.println(url);
+		ShortenURL rl = new ShortenURL();
+		String shortUrl = rl.shortUrl(url);
+		System.out.println(shortUrl);
 		usr.addDailyMap(new MapURL(usr.getUserId(), getDate(date), url));
-		
-		String dyn_url = "http://maps.google.com?";
-		letter = 'A';
-		for (int i = 0; i < poisVisited.size(); i++) {
-			if (i == 0) {
-				dyn_url += "&saddr=loc:"+ poisVisited.get(i).getLatitude() + "+" + poisVisited.get(i).getLongitude();
-			} else if (i == poisVisited.size()-1) {
-				dyn_url += "&daddr=loc:"+ poisVisited.get(i).getLatitude() + "+" + poisVisited.get(i).getLongitude();
-			} else {
-				dyn_url += "&via=loc:"+ poisVisited.get(i).getLatitude() + "+" + poisVisited.get(i).getLongitude();
-			}
-			letter ++;
-		}
-		dyn_url += "&dirflg=w";
-		System.out.println(dyn_url);
 	}
 
 	public void printUsers() {
