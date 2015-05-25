@@ -139,7 +139,8 @@ public class CreateChkIn {
 					}
 					timeBefore = time;
 					try {
-						tracesVisited.addAll(rt.getPoisBetween(jsonRoute, db, time, usr));
+						//tracesVisited.addAll(rt.getPoisBetween(jsonRoute, db, time, usr));
+						tracesVisited.addAll(rt.getTracesBetween(jsonRoute, db, time, usr));
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -177,6 +178,21 @@ public class CreateChkIn {
 		}
 		System.out.println(url);
 		usr.addDailyMap(new MapURL(usr.getUserId(), getDate(date), url));
+		
+		String dyn_url = "http://maps.google.com?";
+		letter = 'A';
+		for (int i = 0; i < poisVisited.size(); i++) {
+			if (i == 0) {
+				dyn_url += "&saddr=loc:"+ poisVisited.get(i).getLatitude() + "+" + poisVisited.get(i).getLongitude();
+			} else if (i == poisVisited.size()-1) {
+				dyn_url += "&daddr=loc:"+ poisVisited.get(i).getLatitude() + "+" + poisVisited.get(i).getLongitude();
+			} else {
+				dyn_url += "&via=loc:"+ poisVisited.get(i).getLatitude() + "+" + poisVisited.get(i).getLongitude();
+			}
+			letter ++;
+		}
+		dyn_url += "&dirflg=w";
+		System.out.println(dyn_url);
 	}
 
 	public void printUsers() {

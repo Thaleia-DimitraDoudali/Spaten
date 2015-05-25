@@ -1,6 +1,7 @@
 package googleMaps;
 
 import java.io.BufferedReader;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import pois.GPSTrace;
-import pois.Poi;
 import checkIns.CheckIn;
 import checkIns.User;
 import db.DBconnector;
@@ -107,6 +107,11 @@ public class Route {
 		for (int i = 0; i < jsonSteps.length(); i++) {
 			System.out.println("i = " + i + " vs. " + jsonSteps.length());
 			JSONObject jsonStep = jsonSteps.getJSONObject(i);
+			JSONObject jsonPolyline = jsonStep.getJSONObject("polyline");
+			String polyline = jsonPolyline.getString("points");
+			System.out.println(polyline);
+			Polyline pl = new Polyline();
+			pl.decodePoly(polyline);
 			JSONObject jsonStart = jsonStep.getJSONObject("start_location");
 			lngFrom = jsonStart.getDouble("lng");
 			latFrom = jsonStart.getDouble("lat");
@@ -158,6 +163,79 @@ public class Route {
 				res.add(tr);
 				usr.getTraces().add(tr);
 			}
+		}
+
+		return res;
+	}
+
+	public ArrayList<GPSTrace> getTracesBetween(String json, DBconnector db,
+			long time, User usr) throws JSONException {
+		
+		ArrayList<GPSTrace> res = new ArrayList<GPSTrace>();
+		ArrayList<String> decPol = new ArrayList<String>();
+		int threshold = 200;
+		GPSTrace tr;
+		double lngFrom = -1, latFrom = -1, lngTo = -1, latTo = -1;
+
+		JSONObject obj = new JSONObject(json);
+		JSONArray jsonRoutes = obj.getJSONArray("routes");
+		JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
+		JSONArray jsonLegs = jsonRoute.getJSONArray("legs");
+		JSONObject jsonLeg = jsonLegs.getJSONObject(0);
+		JSONArray jsonSteps = jsonLeg.getJSONArray("steps");
+
+		
+		for (int i = 0; i < jsonSteps.length(); i++) {
+			decPol.clear();
+			System.out.println("i = " + i + " vs. " + jsonSteps.length());
+			JSONObject jsonStep = jsonSteps.getJSONObject(i);
+			JSONObject jsonPolyline = jsonStep.getJSONObject("polyline");
+			String polyline = jsonPolyline.getString("points");
+			System.out.println(polyline);
+
+			JSONObject jsonStart = jsonStep.getJSONObject("start_location");
+			lngFrom = jsonStart.getDouble("lng");
+			latFrom = jsonStart.getDouble("lat");
+			System.out.println("(" + latFrom + ", " + lngFrom + ")");
+			JSONObject jsonEnd = jsonStep.getJSONObject("end_location");
+			lngTo = jsonEnd.getDouble("lng");
+			latTo = jsonEnd.getDouble("lat");
+			System.out.println("(" + latTo + ", " + lngTo + ")");
+
+			/*if (i == 0) {
+				tr = new GPSTrace(latFrom, lngFrom, time, usr.getUserId());
+				res.add(tr);
+				usr.getTraces().add(tr);
+			}*/
+
+			JSONObject jsonDist = jsonStep.getJSONObject("distance");
+			String dist = jsonDist.getString("value");
+			int d = Integer.parseInt(dist);
+			System.out.println(dist + "m");
+			JSONObject jsonDur = jsonStep.getJSONObject("duration");
+			String dur = jsonDur.getString("value");
+			double du = Double.parseDouble(dur);
+			System.out.println(du + "s");
+			String durat = jsonDur.getString("text");
+			System.out.println(durat);
+			
+			Polyline pl = new Polyline();
+			decPol = pl.decodePoly(polyline);
+			System.out.println(decPol.size());
+			double latit = -1, longt = -1;
+			String[] parts;
+			double durPol = du / decPol.size();
+			for (String s: decPol) {
+				parts = s.split(",");
+				latit = Double.parseDouble(parts[0]);
+				longt = Double.parseDouble(parts[1]);
+				time += durPol;
+				System.out.println(latit + ", " + longt + " " + time);
+				tr = new GPSTrace(latit, longt, time, usr.getUserId());
+				res.add(tr);
+				usr.getTraces().add(tr);
+			}
+
 		}
 
 		return res;
