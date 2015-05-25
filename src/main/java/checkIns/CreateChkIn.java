@@ -28,7 +28,7 @@ public class CreateChkIn {
 			boolean home, boolean travel, long travelDay) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
-		ArrayList<Poi> poisInRange = new ArrayList<Poi>();
+		ArrayList<Integer> poisInRange = new ArrayList<Integer>();
 		ArrayList<GPSTrace> tracesVisited = new ArrayList<GPSTrace>();
 		Route rt = new Route();
 		int restNo = -1, revNo = -1;
@@ -54,7 +54,7 @@ public class CreateChkIn {
 					travelPoi.getLongitude(), travelPoi.getLatitude(), maxDist);
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
-				p = poisInRange.get(restNo);
+				p = db.getPoi(poisInRange.get(restNo));
 			}
 		}
 		// TODO: what if it starts with travel
@@ -73,7 +73,7 @@ public class CreateChkIn {
 					h.getLatitude(), maxDist);
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
-				p = poisInRange.get(restNo);
+				p = db.getPoi(poisInRange.get(restNo));
 			}
 		}
 
@@ -109,11 +109,12 @@ public class CreateChkIn {
 			poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
 					p.getLatitude(), dist);
 			for (Poi poi : poisVisited) {
-				poisInRange.remove(poi);
+				poisInRange.remove(new Integer(poi.getPoiId()));
 			}
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
-				Poi newP = poisInRange.get(restNo);
+				Poi newP = db.getPoi(poisInRange.get(restNo));
+				System.out.println(poisInRange.get(restNo) + " " + newP);
 				System.out.println("Route: (" + p.getLatitude() + ", "
 						+ p.getLongitude() + ") -> (" + newP.getLatitude()
 						+ ", " + newP.getLongitude() + ")");
@@ -164,7 +165,7 @@ public class CreateChkIn {
 		 * Create map for the daily traversal - poisVisited TODO: see path for
 		 * intermediate gps traces!
 		 */
-		String url = "https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000";
+		String url = "https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000&geodesic=true";
 		char letter = 'A';
 		for (Poi poi : poisVisited) {
 			url += "&markers=label:" + letter + "|" + poi.getLatitude() + "," + poi.getLongitude();

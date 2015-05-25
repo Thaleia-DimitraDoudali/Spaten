@@ -239,30 +239,32 @@ public class DBconnector {
 		return res;
 	}
 
-	public ArrayList<Poi> findInRange(int id, double lng, double lat,
+	public ArrayList<Integer> findInRange(int id, double lng, double lat,
 			double dist) {
-		ArrayList<Poi> pois = new ArrayList<Poi>();
+		ArrayList<Integer> pois = new ArrayList<Integer>();
 		try {
 			statement = connection.createStatement();
 			String sql = "SELECT * FROM pois WHERE ("
-					+ "SELECT ST_DWithin(ST_GeographyFromText('SRID=4326;POINT("
+					+ "ST_DWithin(ST_GeographyFromText('SRID=4326;POINT("
 					+ lat + " " + lng + ")'), location, " + dist + ")" + ");";
 			ResultSet rs = statement.executeQuery(sql);
-			Statement st = connection.createStatement();
+			//Statement st = connection.createStatement();
+			System.out.println(sql);
 			// int i = 1;
 			// Return a list with all pois found in range, except itself
 			while (rs.next()) {
-				sql = " SELECT ST_X(location::geometry), ST_Y(location::geometry) FROM pois WHERE poisId = "
+				/*sql = " SELECT ST_X(location::geometry), ST_Y(location::geometry) FROM pois WHERE poisId = "
 						+ rs.getInt("poisId") + ";";
 				ResultSet res = st.executeQuery(sql);
+				System.out.println(sql);
 				if (res.next()) {
 					// System.out.println(i + " " + res.getDouble("st_x") + " "
 					// + res.getDouble("st_y"));
-				}
+				}*/
 				// i++;
 				int pId = rs.getInt("poisId");
 				if (pId != id) {
-					pois.add(getPoi(pId));
+					pois.add(pId);
 				}
 			}
 		} catch (SQLException e) {
