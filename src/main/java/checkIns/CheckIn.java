@@ -35,7 +35,6 @@ public class CheckIn {
 				+ "\t timestamp: " + timestamp  + "\t "; 
 		System.out.print(out);
 		review.print();
-		System.out.println();
 	}
 	
 	public Date getDate(long millis) {

@@ -192,7 +192,7 @@ public class DBconnector {
 					+ "ST_DWithin(ST_GeographyFromText('SRID=4326;POINT("
 					+ lat + " " + lng + ")'), location, " + dist + ")" + ");";
 			ResultSet rs = statement.executeQuery(sql);
-			System.out.println(sql);
+			//System.out.println(sql);
 
 			while (rs.next()) {
 				int pId = rs.getInt("poisId");

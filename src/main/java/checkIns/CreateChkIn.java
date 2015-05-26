@@ -4,11 +4,14 @@ import googleMaps.MapURL;
 import googleMaps.Polyline;
 import googleMaps.Route;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
+
+import launch.OutCSV;
 
 import org.json.JSONException;
 
@@ -21,10 +24,10 @@ public class CreateChkIn {
 
 	Poi travelPoi = null;
 
-	public void createDailyCheckIn(User usr, int chkNum, int poisNum,
-			DBconnector db, double dist, double maxDist, double chkDurMean,
-			double chkDurStDev, int startTime, int endTime, long date,
-			boolean home, boolean travel, long travelDay) {
+	public void createDailyCheckIn(User usr, int chkNum, int poisNum, DBconnector db, double dist, 
+			double maxDist, double chkDurMean, double chkDurStDev, int startTime, int endTime, long date,
+			boolean home, boolean travel, long travelDay, BufferedWriter outChkCSV, 
+			BufferedWriter outTrCSV, BufferedWriter outMapCSV, OutCSV csv) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Integer> poisInRange = new ArrayList<Integer>();
@@ -36,37 +39,30 @@ public class CreateChkIn {
 		CheckIn chk;
 		Poi p = null;
 
-		/* Step 1: First poi will be random - starts 9am - random review as well */
-		// First poi of the day must be in maxDist range from his home
-		// Determine hometown - the first check-in is his home
-		if (travel && (travelDay == 1) && !home) { // pick sthn tuxi, determine
-													// start of the trip
-			System.out.println("1");
+		/*
+		 * Step 1: Determine the first poi of the day to be random
+		 */
+		
+		//If it is the first day of travel, pick a random poi and save it as travelPoi
+		if (travel && (travelDay == 1) && !home) { 
 			restNo = createUniformIntRandom(poisNum);
 			travelPoi = db.getPoi(restNo);
 			p = travelPoi;
-		} else if (travel && travelDay != 1 && !home) { // first poi should be
-														// in maxDist range from
-														// travelPoi
-			System.out.println("2");
+		} //If it's not the first day of the current travel, then choose a poi in maxDist range from travelPoi 
+		else if (travel && travelDay != 1 && !home) { 
 			poisInRange = db.findInRange(travelPoi.getPoiId(),
 					travelPoi.getLongitude(), travelPoi.getLatitude(), maxDist);
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
 				p = db.getPoi(poisInRange.get(restNo));
 			}
-		}
-		// TODO: what if it starts with travel
-		else if (!travel && home) { // if it is the home to be determined it
-									// should be totally random
-			System.out.println("3");
+		} // If it is the first ever check-in, then set as home this random poi
+		else if (!travel && home) { 
 			restNo = createUniformIntRandom(poisNum);
 			p = db.getPoi(restNo);
 			usr.setHome(p);
-		} else if (!travel && !home) { // if home is determined - all other
-										// check-in's should be in maxDist range
-										// from home
-			System.out.println("4");
+		} // If home location is known, then all other pois should be in maxDist range from home 
+		else if (!travel && !home) {
 			Poi h = usr.getHome();
 			poisInRange = db.findInRange(h.getPoiId(), h.getLongitude(),
 					h.getLatitude(), maxDist);
@@ -77,32 +73,32 @@ public class CreateChkIn {
 		}
 
 		if (p != null) {
+			//Select random review from the poi
 			revNo = createUniformIntRandom(p.getReviews().size()) - 1;
 			review = p.getReviews().get(revNo);
+			//Timestamp the checkin
 			long timestamp = date + startTime * 3600 * 1000;
 			chk = new CheckIn(usr.getUserId(), p, timestamp, review);
 			chk.setTravel(travel);
 			usr.addCheckIn(chk);
+			chk.print();
+			csv.appendCheckIn(outChkCSV, chk);
 			p.addCheckIn(chk);
 			poisVisited.add(p);
 			timeBefore = timestamp;
-			usr.getTraces().add(
-					new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
-							usr.getUserId()));
-			tracesVisited.add(new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp,
-							usr.getUserId()));
+			GPSTrace tr = new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp, usr.getUserId());
+			usr.addGPSTrace(tr);
+			tr.print();
+			csv.appendTrace(outTrCSV, tr);
+			tracesVisited.add(tr);
 		}
 		/*
-		 * Step 2: Every other poi will have to be in range from the previous
-		 * (random choice), it should not be a poi he already visited that day,
-		 * he will stay at each poi for 2h.
+		 * Step 2: Every other poi of the day will have to be in walking distance (dist) from
+		 * the initial poi and it should not be a poi he already visited that day.
 		 */
 
 		for (int i = 1; i < chkNum; i++) {
-			System.out.println("Check in no." + i);
-			// if p is null, that means no pois where found in range from home
-			// or travelPoi
-			// so break
+			// if p is null, that means no pois where found in range from home or travelPoi, so break
 			if (p == null)
 				break;
 			poisInRange = db.findInRange(p.getPoiId(), p.getLongitude(),
@@ -113,10 +109,6 @@ public class CreateChkIn {
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
 				Poi newP = db.getPoi(poisInRange.get(restNo));
-				System.out.println(poisInRange.get(restNo) + " " + newP);
-				System.out.println("Route: (" + p.getLatitude() + ", "
-						+ p.getLongitude() + ") -> (" + newP.getLatitude()
-						+ ", " + newP.getLongitude() + ")");
 				String jsonRoute = rt.getRoute(p.getLongitude(),
 						p.getLatitude(), newP.getLongitude(),
 						newP.getLatitude());
@@ -132,16 +124,13 @@ public class CreateChkIn {
 					long time = timeBefore + checkDur * 3600 * 1000
 							+ (long) duration * 1000;
 					if (time > (date + endTime * 3600 * 1000)) {
-						System.out
-								.println("Exceeded the time available for today's check-in's");
+						System.out.println("Exceeded the time available for today's check-in's");
 						break;
 					}
 					timeBefore = time;
 					try {
-						//tracesVisited.addAll(rt.getPoisBetween(jsonRoute, db, time, usr));
-						tracesVisited.addAll(rt.getTracesBetween(jsonRoute, db, time, usr));
+						tracesVisited.addAll(rt.getTracesBetween(jsonRoute, db, time, usr, csv, outTrCSV));
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					revNo = createUniformIntRandom(newP.getReviews().size()) - 1;
@@ -149,21 +138,20 @@ public class CreateChkIn {
 					chk = new CheckIn(usr.getUserId(), newP, time, review);
 					chk.setTravel(travel);
 					usr.addCheckIn(chk);
+					chk.print();
+					csv.appendCheckIn(outChkCSV, chk);
 					newP.addCheckIn(chk);
 					poisVisited.add(newP);
 					p = newP;
 				}
 			} else {
-				/*
-				 * If no pois found in range, that means the user cannot go
-				 * anywhere else, so the day ends there
-				 */
+				// If no pois found in range, that means the user cannot go anywhere else, so the day ends here
 				break;
 			}
 		}
+		
 		/*
-		 * Create map for the daily traversal - poisVisited TODO: see path for
-		 * intermediate gps traces!
+		 * Step 3: Create map for the daily traversal - poisVisited
 		 */
 		String url = "https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000";
 		char letter = 'A';
@@ -172,22 +160,20 @@ public class CreateChkIn {
 			letter ++;
 		}
 		url += "&path=color:blue|enc:";
+		//Encode path points as polylines in order to shorten url
 		Polyline pl = new Polyline();
 		String shortUrl = url + pl.encode(tracesVisited);
-		System.out.println(shortUrl);
 		while (shortUrl.length() > 2048) {
-			System.out.println("URL chars number = " + shortUrl.length());
-			System.out.println("Traces number = " + tracesVisited.size());
-			//Take out 50 traces - randomly
+			//Take out 50 random traces
 			for (int i = 0; i < 50; i++) {
 				int ch = createUniformIntRandom(tracesVisited.size());
 				tracesVisited.remove(ch);
 			}
 			shortUrl = url + pl.encode(tracesVisited);
 		}
-		usr.addDailyMap(new MapURL(usr.getUserId(), getDate(date), shortUrl));
-		System.out.println("URL chars number = " + shortUrl.length());
-		System.out.println("Traces number = " + tracesVisited.size());
+		MapURL mp = new MapURL(usr.getUserId(), getDate(date), shortUrl);
+		usr.addDailyMap(mp);
+		csv.appendMap(outMapCSV, mp);
 	}
 
 	public long convertToTimestamp(String date) {
@@ -196,7 +182,6 @@ public class CreateChkIn {
 		int month = Integer.parseInt(date.substring(0, 2)) - 1;
 		int day = Integer.parseInt(date.substring(3, 5));
 		int year = Integer.parseInt(date.substring(6, 10));
-		System.out.println(month + " " + day + " " + year);
 		calendar.set(year, month, day, -2, 0, 0);
 		return calendar.getTimeInMillis();
 	}
