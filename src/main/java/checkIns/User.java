@@ -12,10 +12,9 @@ public class User {
 
 	private int userId;
 	private List<CheckIn> checkIns = new ArrayList<CheckIn>();
-	private List<String> routes = new ArrayList<String>();
 	private List<GPSTrace> traces = new ArrayList<GPSTrace>();
-	private Poi home;
 	private List<MapURL> dailyMap = new ArrayList<MapURL>();
+	private Poi home;
 	
 	public User(int id) {
 		this.userId = id;
@@ -36,10 +35,6 @@ public class User {
 		traces.add(tr);
 	}
 	
-	public void addRoute(String rt) {
-		routes.add(rt);
-	}
-	
 	public void addCheckIn(CheckIn chk) {
 		this.checkIns.add(chk);
 	}
@@ -58,14 +53,6 @@ public class User {
 
 	public void setCheckIns(List<CheckIn> checkIns) {
 		this.checkIns = checkIns;
-	}
-
-	public List<String> getRoutes() {
-		return routes;
-	}
-
-	public void setRoutes(List<String> routes) {
-		this.routes = routes;
 	}
 
 	public List<GPSTrace> getTraces() {

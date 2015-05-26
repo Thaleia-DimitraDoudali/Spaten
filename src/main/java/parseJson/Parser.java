@@ -1,9 +1,8 @@
 package parseJson;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -90,13 +89,11 @@ public class Parser {
 	
 	public void parseStorePois(DBconnector db, String path) throws IOException, JSONException {
 		
-		BufferedReader br = new BufferedReader(new FileReader(path));
-		String line;
-        line = br.readLine();
-        int i = 1;
-        while (line != null){
-			JSONObject obj = new JSONObject(line);
-			Poi p = returnPoi(i, obj);
+		JSONArray arr = new JSONArray(new String(Files.readAllBytes(Paths.get(path))));
+		//Iterate through all json objects
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject obj = arr.getJSONObject(i);
+			Poi p = returnPoi(i+1, obj);
 			//Add only those that are an actual poi
 			if ((p.getLatitude() != -1) && (p.getLongitude() != -1)) {
 				//If poi with that title, already exists on DB, merge their reviews
@@ -106,43 +103,9 @@ public class Parser {
 				} else {
 					//Insert Poi to DB
 					db.insertPoi(p);
-					i++;
 				}
 			}
-        	line=br.readLine();
-        }
-        br.close();
-	}
-	
-	public HashMap<Integer, Poi> createPois(String path) throws IOException, JSONException {
-		
-		HashMap<String, Poi> restaurantsMap = new HashMap<String, Poi>();
-		HashMap<Integer, Poi> restRetMap = new HashMap<Integer, Poi>();
+		}
 
-		BufferedReader br = new BufferedReader(new FileReader(path));
-		String line;
-        line = br.readLine();
-        int i = 1;
-        while (line != null){
-        	//System.out.println(line);
-			JSONObject obj = new JSONObject(line);
-			Poi p = returnPoi(i, obj);
-			//Add only those that are an actual poi
-			if ((p.getLatitude() != -1) && (p.getLongitude() != -1)) {
-				//If the restaurant already exists on the HashMap, merge their reviews
-				if (restaurantsMap.containsKey(p.getTitle())) {
-					Poi pp = restaurantsMap.get(p.getTitle());
-					pp.addReview(p.getReviews().get(0));
-				} else {
-					restaurantsMap.put(p.getTitle(), p);
-					restRetMap.put(i, p);
-					i++;
-				}
-			}
-        	line=br.readLine();
-        }
-        br.close();
-        return restRetMap;
 	}
-
 }

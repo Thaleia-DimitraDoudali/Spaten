@@ -7,8 +7,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import checkIns.User;
-import pois.GPSTrace;
 import pois.Poi;
 import pois.Review;
 
@@ -16,10 +14,6 @@ public class DBconnector {
 
 	private Connection connection = null;
 	private Statement statement = null;
-
-	public DBconnector() {
-		// TODO Auto-generated constructor stub
-	}
 
 	public void connect() {
 		try {
@@ -34,17 +28,6 @@ public class DBconnector {
 			e.printStackTrace();
 		}
 		System.out.println("Connected to PostgreSQL...");
-	}
-
-	public void createTable() {
-		try {
-			statement = connection.createStatement();
-			String sql = "CREATE TABLE pois(poisId INT NOT NULL PRIMARY KEY, location GEOGRAPHY(POINT,4326));";
-			statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		System.out.println("Created table 'pois'...");
 	}
 
 	public void createPoiTable() {
@@ -200,45 +183,6 @@ public class DBconnector {
 		}
 	}
 
-	public GPSTrace getBetween(double lngFrom, double latFrom, double lngTo,
-			double latTo, double from, double to, long time, User usr) {
-		GPSTrace res = null;
-		try {
-			statement = connection.createStatement();
-			String sql = "CREATE TABLE endPoint(g text);";
-			statement.executeUpdate(sql);
-			sql = "INSERT INTO endPoint(g) VALUES(ST_EndPoint(ST_Line_SubString(ST_Makeline(ST_GeomFromText"
-					+ "('POINT("
-					+ latFrom
-					+ " "
-					+ lngFrom
-					+ ")'), St_GeomFromText('POINT("
-					+ latTo
-					+ " "
-					+ lngTo
-					+ ")')), " + from + ", " + to + ")));";
-			statement.executeUpdate(sql);
-			sql = "SELECT * FROM endPoint";
-			ResultSet rs = statement.executeQuery(sql);
-			if (rs.next())
-				// System.out.println(rs.getString("g"));
-				sql = " SELECT ST_X(g::geometry), ST_Y(g::geometry) FROM endPoint;";
-			rs = statement.executeQuery(sql);
-			if (rs.next()) {
-				// System.out.println(rs.getDouble("st_x") + " " +
-				// rs.getDouble("st_y"));
-				res = new GPSTrace(rs.getDouble("st_x"), rs.getDouble("st_y"),
-						time, usr.getUserId());
-				usr.getTraces().add(res);
-			}
-			sql = "DROP TABLE endPoint;";
-			statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return res;
-	}
-
 	public ArrayList<Integer> findInRange(int id, double lng, double lat,
 			double dist) {
 		ArrayList<Integer> pois = new ArrayList<Integer>();
@@ -248,20 +192,9 @@ public class DBconnector {
 					+ "ST_DWithin(ST_GeographyFromText('SRID=4326;POINT("
 					+ lat + " " + lng + ")'), location, " + dist + ")" + ");";
 			ResultSet rs = statement.executeQuery(sql);
-			//Statement st = connection.createStatement();
 			System.out.println(sql);
-			// int i = 1;
-			// Return a list with all pois found in range, except itself
+
 			while (rs.next()) {
-				/*sql = " SELECT ST_X(location::geometry), ST_Y(location::geometry) FROM pois WHERE poisId = "
-						+ rs.getInt("poisId") + ";";
-				ResultSet res = st.executeQuery(sql);
-				System.out.println(sql);
-				if (res.next()) {
-					// System.out.println(i + " " + res.getDouble("st_x") + " "
-					// + res.getDouble("st_y"));
-				}*/
-				// i++;
 				int pId = rs.getInt("poisId");
 				if (pId != id) {
 					pois.add(pId);

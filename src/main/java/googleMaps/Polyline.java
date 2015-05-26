@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import pois.GPSTrace;
 
 public class Polyline {
-
-	public Polyline() {
-		// TODO Auto-generated constructor stub
-	}
 	
 	public ArrayList<String> decodePoly(String encoded) {
 
@@ -36,8 +32,6 @@ public class Polyline {
 			int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
 			lng += dlng;
 
-			//GeoPoint p = new GeoPoint((int) (((double) lat / 1E5) * 1E6),
-				// (int) (((double) lng / 1E5) * 1E6));
 			double la = (((double) lat / 1E5));
 			double lon =  (((double) lng / 1E5));
 			res.add(la + "," + lon);
