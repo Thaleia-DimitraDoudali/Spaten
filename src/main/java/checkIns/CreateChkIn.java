@@ -1,6 +1,7 @@
 package checkIns;
 
 import googleMaps.MapURL;
+import googleMaps.Polyline;
 import googleMaps.Route;
 import googleMaps.ShortenURL;
 
@@ -167,21 +168,29 @@ public class CreateChkIn {
 		 * Create map for the daily traversal - poisVisited TODO: see path for
 		 * intermediate gps traces!
 		 */
-		String url = "https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000&geodesic=true";
+		String url = "https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000";
 		char letter = 'A';
 		for (Poi poi : poisVisited) {
 			url += "&markers=label:" + letter + "|" + poi.getLatitude() + "," + poi.getLongitude();
 			letter ++;
 		}
-		url += "&path=color:blue";
-		for (GPSTrace tr: tracesVisited) {
-			url += "|" + tr.getLatitude() +"," + tr.getLongitude();
-		}
-		System.out.println(url);
-		ShortenURL rl = new ShortenURL();
-		String shortUrl = rl.shortUrl(url);
+		url += "&path=color:blue|enc:";
+		Polyline pl = new Polyline();
+		String shortUrl = url + pl.encode(tracesVisited);
 		System.out.println(shortUrl);
-		usr.addDailyMap(new MapURL(usr.getUserId(), getDate(date), url));
+		while (shortUrl.length() > 2048) {
+			System.out.println("URL chars number = " + shortUrl.length());
+			System.out.println("Traces number = " + tracesVisited.size());
+			//Take out 50 traces - randomly
+			for (int i = 0; i < 50; i++) {
+				int ch = createUniformIntRandom(tracesVisited.size());
+				tracesVisited.remove(ch);
+			}
+			shortUrl = url + pl.encode(tracesVisited);
+		}
+		usr.addDailyMap(new MapURL(usr.getUserId(), getDate(date), shortUrl));
+		System.out.println("URL chars number = " + shortUrl.length());
+		System.out.println("Traces number = " + tracesVisited.size());
 	}
 
 	public void printUsers() {
