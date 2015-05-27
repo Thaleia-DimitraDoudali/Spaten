@@ -102,7 +102,7 @@ public class Route {
 				tr = new GPSTrace(latit, longt, time, usr.getUserId());
 				res.add(tr);
 				usr.addGPSTrace(tr);
-				tr.print();
+				//tr.print();
 				csv.appendTrace(outTrCSV, tr);
 			}
 

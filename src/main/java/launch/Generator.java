@@ -45,7 +45,7 @@ public class Generator {
 		for (int i = inp.getUserIdStart(); i <= inp.getUserIdEnd(); i++) {
 
 			User usr = new User(i);
-			System.out.println("-------------User no." + i + "-------------");
+			System.out.println("\n-------------User no." + i + "-------------");
 			home = true;
 			for (long time = sdate; time <= edate; time += milPerDay) {
 				

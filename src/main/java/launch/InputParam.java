@@ -33,6 +33,14 @@ public class InputParam {
 		outMaps = cmd.getOptionValue("outMaps");
 	}
 	
+	public void print() {
+		System.out.println(userIdStart + " " + userIdEnd + " "
+				+chkNumMean + " " + chkNumStDev + " "
+				+dist + " " + maxDist + " " + chkDurMean + " "
+				+ chkDurStDev + " " + startTime + " " + endTime + " "
+				+ startDate + " " + endDate + " " + outCheckIns + " " 
+				+ outTraces + " " + outMaps + " ");
+	}
 
 	public void parse(String[] in) {
 		CommandLineParser parser = new GnuParser();

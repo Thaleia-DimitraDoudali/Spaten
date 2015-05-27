@@ -81,14 +81,14 @@ public class CreateChkIn {
 			chk = new CheckIn(usr.getUserId(), p, timestamp, review);
 			chk.setTravel(travel);
 			usr.addCheckIn(chk);
-			chk.print();
+			//chk.print();
 			csv.appendCheckIn(outChkCSV, chk);
 			p.addCheckIn(chk);
 			poisVisited.add(p);
 			timeBefore = timestamp;
 			GPSTrace tr = new GPSTrace(p.getLatitude(), p.getLongitude(), timestamp, usr.getUserId());
 			usr.addGPSTrace(tr);
-			tr.print();
+			//tr.print();
 			csv.appendTrace(outTrCSV, tr);
 			tracesVisited.add(tr);
 		}
@@ -138,7 +138,7 @@ public class CreateChkIn {
 					chk = new CheckIn(usr.getUserId(), newP, time, review);
 					chk.setTravel(travel);
 					usr.addCheckIn(chk);
-					chk.print();
+					//chk.print();
 					csv.appendCheckIn(outChkCSV, chk);
 					newP.addCheckIn(chk);
 					poisVisited.add(newP);
