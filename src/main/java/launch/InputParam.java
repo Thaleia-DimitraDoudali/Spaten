@@ -10,13 +10,14 @@ public class InputParam {
 
 	private Options options = new Options();
 	private CommandLine cmd;
-	private Integer userNum, chkNumMean, chkNumStDev, startTime, endTime;
+	private Integer userIdStart, userIdEnd, chkNumMean, chkNumStDev, startTime, endTime;
 	private Double dist, maxDist, chkDurMean, chkDurStDev;
 	private String startDate, endDate, outCheckIns, outTraces, outMaps;
 
 
 	public void setParams() {
-		userNum = Integer.parseInt(cmd.getOptionValue("userNum"));
+		userIdStart = Integer.parseInt(cmd.getOptionValue("userIdStart"));
+		userIdEnd = Integer.parseInt(cmd.getOptionValue("userIdEnd"));
 		chkNumMean = Integer.parseInt(cmd.getOptionValue("chkNumMean"));
 		chkNumStDev = Integer.parseInt(cmd.getOptionValue("chkNumStDev"));
 		dist = Double.parseDouble(cmd.getOptionValue("dist"));
@@ -44,7 +45,8 @@ public class InputParam {
 
 	public void createOptions() {
 		// Number of users created
-		options.addOption("userNum", true, "Number of users created");
+		options.addOption("userIdStart", true, "First user id created");
+		options.addOption("userIdEnd", true, "Last user id created");
 		// Gauss parameters for check-in's per day
 		options.addOption("chkNumMean", true, "Mean of Gauss "
 				+ "that determines the number of a user's check-in's per day");
@@ -89,14 +91,6 @@ public class InputParam {
 
 	public void setCmd(CommandLine cmd) {
 		this.cmd = cmd;
-	}
-
-	public Integer getUserNum() {
-		return userNum;
-	}
-
-	public void setUserNum(Integer userNum) {
-		this.userNum = userNum;
 	}
 
 	public Integer getChkNumMean() {
@@ -206,6 +200,26 @@ public class InputParam {
 
 	public void setOutMap(String outMap) {
 		this.outMaps = outMap;
+	}
+
+
+	public Integer getUserIdStart() {
+		return userIdStart;
+	}
+
+
+	public void setUserIdStart(Integer userIdStart) {
+		this.userIdStart = userIdStart;
+	}
+
+
+	public Integer getUserIdEnd() {
+		return userIdEnd;
+	}
+
+
+	public void setUserIdEnd(Integer userIdEnd) {
+		this.userIdEnd = userIdEnd;
 	}
 
 

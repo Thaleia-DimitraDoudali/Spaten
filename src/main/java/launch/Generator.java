@@ -42,7 +42,7 @@ public class Generator {
 		BufferedWriter outMapCSV = csv.createWriter(inp.getOutMap());
 		
 		// For each user create their check-in's
-		for (int i = 1; i <= inp.getUserNum(); i++) {
+		for (int i = inp.getUserIdStart(); i <= inp.getUserIdEnd(); i++) {
 
 			User usr = new User(i);
 			System.out.println("-------------User no." + i + "-------------");
@@ -83,15 +83,15 @@ public class Generator {
 				}
 				home = false;				
 			}
-	
-			//Close output files
-			try {
-				outChkCSV.close();
-				outTrCSV.close();
-				outMapCSV.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		}
+		
+		//Close output files
+		try {
+			outChkCSV.close();
+			outTrCSV.close();
+			outMapCSV.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
