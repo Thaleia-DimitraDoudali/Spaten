@@ -1,8 +1,8 @@
 package parseJson;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,11 +88,13 @@ public class Parser {
 	}
 	
 	public void parseStorePois(DBconnector db, String path) throws IOException, JSONException {
-		
-		JSONArray arr = new JSONArray(new String(Files.readAllBytes(Paths.get(path))));
-		//Iterate through all json objects
-		for (int i = 0; i < arr.length(); i++) {
-			JSONObject obj = arr.getJSONObject(i);
+
+		BufferedReader br = new BufferedReader(new FileReader(path));
+		String line;
+        line = br.readLine();
+        int i = 1;
+        while (line != null){
+			JSONObject obj = new JSONObject(line);
 			Poi p = returnPoi(i+1, obj);
 			//Add only those that are an actual poi
 			if ((p.getLatitude() != -1) && (p.getLongitude() != -1)) {
@@ -105,7 +107,8 @@ public class Parser {
 					db.insertPoi(p);
 				}
 			}
+			line=br.readLine();
 		}
-
+        br.close();
 	}
 }
