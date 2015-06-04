@@ -124,6 +124,12 @@ To ευρετήριο R-δέντρο (R-tree) είναι μία δενδρική
 συγκεκριμένα, οι χρήστες του ελέθευρου Directions API μπορούν να κάνουν το πολύ δύο αιτήσεις ανά δευτερόλεπτο και 2500 αιτήσεις ανά ημέρα.
 \end{itemize}
 
+Για παράδειγμα:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+ "status" : "OK"
+\end{lstlisting}
+
 \subsubsection{Πεδίο routes}
 
 Το πεδίο routes είναι ένας JSON πίνακας, κάθε στοιχείο του οποίου είναι μία διαφορετική διαδρομή (route) ανάμεσα στην καθορισμένη αφετηρία και προορισμό. 
@@ -139,6 +145,33 @@ To ευρετήριο R-δέντρο (R-tree) είναι μία δενδρική
  \item copyrights: τα πνευματικά δικαιώματα της υπηρεσίας σε μορφή κειμένου.
  \item warnings[]: ένας πίνακας με προειδοποιήσεις που πρέπει να γίνουν γνωστές όταν παρουσιάζεται η διαδρομή.
 \end{itemize}
+
+Για παράδειγμα:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+	"bounds" : {
+            "northeast" : {
+               "lat" : 37.97818609999999,
+               "lng" : 23.7762659
+            },
+            "southwest" : {
+               "lat" : 37.9761428,
+               "lng" : 23.7689148
+            }
+         },
+         "copyrights" : "Map data ©2015 Google",
+         "legs" : [
+	    ... ]
+	 "overview_polyline" : {
+            "points" : "{exfFuxbpCg@fCkBpK}B~MkB|KIf@QG"
+         },
+         "summary" : "Λεωφ. Στρατάρχου Αλεξάνδρου Παπάγου",
+         "warnings" : [
+            "Walking directions are in beta.    Use caution – This route may be missing sidewalks or pedestrian paths."
+         ],
+         "waypoint_order" : []   
+\end{lstlisting}
+
 
 \subsubsection{Πεδίο legs[]}
 
@@ -158,8 +191,93 @@ To ευρετήριο R-δέντρο (R-tree) είναι μία δενδρική
  \item end\_address: αντίστοιχα με το πεδίο start\_address, για το τελικό σημείο του κομματιού της διαδρομής.
 \end{itemize}
 
+Για παράδειγμα:
 
-\subsection{Encoded polyline}
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+	      "distance" : {
+                  "text" : "0.7 km",
+                  "value" : 690
+               },
+               "duration" : {
+                  "text" : "7 mins",
+                  "value" : 434
+               },
+               "end_address" : "Iasona Maratou 509, Zografou 157 73, Greece",
+               "end_location" : {
+                  "lat" : 37.97818609999999,
+                  "lng" : 23.7689477
+               },
+               "start_address" : "Papagou 147, Zografou 157 73, Greece",
+               "start_location" : {
+                  "lat" : 37.9761428,
+                  "lng" : 23.7762659
+               },
+               "steps" : [
+		    .... ]
+\end{lstlisting}
+
+
+\subsubsection{Πεδίο steps[]}
+
+Κάθε στοιχείο του πίνακα steps είναι ένα από τα βήματα στις οδηγίες και υποδηλώνει μία συγκεκριμένη οδηγία. Το βήμα περιλαμβάνει, επίσης, τη διάρκεια και την απόσταση 
+μέχρι το επόμενο βήμα. Κάθε βήμα (step) μπορεί να περιέχει τα παρακάτω πεδία: 
+
+\begin{itemize}
+ \item html\_instructions: η οδηγία για το συγκεκρίμενο βήμα, σε μορφή html κειμένου. 
+ \item distance: η απόσταση που θα διανυθεί από το βήμα αυτό μέχρι το επόμενο.
+ \item duration: η διάρκεια που χρειάζεται για να ολοκληρωθεί το συγκεκριμένο βήμα, μέχρι τη μετάβαση στο επόμενο.
+ \item start\_location: οι γεωγραφικές συντεταγμένες του σημείου αφετηρίους του βήματος.
+ \item end\_location: οι γεωγραφικές συνταταγμένες του σημείου προορισμού του βήματος.
+ \item polyline: μία κωδικοποιημένη αναπαράσταση της διαδρομής του βήματος.
+ \item travel\_mode: ο τρόπος μετακίνησης που έχει καθοριστεί ως παράμετρος στην HTTP αίτηση.
+\end{itemize}
+
+Για παράδειγμα, ένα step μπορεί να έχει την παρακάτω μορφή:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+	"distance" : {
+           "text" : "0.7 km",
+           "value" : 680
+        },
+        "duration" : {
+           "text" : "7 mins",
+           "value" : 427
+        },
+        "end_location" : {
+           "lat" : 37.9781038,
+           "lng" : 23.7689148
+        },
+        "html_instructions" : "Head \u003cb\u003ewest\u003c/b\u003e on \u003cb\u003eΛεωφ. Στρατάρχου Αλεξάνδρου Παπάγου\u003c/b\u003e toward \u003cb\u003eΓρ. Κουσίδη\u003c/b\u003e",
+        "polyline" : {
+           "points" : "{exfFuxbpCQv@ETCLKj@CPYxAi@|Cc@fCm@lDg@pCCNc@nC_AnFCHYhBMx@If@"
+        },
+        "start_location" : {
+           "lat" : 37.9761428,
+           "lng" : 23.7762659
+        },
+        "travel_mode" : "WALKING"
+\end{lstlisting}
+
+
+\subsection{Αλγόριθμος κωδικοποίησης σημείων διαδρομής}
+
+Το αρχείο απάντησης JSON περιέχει κωδικοποιημένη αναπαράσταση (encoded polyline) της διαδρομής. Πιο συγκεκριμένα, η αναπαράσταση αυτή είναι το αποτέλεσμα της 
+κωδικοποίησης ενός πλήθους γεωγραφικών συντεταγμένων κατά μήκος της διαδρομής. Η υπηρεσία του Google Maps API, χρησιμοποιεί έναν συγκεκριμένο αλγόριθμο κωδικοποίησης 
+γεωγραφικών συντεταγμένων. Ο αλγόριθμος αυτός αποτελείται από τα παρακάτω βήματα και αφορά την κωδικοποίηση ενός προσημασμένου δεκαδικού αριθμού, ο οποίος 
+αναπαριστά το γεωγραφικό πλάτος ή μήκος:
+
+\begin{enumerate}
+ \item Πολλαπλασιασμός του αριθμού με το 10.000 και στρογγυλοποίηση του τελικού αριθμού.
+ \item Μετατροπή του αριθμού σε δυαδικό με τη μέθοδο του συμπληρώματος ως προς δύο.
+ \item Αριστερή μετατόπιση (lefy shift) του δυαδικού αριθμού κατά ένα bit.
+ \item Αν ο αρχικός αριθμός ήταν αρνητικός τότε αντιστροφή των δυαδικών ψηφίων.
+ \item Ομαδοποίηση των bits του αριθμού ανά πεντάδες αρχίζοντας από τα δεξιά.
+ \item Αντιστροφή της σειράς των πεντάδων.
+ \item Εφαρμογή του τελεστή OR με το δυαδικό αριθμό 0x20 κάθε πεντάδας, εκτός της τελευταίας από δεξιά.
+ \item Μετατροπή κάθε δυαδικής πεντάδας σε ακέραιο δεκαδικό αριθμό.
+ \item Προσθήκη του δεκαδικού αριθμού 63 σε κάθε έναν από τους δεκαδικούς αριθμούς που προέκυψαν από το προηγούμενο βήμα.
+ \item Μετατροπή κάθε δεκαδικού αριθμού στην αντίστοιχη αναπαράσταση ASCII.
+\end{enumerate}
 
 
 
