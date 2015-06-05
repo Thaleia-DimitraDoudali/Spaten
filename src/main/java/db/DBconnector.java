@@ -22,8 +22,8 @@ public class DBconnector {
 			e.printStackTrace();
 		}
 		try {
-			connection = DriverManager.getConnection("jdbc:postgresql:datagen",
-					"postgres", "root");
+			connection = DriverManager.getConnection("jdbc:postgresql://192.168.5.141/datagen",
+					"thaleia", "thaleia");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

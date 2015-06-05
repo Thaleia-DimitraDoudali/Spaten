@@ -131,7 +131,7 @@
 \def\bibsize#1{\def\bib@size{#1}}            \def\bib@size{}
 \DeclareOption{slanted}{
     \partfont{\Large}
-    \chapterfont{\large}
+    \chapterfont{\huge}
     \chapterauthorfont{\large}
     \sectionfont{\large\slshape}
     \subsectionfont{\slshape}
