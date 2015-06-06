@@ -24,7 +24,7 @@ public class CreateChkIn {
 
 	Poi travelPoi = null;
 
-	public void createDailyCheckIn(User usr, int chkNum, int poisNum, DBconnector db, double dist, 
+	public int createDailyCheckIn(User usr, int chkNum, int poisNum, DBconnector db, double dist, 
 			double maxDist, double chkDurMean, double chkDurStDev, int startTime, int endTime, long date,
 			boolean home, boolean travel, long travelDay, BufferedWriter outChkCSV, 
 			BufferedWriter outTrCSV, BufferedWriter outMapCSV, OutCSV csv) {
@@ -33,7 +33,7 @@ public class CreateChkIn {
 		ArrayList<Integer> poisInRange = new ArrayList<Integer>();
 		ArrayList<GPSTrace> tracesVisited = new ArrayList<GPSTrace>();
 		Route rt = new Route();
-		int restNo = -1, revNo = -1;
+		int restNo = -1, revNo = -1, req = 0;
 		long timeBefore = -1;
 		Review review;
 		CheckIn chk;
@@ -112,6 +112,7 @@ public class CreateChkIn {
 				String jsonRoute = rt.getRoute(p.getLongitude(),
 						p.getLatitude(), newP.getLongitude(),
 						newP.getLatitude());
+				req ++;
 				double duration = 0;
 				try {
 					duration = rt.getDuration(jsonRoute);
@@ -167,13 +168,17 @@ public class CreateChkIn {
 			//Take out 50 random traces
 			for (int i = 0; i < 50; i++) {
 				int ch = createUniformIntRandom(tracesVisited.size());
-				tracesVisited.remove(ch);
+				if (ch != 0) {
+					tracesVisited.remove(ch-1);
+				}
 			}
 			shortUrl = url + pl.encode(tracesVisited);
 		}
 		MapURL mp = new MapURL(usr.getUserId(), getDate(date), shortUrl);
 		usr.addDailyMap(mp);
 		csv.appendMap(outMapCSV, mp);
+		
+		return req;
 	}
 
 	public long convertToTimestamp(String date) {
@@ -182,7 +187,7 @@ public class CreateChkIn {
 		int month = Integer.parseInt(date.substring(0, 2)) - 1;
 		int day = Integer.parseInt(date.substring(3, 5));
 		int year = Integer.parseInt(date.substring(6, 10));
-		calendar.set(year, month, day, -2, 0, 0);
+		calendar.set(year, month, day, 0, 0, 0);
 		return calendar.getTimeInMillis();
 	}
 

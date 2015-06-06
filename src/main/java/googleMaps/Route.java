@@ -31,7 +31,8 @@ public class Route {
 
 		String res = "";
 		try {
-			String url = "http://maps.googleapis.com/maps/api/directions/json?origin="
+			String url = "http://maps.googleapis.com/maps/api/directions/json?"
+					+ "origin="
 					+ latFrom
 					+ ","
 					+ longFrom
@@ -74,6 +75,13 @@ public class Route {
 		String[] parts;
 
 		JSONObject obj = new JSONObject(json);
+		
+		String jsonStatus = obj.getString("status");
+		if (!jsonStatus.equals("OK")) {
+			System.out.println(jsonStatus);
+			return res;
+		}
+		
 		JSONArray jsonRoutes = obj.getJSONArray("routes");
 		JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
 		JSONArray jsonLegs = jsonRoute.getJSONArray("legs");

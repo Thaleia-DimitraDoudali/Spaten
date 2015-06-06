@@ -35,6 +35,9 @@ public class Generator {
 		boolean home = true, travel = false;
 		long travelCount = 0, trDays = 0;		
 		
+		//Number of requests to Google Maps Directions API
+		int req_api = 0;
+		
 		//Create output files
 		OutCSV csv = new OutCSV();
 		BufferedWriter outChkCSV = csv.createWriter(inp.getOutCheckIns());
@@ -73,7 +76,7 @@ public class Generator {
 				int checkNum = crChk.createGaussianRandom(inp.getChkNumMean(), inp.getChkNumStDev());
 				
 				// Create daily check-in
-				crChk.createDailyCheckIn(usr, checkNum, poisNum, db, inp.getDist(), inp.getMaxDist(),
+				req_api += crChk.createDailyCheckIn(usr, checkNum, poisNum, db, inp.getDist(), inp.getMaxDist(),
 						inp.getChkDurMean(), inp.getChkDurStDev(), inp.getStartTime(), inp.getEndTime(), 
 						time, home, travel, travelCount, outChkCSV, outTrCSV, outMapCSV, csv);
 				
@@ -84,6 +87,8 @@ public class Generator {
 				home = false;				
 			}
 		}
+		
+		System.out.println("\n Requests to Google Directions API: " + req_api);
 		
 		//Close output files
 		try {
