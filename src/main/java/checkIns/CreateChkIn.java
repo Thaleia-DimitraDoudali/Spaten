@@ -27,12 +27,12 @@ public class CreateChkIn {
 	public int createDailyCheckIn(User usr, int chkNum, int poisNum, DBconnector db, double dist, 
 			double maxDist, double chkDurMean, double chkDurStDev, int startTime, int endTime, long date,
 			boolean home, boolean travel, long travelDay, BufferedWriter outChkCSV, 
-			BufferedWriter outTrCSV, BufferedWriter outMapCSV, OutCSV csv) {
+			BufferedWriter outTrCSV, BufferedWriter outMapCSV, OutCSV csv, String key) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Integer> poisInRange = new ArrayList<Integer>();
 		ArrayList<GPSTrace> tracesVisited = new ArrayList<GPSTrace>();
-		Route rt = new Route();
+		Route rt = new Route(key);
 		int restNo = -1, revNo = -1, req = 0;
 		long timeBefore = -1;
 		Review review;
@@ -109,10 +109,10 @@ public class CreateChkIn {
 			if (!poisInRange.isEmpty()) {
 				restNo = createUniformIntRandom(poisInRange.size()) - 1;
 				Poi newP = db.getPoi(poisInRange.get(restNo));
+				req ++;
 				String jsonRoute = rt.getRoute(p.getLongitude(),
 						p.getLatitude(), newP.getLongitude(),
 						newP.getLatitude());
-				req ++;
 				double duration = 0;
 				try {
 					duration = rt.getDuration(jsonRoute);

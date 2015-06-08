@@ -12,7 +12,7 @@ public class InputParam {
 	private CommandLine cmd;
 	private Integer userIdStart, userIdEnd, chkNumMean, chkNumStDev, startTime, endTime;
 	private Double dist, maxDist, chkDurMean, chkDurStDev;
-	private String startDate, endDate, outCheckIns, outTraces, outMaps;
+	private String startDate, endDate, outCheckIns, outTraces, outMaps, key;
 
 
 	public void setParams() {
@@ -31,6 +31,7 @@ public class InputParam {
 		outCheckIns = cmd.getOptionValue("outCheckIns");
 		outTraces = cmd.getOptionValue("outTraces");
 		outMaps = cmd.getOptionValue("outMaps");
+		key = cmd.getOptionValue("key");
 	}
 	
 	public void print() {
@@ -83,6 +84,8 @@ public class InputParam {
 		options.addOption("outCheckIns", true, "The csv file where the check-ins will be stored");
 		options.addOption("outTraces", true, "The csv file where the gps traces will be stored");
 		options.addOption("outMaps", true, "The csv file where the daily maps will be stored");
+		//Key
+		options.addOption("key", true, "The key for google maps directions api");
 	}
 	
 	public Options getOptions() {
@@ -228,6 +231,14 @@ public class InputParam {
 
 	public void setUserIdEnd(Integer userIdEnd) {
 		this.userIdEnd = userIdEnd;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
 	}
 
 

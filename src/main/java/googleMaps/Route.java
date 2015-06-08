@@ -18,6 +18,12 @@ import checkIns.User;
 import db.DBconnector;
 
 public class Route {
+	
+	String key;
+	
+	public Route(String k) {
+		key = k;
+	}
 
 	public String getRoute(double longFrom, double latFrom, double longTo,
 			double latTo) {
@@ -28,11 +34,12 @@ public class Route {
 		} catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
-
+		
 		String res = "";
 		try {
-			String url = "http://maps.googleapis.com/maps/api/directions/json?"
-					+ "origin="
+			String url = "https://maps.googleapis.com/maps/api/directions/json?key="
+					+ key
+					+ "&origin="
 					+ latFrom
 					+ ","
 					+ longFrom
@@ -44,7 +51,7 @@ public class Route {
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("GET");
-			//System.out.println("\nSending 'GET' request to URL : " + url);
+			System.out.println("\nSending 'GET' request to URL : " + url);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					con.getInputStream()));
@@ -78,7 +85,6 @@ public class Route {
 		
 		String jsonStatus = obj.getString("status");
 		if (!jsonStatus.equals("OK")) {
-			System.out.println(jsonStatus);
 			return res;
 		}
 		
@@ -121,6 +127,13 @@ public class Route {
 
 	public double getDuration(String json) throws JSONException {
 		JSONObject obj = new JSONObject(json);
+		
+		String jsonStatus = obj.getString("status");
+		System.out.println(jsonStatus);
+		if (!jsonStatus.equals("OK")) {
+			return -1;
+		}
+		
 		JSONArray jsonRoutes = obj.getJSONArray("routes");
 		if (jsonRoutes.isNull(0)) {
 			return -1;
