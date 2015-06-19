@@ -1,0 +1,57 @@
+\chapter{Introduction}
+
+\section{Motivation}
+
+Nowadays, the amount of social networking data that is being produced and consumed daily is huge and it is constantly increasing.
+Moreover, these data can be in the form of text, photography, video, time and location. For example, the online social networking service Twitter 
+has 302 million active users per month and manages 500 million tweets per day, according to official statistics \cite {1}. 
+The tweets include textual data and a timestamp (the time of publication) and may also contain
+image, video, and location. Traditional data storage and processing techniques are no longer sufficient for the huge amount of polymorphic 
+social media data. Consequently, modern social networking services
+resort to distributed systems and data management tools. For example, Twitter \cite {2} used to 
+store tweets in traditional databases. However, as time passed and the amount of tweets increased significantly, Twitter had several issues in 
+reading and writing data in these databases. Thus, Twitter created and used distributed storage tools in order to manage it's data. 
+These tools gave notable boost in the performance of the service.
+
+A large number of online services now use distributed data storage systems. For example, large online social media platforms 
+such as Twitter and Yahoo!, use the distributed database system HBase \cite {3}, so as to manage their data \cite {4}. 
+Similarly, many online social networking services like Facebook and Twitter,
+use the distributed data storage and management system Hadoop \cite {5} \cite {6}. 
+Even though we can retrieve a list of social media platforms that use certain distributed data management tools, 
+we cannot have access in the data that these platforms use, due to user's privacy restrictions. 
+In this way, it is not possible to 
+evaluate properly such social networking services.
+
+In the current diploma thesis, we want to bridge the gap considering the full understanding of the function of social networking services.
+Since we can not have access to the relevant data, we tried to create realistic social networking data, which are similar to real such data.
+Hence, we designed and implemented a generator of realistic spatiotemporal and textual data, similar to 
+those found in well-known social networking services such as Facebook.
+
+\section{Thesis contribution}
+
+\begin{enumerate}
+  \item Design and implementation of an open source parameterized generator of spatio-temporal and textual social media data. 
+  \item Creation of a large dataset of such complex realistic social media data using the generator.
+  \item Insertion of the large dataset into a distributed storage system. 
+  \item Evaluation of the storage system's performance and scalability.
+\end{enumerate}
+
+\section{Chapter outline}
+
+In chapter 2 we present the theoretical background, which is important for someone to know, in order to understand concepts and terminologies used later on. 
+More specifically, we analyze the tools used in the implementation of the generator, such as the database for the source data,
+Google's services for the creation and presentation of user's routes and some mathematical concepts for the input parameters. Also,
+we include thw distributed storage and data management tools, which were used in order to store the dataset created by the generator. 
+
+In chapter 3 we describe in details the design of the generator.
+
+
+
+
+
+
+
+
+
+
+
