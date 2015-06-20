@@ -15,9 +15,9 @@ Moreover, each row can be uniquely identified by a certain attribute, called pri
 a foreign key for the second table. Finally, a database index is a data structure that improves the speed of data retrieval operations on a database table 
 at the cost of additional writes and storage space to maintain the index data structure.
 
-\subsection{ACID}
+\subsection{ACID properties}
 
-In computer science, ACID (Atomicity, Consistency, Isolation, Durability) \cite{10} is a set of properties that guarantee that database transactions are processed reliably. 
+ACID (Atomicity, Consistency, Isolation, Durability) \cite{10} is a set of properties that guarantee that database transactions are processed reliably. 
 In the context of databases, a single logical operation on the data is called a transaction. 
 
 \subsubsection{Atomicity}
@@ -66,20 +66,53 @@ to be run in SQL. It defines new data types, functions, operators and indexes es
 
 \subsubsection{Geography type}
 
+The geography type provides native support for spatial features represented on geographic coordinates. A specific point on a map can be identified by it's 
+geographic coordinates, stated in the form of (latitude, longitude). Geographic coordinates are spherical coordinates expressed in angular units (degrees). 
+The basis for the PostGIS geographic type is a sphere. The shortest path between two points on the sphere is a great circle arc. That means that calculations 
+on geographies (areas, distances, lengths, intersections, etc) must be calculated on the sphere, using more complicated mathematics. For more accurate 
+measurements, the calculations must take the actual spheroidal shape of the world into account. There are several functions and operators 
+that take as input or return as output a geography data type object. One very useful one, is the function ST\_DWithin. 
+This function returns true if the geographies are within the specified distance of one another. Units are in meters and measurement is defaulted 
+to measure around spheroid. 
 
-Ενδεικτικά, το PostGIS επιτρέπει την αποθήκευση στην PostgreSQL των γεωγραφικών συντεταγμένων ενός σημείου στο χάρτη. Οι συντεταγμένες αυτές αποτελούνται από ένα 
-ζεύγος αριθμών, το γεωγραφικό πλάτος (latitude) και το γεωγραφικό μήκος (longitude). Το PostGIS δίνει την επιλογή αποθήκευσης των συντεταγμένων ως ένα γεωγραφικό 
-τύπο δεδομένων (geography type). Επιπλέον, παρέχει μία πληθώρα συναρτήσεων για αυτό το γεωγραφικό τύπο δεδομένων, που καθιστούν δυνατό τον υπολογισμό των πραγματικών 
-αποστάσεων μεταξύ γεωγραφικών σημείων. Με τον τρόπο αυτόν, μπορούν για παράδειγμα να γίνουν επερωτήσεις σχετικά με το πλήθος σημείων που βρίσκονται σε συγκεκριμένη 
-απόσταση από ένα κεντρικό σημείο (συνάρτηση ST\_DWithin).
+\subsection{Indexes}
 
+A database index is a data structure that improves the speed of data retrieval operations on a database table at the cost of additional writes and storage 
+space to maintain the index data structure. Indexes are used to quickly locate data without having to search every row in a database table every time a database 
+table is accessed. Indexes can be created using one or more columns of a database table, providing the basis for both rapid random lookups and efficient access 
+of ordered records.
 
+\subsubsection{B-tree}
 
+PostgreSQL uses by default a B-tree index on a table column. B-tree \cite{13} is a tree data structure that keeps data sorted and allows searches, sequential access, 
+insertions, and deletions in logarithmic time. The B-tree is a generalization of a binary search tree in that a node can have more than two children.
+More specifically, it is a balanced tree whose nodes contain pointers to a table's records and a number of keys. The keys act as separation values which 
+divide its subtrees. For example, if an internal node has 3 child nodes (or subtrees) then it must have 2 keys: a1 and a2. All values in the leftmost subtree 
+will be less than a1, all values in the middle subtree will be between a1 and a2, and all values in the rightmost subtree will be greater than a2. 
+Unlike self-balancing binary search trees, the B-tree is optimized for systems that read and write large blocks of data.
 
+\subsubsection{R-tree}
 
+R-trees \cite{14} are tree data structures used for spatial access methods, such as indexing multi-dimensional information like geographical coordinates. 
+The key idea of the data structure is to group nearby objects and represent them with their minimum bounding rectangle in the next higher level of the tree; 
+the "R" in R-tree is for rectangle. Since all objects lie within this bounding rectangle, a query that does not intersect the bounding rectangle also cannot 
+intersect any of the contained objects. At the leaf level, each rectangle describes a single object; at higher levels the aggregation of an increasing number 
+of objects. This can also be seen as an increasingly coarse approximation of the data set. 
+R-tree's searching lgorithms use the bounding boxes to decide whether or not to search inside a subtree. In this way, most of the nodes in the tree are never 
+read during a search. Like B-trees, this makes R-trees suitable for large data sets and databases, where nodes can be paged to memory when needed, and the whole 
+tree cannot be kept in main memory. 
 
+\subsubsection{GiST}
 
+GiST stands for Generalized Search Tree. It is a balanced, tree-structured access method, that acts as a base template in which to implement arbitrary 
+indexing schemes. B-trees, R-trees and many other indexing schemes can be implemented in GiST. GiST tree nodes contain a pair of values in the form of (p, prt). 
+The first value, p, is used as a search key and the second value, ptr, is a pointer to the data if the node is a leaf or a pointer to another node 
+if the node is intermediate. The search key p represents an attribute that becomes true for all data that can be reached through the pointer ptr. 
+Also, GiST index can handle any query predicate, as long as certain functions, that influence the behavior of the search keys, are implemented. 
 
+PostGIS can use GiST index at a table attribute. When a table column is a geography data type, then GiST will use an improved version of an R-tree index 
+(R-tree-over-GiST scheme). PostgreSQL doesn't allow, at the most recent versions, the use of standard R-tree, because this type of index 
+cannot handle attributes with size bigger than 8K and fail when a geography column is null. 
 
 
 
