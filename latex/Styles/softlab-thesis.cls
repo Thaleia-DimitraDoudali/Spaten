@@ -131,7 +131,7 @@
 \def\bibsize#1{\def\bib@size{#1}}            \def\bib@size{}
 \DeclareOption{slanted}{
     \partfont{\Large}
-    \chapterfont{\huge}
+    \chapterfont{\large}
     \chapterauthorfont{\large}
     \sectionfont{\large\slshape}
     \subsectionfont{\slshape}
@@ -746,18 +746,18 @@
   \let\maketitle\relax%
 }
 \def\abstractgr{%
-  \begin{greek}%
+  %\begin{greek}%
   \chapter*{\abstractnamegr\@mkboth{\abstractnamegr}{\abstractnamegr}}%
-  \addcontentsline{toc}{chapter}{\abstractnamegr}%
+ % \addcontentsline{toc}{chapter}{\abstractnamegr}%
   \noindent\ignorespaces}
 \def\endabstractgr{%
   \par%
-  \end{greek}%
+  %\end{greek}%
   \vfil\null}
 \def\abstracten{%
   \begin{english}%
   \chapter*{\abstractnameen\@mkboth{\abstractnameen}{\abstractnameen}}%
-  \addcontentsline{toc}{chapter}{\abstractnameen}%
+  %\addcontentsline{toc}{chapter}{\abstractnameen}%
   \noindent\ignorespaces}
 \def\endabstracten{%
   \par%
@@ -1151,7 +1151,7 @@
     \chapter*{\contentsname
         \@mkboth{\contentsname}%
                 {\contentsname}}%
-    \addcontentsline{toc}{chapter}{\contentsname}
+    %\addcontentsline{toc}{chapter}{\contentsname}
     \@starttoc{toc}%
     }
 \newcommand*{\l@part}[2]{%
@@ -1196,7 +1196,7 @@
     \chapter*{\listfigurename
       \@mkboth{\listfigurename}%
               {\listfigurename}}%
-    \addcontentsline{toc}{chapter}{\listfigurename}
+    %\addcontentsline{toc}{chapter}{\listfigurename}
     \@starttoc{lof}%
     }
 \newcommand*{\l@figure}{\@dottedtocline{1}{1.5em}{2.3em}}
@@ -1216,7 +1216,7 @@
 \newenvironment{thebibliography}[1]
      {\if@chapterbib
         \section*{\refname\@mkboth{\refname}{\refname}}%
-        \addcontentsline{toc}{section}{\refname}%
+        %\addcontentsline{toc}{section}{\refname}%
       \else
         \chapter*{\bibname\@mkboth{\bibname}{\bibname}}%
         \addtocontents{toc}{\protect\addvspace{1em}}%
@@ -1318,10 +1318,10 @@
 % Names
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \if@greek
-\def\contentsname{Περιεχόμενα}
-\def\listfigurename{Σχήματα}
-\def\listtablename{Πίνακες}
-\def\bibname{Βιβλιογραφία}
+\def\contentsname{Contents}
+\def\listfigurename{List of Figures}
+\def\listtablename{List of Tables}
+\def\bibname{Bibliography}
 \def\refname{Αναφορές}
 \def\indexname{Ευρετήριο}
 \def\figurename{Σχήμα}
@@ -1374,9 +1374,13 @@
 \def\abstractnamegr{Περίληψη}
 \def\abstractnameen{Abstract}
 \def\keywordsnamegr{Λέξεις κλειδιά}
-\def\keywordsnameen{Key words}
+\def\keywordsnameen{Keywords}
 \def\acknowledgementsnamegr{Ευχαριστίες}
 \def\acknowledgementsnameen{Acknowledgements}
+\def\contentsname{Contents}
+\def\listfigurename{List of Figures}
+\def\listtablename{List of Tables}
+\def\bibname{Bibliography}
 \chapapp{\chaptername}                   % Print ``Chapter''
 \def\figureshortname{\figurename}        % I don't like short names
 \def\tableshortname{\tablename}
@@ -1462,9 +1466,9 @@
   \let\@makefntext\@tmp@makefntext%
 }
 \newenvironment{acknowledgementsgr}{%
-  \begin{greek}%
+  %\begin{greek}%
   \chapter*{\acknowledgementsnamegr}%
-  \addcontentsline{toc}{chapter}{\acknowledgementsnamegr}%
+  %\addcontentsline{toc}{chapter}{\acknowledgementsnamegr}%
   \begingroup%
   \let\footnoterule\relax%
   \noindent\ignorespaces%
@@ -1473,26 +1477,14 @@
     \@author, \\[6pt]
     \@locationgr, \@date@defense
   \end{flushright}
-  \footacknowledgement{%
-    Η εργασία αυτή είναι επίσης διαθέσιμη ως Τεχνική Αναφορά
-    \@TRnumber, Εθνικό Μετσόβιο Πολυτεχνείο, Σχολή Ηλεκτρολόγων
-    Μηχανικών και Μηχανικών Υπολογιστών, Τομέας Τεχνολογίας
-    Πληροφορικής και Υπολογιστών, Εργαστήριο Τεχνολογίας
-    Λογισμικού, \@date.
-    \\[6pt]
-    \begin{tabular}{@{}ll@{}}
-    URL: & \texttt{http://www.softlab.ntua.gr/techrep/} \\
-    FTP: & \texttt{ftp://ftp.softlab.ntua.gr/pub/techrep/}
-    \end{tabular}
-  }
   \newpage%
   \endgroup%
-  \end{greek}%
+  %\end{greek}%
 }
 \newenvironment{acknowledgementsen}{%
   \begin{english}%
   \chapter*{\acknowledgementsnameen}%
-  \addcontentsline{toc}{chapter}{\acknowledgementsnameen}%
+  %\addcontentsline{toc}{chapter}{\acknowledgementsnameen}%
   \begingroup%
   \let\footnoterule\relax%
   \noindent\ignorespaces%

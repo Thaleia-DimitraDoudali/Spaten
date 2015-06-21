@@ -104,7 +104,7 @@ tree cannot be kept in main memory.
 
 \subsubsection{GiST}
 
-GiST stands for Generalized Search Tree. It is a balanced, tree-structured access method, that acts as a base template in which to implement arbitrary 
+GiST \cite{15} stands for Generalized Search Tree. It is a balanced, tree-structured access method, that acts as a base template in which to implement arbitrary 
 indexing schemes. B-trees, R-trees and many other indexing schemes can be implemented in GiST. GiST tree nodes contain a pair of values in the form of (p, prt). 
 The first value, p, is used as a search key and the second value, ptr, is a pointer to the data if the node is a leaf or a pointer to another node 
 if the node is intermediate. The search key p represents an attribute that becomes true for all data that can be reached through the pointer ptr. 
@@ -113,6 +113,330 @@ Also, GiST index can handle any query predicate, as long as certain functions, t
 PostGIS can use GiST index at a table attribute. When a table column is a geography data type, then GiST will use an improved version of an R-tree index 
 (R-tree-over-GiST scheme). PostgreSQL doesn't allow, at the most recent versions, the use of standard R-tree, because this type of index 
 cannot handle attributes with size bigger than 8K and fail when a geography column is null. 
+
+\section{Google Maps Directions API}
+
+The Google Directions API \cite{16} is a service that calculates directions between locations using an HTTP request. A Directions API request takes the following form:
+\begin{center}
+  http://maps.googleapis.com/maps/api/directions/output?parameters
+\end{center}
+
+where output determines the type of file that will contain the answer to the HTTP request. The type of the output file can be either json of xml. 
+The field parameters 
+defines the parameters and their values that will come along with the HTTP request. Certain parameters are required while others are optional. As is standard 
+in URLs, all parameters are separated using the ampersand (\&) character. Required parameters are the origin and destination locations between which we 
+request directions through the Directions API. These locations can be in the form of textual geographical coordinates as a value pair of latitude and 
+longitude. Location can also be inserted as the address of the specific point. In this case, Directions service will geocode the string and convert it to 
+a latitude/longitude coordinate in order to calculate directions. Other optional parameters, that can be defined, are the mode of transportation, 
+which can be driving, walking, bicycling, or transit. For example, a complete HTTP request to the Directions API can be the following:
+
+\begin{center}
+ http://maps.googleapis.com/maps/api/directions/json?origin=37.976159, 23.776274\&destination=37.978180, 23.768957\&mode=walking
+\end{center}
+
+\subsection{JSON response file}
+
+JSON (JavaScript Object Notation) file format, is an open standard format that uses human-readable text to transmit data objects consisting of attribute–value pairs. 
+Directions responses in json type format contain the following fields: 
+
+\subsubsection{Status}
+
+The status field within the Directions response object contains the status of the request, and may contain debugging information to help you track down why 
+the Directions service failed. The status field may contain the following values:
+
+\begin{itemize}
+ \item OK, the response contains a valid result. 
+ \item NOT\_FOUND, at least one of the locations specified in the request's origin, destination, or waypoints could not be geocoded.
+ \item ZERO\_RESULTS, no route could be found between the origin and destination.
+ \item INVALID\_REQUEST, the provided request was invalid. Common causes of this status include an invalid parameter or parameter value.
+ \item REQUEST\_DENIED, the service denied use of the directions service by your application. 
+ \item UNKNOWN\_ERROR, a directions request could not be processed due to a server error. 
+ \item OVER\_QUERY\_LIMIT, the service has received too many requests from your application within the allowed time period. 
+ More specifically, users of the free Directions API are able to perform at most 2 HTTP request per second and 2500 HTTP requests per day to the API.
+
+\end{itemize}
+
+For example:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+ "status" : "OK"
+\end{lstlisting}
+
+\subsubsection{Routes}
+
+Routes field is a JSON array, whose elements represent a different route between the origin and destination locations. Each route can contain the following 
+fields:
+
+\begin{itemize}
+ \item summary: a short textual description for the route, suitable for naming and disambiguating the route from alternatives.
+ \item legs[]: an array which contains information about a leg of the route, between two locations within the given route. If there are no 
+ waypoints defined, the array will include one element, which will be the total route. 
+ \item waypoint\_order: an array indicating the order of any waypoints in the calculated route. 
+ \item overview\_polyline: a single points object that holds an encoded polyline representation of the route. This polyline is an approximate 
+ (smoothed) path of the resulting directions.
+ \item bounds: the viewport bounding box of the overview\_polyline.
+ \item copyrights: the copyrights text to be displayed for this route. 
+ \item warnings[]: an array of warnings to be displayed when showing these directions.
+\end{itemize}
+
+For example:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+	"bounds" : {
+            "northeast" : {
+               "lat" : 37.97818609999999,
+               "lng" : 23.7762659
+            },
+            "southwest" : {
+               "lat" : 37.9761428,
+               "lng" : 23.7689148
+            }
+         },
+         "copyrights" : "Map data ©2015 Google",
+         "legs" : [
+	    ... ]
+	 "overview_polyline" : {
+            "points" : "{exfFuxbpCg@fCkBpK}B~MkB|KIf@QG"
+         },
+         "summary" : "Λεωφ. Στρατάρχου Αλεξάνδρου Παπάγου",
+         "warnings" : [
+            "Walking directions are in beta.    Use caution – This route may be missing sidewalks or pedestrian paths."
+         ],
+         "waypoint_order" : []   
+\end{lstlisting}
+
+\subsubsection{legs[]}
+
+Each element in the legs array specifies a single leg of the journey from the origin to the destination in the calculated route. For routes that contain 
+no waypoints, the route will consist of a single "leg," but for routes that define one or more waypoints, the route will consist of one or more legs, 
+corresponding to the specific legs of the journey.
+
+Each leg within the legs field(s) may contain the following fields:
+
+\begin{itemize}
+ \item steps[]: an array of steps denoting information about each separate step of the leg of the journey.
+ \item distance: the total distance covered by this leg, where value field contains the distance in meters and text field contains a human-readable representation of 
+ the distance, displayed in units as used at the origin
+ \item duration: the total duration of this leg, where value field contains the duration in seconds and text field contains a human-readable representation of the duration.
+ \item start\_location: contains the latitude/longitude coordinates of the origin of this leg. Because the Directions API calculates directions between locations 
+ by using the nearest transportation option (usually a road) at the start and end points, start\_location may be different than the provided origin of this leg 
+ if, for example, a road is not near the origin.
+ \item start\_address: contains the human-readable address (typically a street address) reflecting the start\_location of this leg.
+ \item end\_location: contains the latitude/longitude coordinates of the given destination of this leg. Because the Directions API calculates directions 
+ between locations by using the nearest transportation option (usually a road) at the start and end points, end\_location may be different than the provided 
+ destination of this leg if, for example, a road is not near the destination.
+ \item end\_address: contains the human-readable address (typically a street address) reflecting the end\_location of this leg.
+\end{itemize}
+
+For example:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+	      "distance" : {
+                  "text" : "0.7 km",
+                  "value" : 690
+               },
+               "duration" : {
+                  "text" : "7 mins",
+                  "value" : 434
+               },
+               "end_address" : "Iasona Maratou 509, Zografou 157 73, Greece",
+               "end_location" : {
+                  "lat" : 37.97818609999999,
+                  "lng" : 23.7689477
+               },
+               "start_address" : "Papagou 147, Zografou 157 73, Greece",
+               "start_location" : {
+                  "lat" : 37.9761428,
+                  "lng" : 23.7762659
+               },
+               "steps" : [
+		    .... ]
+\end{lstlisting}
+
+\subsubsection{steps[]}
+
+Each element in the steps array defines a single step of the calculated directions. A step is the most 
+atomic unit of a direction's route, containing a single step describing a specific, single instruction on the journey. 
+The step not only describes the instruction but also contains distance and duration information relating to how this step relates to the following step. 
+Each step within the steps field(s) may contain the following fields:
+
+\begin{itemize}
+ \item html\_instructions: formatted instructions for this step, presented as an HTML text string. 
+ \item distance: the distance covered by this step until the next step.
+ \item duration: the time required to perform the step, until the next step.
+ \item start\_location: the geographical coordinated of the location of the starting point of this step.
+ \item end\_location: the geographical coordinated of the location of the last point of this step.
+ \item polyline: a single points object that holds an encoded polyline representation of the step. This polyline is an approximate (smoothed) path of the step.
+ \item travel\_mode: the mode of transportation, as it is defined in the mode parameter of the HTTP request.
+\end{itemize}
+
+For example:
+
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true]
+	"distance" : {
+           "text" : "0.7 km",
+           "value" : 680
+        },
+        "duration" : {
+           "text" : "7 mins",
+           "value" : 427
+        },
+        "end_location" : {
+           "lat" : 37.9781038,
+           "lng" : 23.7689148
+        },
+        "html_instructions" : "Head \u003cb\u003ewest\u003c/b\u003e on \u003cb\u003eΛεωφ. Στρατάρχου Αλεξάνδρου Παπάγου\u003c/b\u003e toward \u003cb\u003eΓρ. Κουσίδη\u003c/b\u003e",
+        "polyline" : {
+           "points" : "{exfFuxbpCQv@ETCLKj@CPYxAi@|Cc@fCm@lDg@pCCNc@nC_AnFCHYhBMx@If@"
+        },
+        "start_location" : {
+           "lat" : 37.9761428,
+           "lng" : 23.7762659
+        },
+        "travel_mode" : "WALKING"
+\end{lstlisting}
+
+
+\subsection{Encoded Polyline Algorithm Format}
+
+JSON response file contains an encoded polyline as a representation of the route. This representation is the result of encoding 
+the geographical coordinates of the intermediate points of the route. Google Maps API follows a specific encoding algorithm \cite{17} of the latitude and longitude 
+of any point. The steps for encoding such a signed value indicating the latitude or longitude are specified below:
+
+\begin{enumerate}
+ \item Multiply the initial signed value by 1e5, rounding the result.
+ \item Convert the result to it's binary equivalent value, using it's two complement. 
+ \item Left-shift the binary value one bit.
+ \item If the original decimal value is negative, invert this encoding.
+ \item Break the binary value out into 5-bit chunks (starting from the right hand side.
+ \item Place the 5-bit chunks into reverse order.
+ \item OR each value with 0x20 if another bit chunk follows.
+ \item Convert each value to decimal.
+ \item Add 63 to each value.
+ \item Convert each value to its ASCII equivalent.
+\end{enumerate}
+
+Following these steps in reverse we can decode an encoded polyline into the appropriate list of geographical coordinates. 
+
+\section{Google Maps Static Maps API}
+
+The Google Static Map service \cite{18} creates a map based on URL parameters sent through a standard HTTP request and returns the map as an image 
+that can be displayed on a web page, or accessed through a URL. A simple HTTP request to the Google Static Maps API takes the following form:
+
+\begin{center}
+ https://maps.googleapis.com/maps/api/staticmap?parameters
+\end{center}
+
+The Static Maps API defines map images using the following URL parameters:
+
+\subsubsection{Location Parameters}
+
+\begin{itemize}
+ \item center: defines the center of the map, equidistant from all edges of the map. This parameter takes a location as either a comma-separated {latitude,longitude} 
+ pair or a string address identifying a unique location on the face of the earth.
+ \item zoom: defines the zoom level of the map, which determines the magnification level of the map. 
+\end{itemize}
+
+\subsubsection{Map Parameters}
+
+\begin{itemize}
+ \item size: the rectangular dimensions of the map image. This parameter takes a string of the form \{horizontal\_value\}x\{vertical\_value\}. 
+ \item scale: affects the number of pixels that are returned. scale=2 returns twice as many pixels as scale=1 while retaining the same coverage area and level of detail.
+ \item format: the format of the resulting image. Possible formats include PNG, GIF and JPEG types.
+ \item maptype: the type of map to construct. There are several possible maptype values, including roadmap, satellite, hybrid, and terrain. 
+ \item language: the language to use for display of labels on map tiles.
+\end{itemize}
+
+\subsubsection{Feature Parameters}
+
+\begin{itemize}
+ \item markers: one or more markers to attach to the image at specified locations. This parameter takes a single marker definition with parameters separated 
+ by the pipe character (|). 
+ \item path: a single path of two or more connected points to overlay on the image at specified locations. This parameter takes a string of point definitions 
+ separated by the pipe character (|). In addition, the encoded polyline representation can be used instead of multiple points, as long as the prefix enc: 
+ is used in the value of the parameter path.
+ \item visible: one or more locations that should remain visible on the map, though no markers or other indicators will be displayed. 
+\end{itemize}
+
+For example, a HTTP request at Google Static Maps API can be the following:
+
+\begin{center}
+ https://maps.googleapis.com/maps/api/staticmap?\&size=1000x1000\&markers=label:A|17.7466,-64.703\&markers=label:C|17.7453,-64.7019\&path=color:blue|enc:gcikBvh|iKFJ??nAaAFGjA\}@rAiAJK
+\end{center}
+
+\section{Mathematical Background}
+
+\subsection{Random Variables}
+
+A random variable X is a measurable function from the set of possible outcomes Ω, Χ: Ω\(\rightarrow\)A or Χ: Ω\(\rightarrow\)R, where A is a 
+subset of the set of real numbers. If A is a set of discrete values, such as the set of integer numbers, then the random variable is discrete. 
+If A is a set of infinite possible values, then the random variable is continuous. In general, a random variable is a variable whose value is 
+subject to variations due to chance. A random variable can take on a set of possible different values (similarly to other mathematical variables), 
+each with an associated probability if the variable is discrete, or with a probability density function if the variable is continuous. 
+The function of the random variable is called probability distribution.
+
+\subsection{Uniform Distribution}
+
+The discrete uniform distribution is a symmetric probability distribution whereby a finite number of values are equally likely to be observed; 
+every one of n values has equal probability 1/n. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/uniform_1.png}
+  \caption{Discrete uniform probability mass function \cite{19}}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/uniform_2.png}
+  \caption{Discrete uniform cumulative distribution function \cite{20}}
+\end{figure}
+
+\subsection{Normal Distribution}
+
+Normal distribution, known also as Gauss distribution, refers to continuous random variables. 
+The normal distribution is remarkably useful because of the central limit theorem. In its most general form, it states that averages of random variables 
+drawn from independent distributions are normally distributed. The probability density of the normal distribution is:
+
+\[P(x) = \frac{1}{{\sigma \sqrt {2\pi } }}e^{{{ - \left( {x - \mu } \right)^2 } \mathord{\left/ {\vphantom {{ - \left( {x - \mu } \right)^2 } {2\sigma ^2 }}} \right. \kern-\nulldelimiterspace} {2\sigma ^2 }}}\]
+
+where \(\mu\) is the mean of the distribution and \(\sigma\) is the standard deviation of the distribution.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/gauss_1.png}
+  \caption{Probability density function \cite{21}}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/gauss_2.png}
+  \caption{Cumulative distribution function \cite{22}}
+\end{figure}
+
+According to an empirical rule, about 68\% of values drawn from a normal distribution are within one standard deviation \(\sigma\) away from the mean; 
+about 95\% of the values lie within two standard deviations; and about 99.7\% are within three standard deviations. This fact is known as the 68-95-99.7 
+rule, or the 3-sigma rule.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\textwidth]{figures/Empirical_Rule.PNG}
+  \caption{3-sigma empirical rule for the normal distribution \cite{23} }
+\end{figure}
+
+\subsection{Bernoulli distribution}
+
+The Bernoulli distribution is the probability distribution of a random variable which takes value 1 with success probability p and value 0 with failure 
+probability q=1-p. It can be used, for example, to represent the toss of a (not necessarily fair) coin, where "1" is defined to mean "heads" and "0" is 
+defined to mean "tails" (or vice versa).
+
+If X is a random variable with this distribution, we have:
+
+\[P(X=1) = p\]
+\[P(X=0) = 1-p\]
+
+The experiment is called fair if p=0.5 and can represent the toss of a fair coin. 
+
 
 
 
