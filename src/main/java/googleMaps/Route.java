@@ -26,7 +26,7 @@ public class Route {
 	}
 
 	public String getRoute(double longFrom, double latFrom, double longTo,
-			double latTo) {
+			double latTo, int req_api, int req) {
 
 		// Sleep for half a second
 		try {
@@ -37,9 +37,8 @@ public class Route {
 		
 		String res = "";
 		try {
-			String url = "https://maps.googleapis.com/maps/api/directions/json?key="
-					+ key
-					+ "&origin="
+			String url = "https://maps.googleapis.com/maps/api/directions/json?"
+					+ "origin="
 					+ latFrom
 					+ ","
 					+ longFrom
@@ -51,7 +50,8 @@ public class Route {
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("GET");
-			System.out.println("\nSending 'GET' request to URL : " + url);
+			int r = req_api + req;
+			System.out.println("\nRequest no." + r + ": " + url);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					con.getInputStream()));

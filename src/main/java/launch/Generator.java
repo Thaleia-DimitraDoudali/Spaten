@@ -78,7 +78,7 @@ public class Generator {
 				// Create daily check-in
 				req_api += crChk.createDailyCheckIn(usr, checkNum, poisNum, db, inp.getDist(), inp.getMaxDist(),
 						inp.getChkDurMean(), inp.getChkDurStDev(), inp.getStartTime(), inp.getEndTime(), 
-						time, home, travel, travelCount, outChkCSV, outTrCSV, outMapCSV, csv, inp.getKey());
+						time, home, travel, travelCount, outChkCSV, outTrCSV, outMapCSV, csv, inp.getKey(), req_api);
 				
 				if (travel && (travelCount == trDays)) {
 					travel = false;

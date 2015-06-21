@@ -27,7 +27,7 @@ public class CreateChkIn {
 	public int createDailyCheckIn(User usr, int chkNum, int poisNum, DBconnector db, double dist, 
 			double maxDist, double chkDurMean, double chkDurStDev, int startTime, int endTime, long date,
 			boolean home, boolean travel, long travelDay, BufferedWriter outChkCSV, 
-			BufferedWriter outTrCSV, BufferedWriter outMapCSV, OutCSV csv, String key) {
+			BufferedWriter outTrCSV, BufferedWriter outMapCSV, OutCSV csv, String key, int req_api) {
 
 		ArrayList<Poi> poisVisited = new ArrayList<Poi>();
 		ArrayList<Integer> poisInRange = new ArrayList<Integer>();
@@ -112,7 +112,7 @@ public class CreateChkIn {
 				req ++;
 				String jsonRoute = rt.getRoute(p.getLongitude(),
 						p.getLatitude(), newP.getLongitude(),
-						newP.getLatitude());
+						newP.getLatitude(), req_api, req);
 				double duration = 0;
 				try {
 					duration = rt.getDuration(jsonRoute);

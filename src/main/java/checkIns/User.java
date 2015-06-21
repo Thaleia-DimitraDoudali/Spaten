@@ -15,6 +15,7 @@ public class User {
 	private List<GPSTrace> traces = new ArrayList<GPSTrace>();
 	private List<MapURL> dailyMap = new ArrayList<MapURL>();
 	private Poi home;
+	private Poi travelPoi;
 	
 	public User(int id) {
 		this.userId = id;
@@ -77,6 +78,14 @@ public class User {
 
 	public void setDailyMap(List<MapURL> dailyMap) {
 		this.dailyMap = dailyMap;
+	}
+
+	public Poi getTravelPoi() {
+		return travelPoi;
+	}
+
+	public void setTravelPoi(Poi travelPoi) {
+		this.travelPoi = travelPoi;
 	}
 
 }
