@@ -23,4 +23,4 @@ clean:
 	$(RM) *.{nav,snm,vrb,fls,fdb_latexmk} *~ *.bak
 
 distclean: clean
-	$(RM) $(FILE).{dvi,ps,pdf}
+	$(RM) $(FILE).{dvi,ps,pdf} thesis_text.pdf thesis_title.pdf

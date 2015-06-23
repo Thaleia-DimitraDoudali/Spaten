@@ -114,6 +114,55 @@ PostGIS can use GiST index at a table attribute. When a table column is a geogra
 (R-tree-over-GiST scheme). PostgreSQL doesn't allow, at the most recent versions, the use of standard R-tree, because this type of index 
 cannot handle attributes with size bigger than 8K and fail when a geography column is null. 
 
+
+\section{HBase}
+
+HBase is an open source, non-relational (NoSQL), distributed database modeled after Google's BigTable \cite{24}. It is developed as part of Apache Software Foundation's Apache 
+Hadoop project and runs on top of HDFS. The Hadoop Distributed File System (HDFS) is a distributed file system designed to run on commodity hardware. 
+HDFS is highly fault-tolerant and is designed to be deployed on low-cost hardware. HDFS provides high throughput access to application data and is suitable 
+for applications that have large data sets. HDFS relaxes a few POSIX requirements to enable streaming access to file system data. 
+
+HBase works best for sparse data sets, which are common in many Big Data use cases. Unlike relational database systems, HBase does not support a 
+structured query language like SQL; in fact, HBase isn’t a relational data store at all. HBase  is a column-oriented database and follows a 
+key/value data storage model. The main characteristics if the data model are the following: 
+
+\begin{itemize}
+ \item Table: HBase organizes data into tables as most database systems.
+ \item Row: Within a table, data is stored according to its row. Rows are uniquely identified by a key. Row keys are treated as byte arrays, thus they do not 
+ have a specific data type.
+ \item Column Family: Column families group data within a row, impacting their physical arrangement. They are stored together on disk, which is why 
+ HBase is referred to as a column-oriented data store. Column families must be defined up front, during table creation. 
+ \item Column Qualifier: Data within a column family is addressed via its column qualifier, or simply, column. Column qualifiers need not be consistent 
+ between rows. Like row keys, column qualifiers do not have a data type and are always treated as a byte array.
+ \item Cell: A combination of row key, column family, and column qualifier uniquely identifies a cell. The data stored in a cell is 
+ referred to as that cell’s value. Values also do not have a data type and are always treated as a byte array.
+ \item Timestamp: Values within a cell are versioned. Versions are identified by their version number, which by default is the timestamp of when the cell was written. 
+If a timestamp is not specified during a write, the current timestamp is used. If the timestamp is not specified for a read, the latest one is returned. The number 
+of cell value versions retained by HBase is configured for each column family. The default number of cell versions is three.
+\end{itemize}
+
+For example, a table in HBase can be the following:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/hbase.png}
+  \caption{A table in HBase consisting of two column families}
+\end{figure}
+
+HBase has the following three major architecture components:
+
+\begin{itemize}
+ \item Region server: Regions are parts of HBase tables, splitted accross the region servers of the distributed system and managed by a region server. 
+ Region server communicates with the client and handles data-related operations. Also, it handles read and write requests for all regions under it and decides 
+ the size of the regions.
+ \item Master server: Master server assigns regions to the region servers and handles the load balancing of the regions across region servers. Moreover, it is 
+ responsible for schema changes and other metadata operations such as creation of tables and column families. 
+ \item Zookeeper: Zookeeper server is responsible to handle and synchronize the communication between the master and region servers, providing 
+ fault tolerance. More specifically, ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed 
+ synchronization, and providing group services.
+\end{itemize}
+
+
 \section{Google Maps Directions API}
 
 The Google Directions API \cite{16} is a service that calculates directions between locations using an HTTP request. A Directions API request takes the following form:
@@ -383,13 +432,13 @@ every one of n values has equal probability 1/n.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{figures/uniform_1.png}
-  \caption{Discrete uniform probability mass function \cite{19}}
+  \caption{Discrete uniform probability mass function}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{figures/uniform_2.png}
-  \caption{Discrete uniform cumulative distribution function \cite{20}}
+  \caption{Discrete uniform cumulative distribution function}
 \end{figure}
 
 \subsection{Normal Distribution}
@@ -405,13 +454,13 @@ where \(\mu\) is the mean of the distribution and \(\sigma\) is the standard dev
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{figures/gauss_1.png}
-  \caption{Probability density function \cite{21}}
+  \caption{Probability density function}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{figures/gauss_2.png}
-  \caption{Cumulative distribution function \cite{22}}
+  \caption{Cumulative distribution function}
 \end{figure}
 
 According to an empirical rule, about 68\% of values drawn from a normal distribution are within one standard deviation \(\sigma\) away from the mean; 
@@ -421,10 +470,10 @@ rule, or the 3-sigma rule.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.6\textwidth]{figures/Empirical_Rule.PNG}
-  \caption{3-sigma empirical rule for the normal distribution \cite{23} }
+  \caption{3-sigma empirical rule for the normal distribution}
 \end{figure}
 
-\subsection{Bernoulli distribution}
+\subsection{Bernoulli Distribution}
 
 The Bernoulli distribution is the probability distribution of a random variable which takes value 1 with success probability p and value 0 with failure 
 probability q=1-p. It can be used, for example, to represent the toss of a (not necessarily fair) coin, where "1" is defined to mean "heads" and "0" is 
