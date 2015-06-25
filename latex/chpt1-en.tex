@@ -7,7 +7,7 @@
 \section{Motivation}
 
 Nowadays, the amount of social networking data that is being produced and consumed daily is huge and it is constantly increasing.
-Moreover, these data can be in the form of text, photography, video, time and location. For example, the online social networking service Twitter 
+Moreover, these data can be in the form of text, photographs, video, time and location. For example, the online social networking service Twitter 
 has 302 million active users per month and manages 500 million tweets per day, according to official statistics \cite {1}. 
 The tweets include textual data and a timestamp (the time of publication) and may also contain
 image, video, and location. Traditional data storage and processing techniques are no longer sufficient for the huge amount of polymorphic 
@@ -18,11 +18,11 @@ reading and writing data in these databases. Thus, Twitter created and used dist
 These tools gave notable boost in the performance of the service.
 
 A large number of online services now use distributed data storage systems. For example, large online social media platforms 
-such as Twitter and Yahoo!, use the distributed database system HBase \cite {3}, so as to manage their data \cite {4}. 
+such as Twitter and Yahoo!, use the distributed database system HBase, so as to manage their data \cite {4}. 
 Similarly, many online social networking services like Facebook and Twitter,
-use the distributed data storage and management system Hadoop \cite {5} \cite {6}. 
+use the distributed data storage and management system Hadoop \cite {6}. 
 Even though we can retrieve a list of social media platforms that use certain distributed data management tools, 
-we cannot have access in the data that these platforms use, due to user's privacy restrictions. 
+we cannot have access to the data that these platforms use, due to user's privacy restrictions. 
 In this way, it is not possible to 
 evaluate properly such social networking services.
 
@@ -47,7 +47,48 @@ More specifically, we analyze the tools used in the implementation of the genera
 Google's services for the creation and presentation of user's routes and some mathematical concepts for the input parameters. Also,
 we include thw distributed storage and data management tools, which were used in order to store the dataset created by the generator. 
 
-In chapter 3 we describe in details the design of the generator.
+In chapter 3 we describe in detail the design of the generator. We analyze the storage schema of the source data, we define the input parameters and 
+present thoroughly the attributes, the decision and complete function of the generator. 
+
+In chapter 5 we sum up the results of the evaluation of social media services. We, also, present related work and possible extensions of the current 
+diploma thesis.
+
+\section{Brief generator description}
+
+The main function of the generator is to create realistic spatiotemporal and textual social media data. More specifically, the generator creates users 
+of online social networking services, who visit many places during the day and leave a review and rating to the corresponding points of interest. 
+Therefore, the generator produces user's daily routes during a specific perdiod of time.
+
+The generator uses real points of interest as source data. These points where crawled from TripAdvisor, a well-known online travel service. 
+The source data contain the geographical coordinates, the title and address of each point of interest, as well as a list of ratings and reviews for each point 
+made by real TripAdvisor users. In order to store these points, we used the PostgreSQL database, so as to have access to functions of geographic data types 
+given by the extension PostGIS of PostgreSQL. The generator is parameterized by certain input variables, so as to create data that can vary in size and structure. 
+For example, there are input parameters that define the number of users created, the period of time for which the generator will create daily routes and 
+others that influence the daily check-ins to the points of interest. 
+
+The generator takes certain decisions, that refer to the daily routes created, using random factors. More specifically, the points of interest that a user visits 
+are defined in a random way. The only restriction to this decision, is that the points must be near the user's home. The home of the user is defined in a random 
+way and the distance from there is determined by an input parameter. The generator gives the ability to travel to it's users, so that they can check-in into 
+places that are further away from their home. The location and duration of their trips are also decided in a random way. The generator 
+allows only one visit per day to each point of interest per user. Every user that visits a point of interest leaves a random rating and review for that point.
+
+As far as the transition from one point of interest to the next one is concerned, the user walks in order to get to his destination. This is the reason why 
+the check-ins should occur in points of interest that are in walking distance between them. The distance between the visits is defined through an input 
+parameter. The generator issues a request to Google's Directions API and gets a response file that contains analytical directions and information of the route 
+from the origin to the destination. The response file includes all the intermediates points on the map in an encoded representation. The generator 
+decodes and transforms these points ito GPS traces, that indicate the route. The response file also contains the duration of the route from the starting point to 
+the destination. Using this information, the generator can calculate the time when the user will check-in to the next place. Each check-in and GPS trace is 
+timestamped. The number of points that a user will visit during the day and the duration of the visits is determined in a random way influenced by 
+certain input parameters. Finally, the generator uses the Google Static Maps API, in order to illustrate each user's daily routes into a static map.
+
+As a result, the data created by the generator simulate real social media data, due to the usage of real points of interest as source data and 
+the utilization of random factors in the decisions that the generator makes, while creating the daily routes.
+
+
+
+
+
+
 
 
 

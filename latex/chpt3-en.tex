@@ -138,7 +138,7 @@ The generator takes as input the next parameters:
  \item outMaps: The output file storing the URLs for the daily maps depicting the daily routes of all users created.
 \end{itemize}
 
-\section{Generator's implementation design}
+\section{Generator's implementation definitions}
 
 The generator's main function is to create user's daily routes, which will contain information simulating real social media data. These daily routes 
 consist of visits (check-ins) to points of interest and paths that the user followed from one point to the next one. The generator takes as input the 
@@ -154,7 +154,7 @@ to the next point, following the path that Google Directions API provides, and c
 same daily route strategy in the location of his trip.
 
 
-\subsection{Home definition}
+\subsection{Home}
 
 The location of a user's home is the center around which he walks every day. The points of interest that a user visits are selected in a random way, thus there can 
 exist routes that don't make sense. For example, a user can walk one day in Greece, the next day in France and the other day again back in Greece. This is the reason 
@@ -163,7 +163,7 @@ of maxDist meters from his home, as those are defined by the according input par
 the point where his first ever visit is made on startDate. The choice of this point is done using a generator of random numbers which follow a uniform distribution. 
 The range of the distribution are the total number of source POIs stored in PostgreSQL.
 
-\subsection{Trip definition}
+\subsection{Trip}
 
 A user created by the generator is capable to travel, so as to be able to visit places that are further than maxDist meters from his home. In this way, 
 routes one day in Greece and the next one in France make sense. However, there has to be defined a central point around which the user will walk during his trip. 
@@ -184,7 +184,7 @@ Thus, the generator decides every day whether or not to start a trip for the cur
 if the generator decides to start a trip for the current user, then it decides, in a random way as well, the duration and the location of the trip. Each 
 daily route during the trip has to be in maxDist range from the trip's central location.
 
-\subsection{Check-in POI definition}
+\subsection{Check-in POI}
 
 The number of daily check-ins is defined using a generator of random numbers that follow a normal distribution with a mean value determined by the input parameter 
 chkNumMean and standard deviation determined by the input parameter chkNumStDev. Therefore, every day the generator picks a different number of daily check-ins, which 
@@ -203,13 +203,13 @@ Using the same strategy, the generator chooses all next points of interest that 
 a smaller distance from the first POI visited. This distance is defined by the input parameter dist. Also, a user is not allowed to visit the same place twice 
 during the day, so every next check-in should be in a POI not visited that specific day.
 
-\subsection{Check-in review definition}
+\subsection{Check-in review}
 
 The generator assigns a rating and review to every user's check-in. More specifically, every source point of interest as it is stored in PostgreSQL database, 
 contains certain reviews for the specific point. The generator chooses randomly a review amongst the available for the POI, using a generator of random 
 numbers that follow a uniform distribution. The range of the distribution is the number of available reviews for the specific POI.
 
-\subsection{Path between check-ins definition}
+\subsection{Path between check-ins}
 
 The generator issues an http request to Google Directions API, in order to obtain information about the path that a user will follow in order to walk from one point 
 of interest to the next one. Since the source data contain the geographical coordinates of every point of interest, the generator has access to the latitude and 
@@ -228,7 +228,7 @@ to a list of geographical coordinates indicating all the points on the map, that
 will be stored as GPS traces, representating the user's route. For each path, the starting and ending points, which are the points of interest, will also be stored 
 as GPS traces.
 
-\subsection{Timestamp definition}
+\subsection{Timestamp}
 
 As far as time is concerned, the generator defines that the first check-in of the day will happen at the time defined by the input parameter startTime. 
 The duration of the visit to a point of interest is set 
@@ -243,7 +243,7 @@ Concerning the timestamp of the GPS traces, they are calculated through the json
 splitted up by the number of points decoded from the polyline. Therefore, the timestamp of the first GPS trace of the path is set to be the time the visit 
 at the origin ended plus the fraction of the divided time needed to get to that point on the map.
 
-\subsection{Static map definition}
+\subsection{Static map}
 
 The generator uses a static map in order to depict the user's daily route, by issuing an http request to the Google Static Maps API. 
 The points where a user checked in during the day are distinctly visible on the map with markers. These markers are also named using capital 
