@@ -14,6 +14,7 @@ import parser.ParseCheckIn;
 
 public class CheckIn implements Serializable {
 
+	private int userId;
 	private long timestamp;
 	private int travel;
 	private POI poi;
@@ -24,7 +25,8 @@ public class CheckIn implements Serializable {
 		this.review = new Review();
 	}
 
-	public CheckIn(long t, int tr, POI p, Review r) {
+	public CheckIn(int id, long t, int tr, POI p, Review r) {
+		this.userId = id;
 		this.timestamp = t;
 		this.travel = tr;
 		this.poi = p;
@@ -33,7 +35,7 @@ public class CheckIn implements Serializable {
 
 	@Override
 	public String toString() {
-		return this.timestamp + " - " + this.travel + " - " + this.poi.toString()
+		return  this.userId + " - " + this.timestamp + " - " + this.travel + " - " + this.poi.toString()
 				+ " " + this.review.toString();
 	}
 
@@ -61,6 +63,14 @@ public class CheckIn implements Serializable {
 		this.poi = poi;
 	}
 
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+
 	public Review getReview() {
 		return review;
 	}
@@ -73,6 +83,8 @@ public class CheckIn implements Serializable {
 		int index = 0;
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
+		this.userId = buffer.getInt(index);
+		index += Integer.SIZE / 8;
 		this.timestamp = buffer.getLong(index);
 		index += Long.SIZE / 8;
 		this.travel = buffer.getInt(index);
@@ -86,14 +98,15 @@ public class CheckIn implements Serializable {
 
 	public byte[] getBytes() throws Exception {
 		try {
-			int totalSize = Long.SIZE / 8 // timestamp
+			int totalSize = Integer.SIZE / 8 //user id 
+					+ Long.SIZE / 8 // timestamp
 					+ Integer.SIZE / 8 // travel
 					+ this.poi.getBytes().length // poi bytes length
 					+ this.review.getBytes().length; // review bytes length
 
 			byte[] serializable = new byte[totalSize];
 			ByteBuffer buffer = ByteBuffer.wrap(serializable);
-
+			buffer.put(Bytes.toBytes(this.userId));
 			buffer.put(Bytes.toBytes(this.timestamp));
 			buffer.put(Bytes.toBytes(this.travel));
 			buffer.put(this.poi.getBytes());
@@ -106,30 +119,4 @@ public class CheckIn implements Serializable {
 		return null;
 	}
 
-	public static void main(String[] args) throws Exception {
-		
-		ParseCheckIn pr = new ParseCheckIn();
-		FileReader fr = new FileReader(args[0]);
-		BufferedReader br = new BufferedReader(fr);
-		
-		String line = br.readLine();
-		line = br.readLine();
-		
-		//Checking serialization and deserialition
-		CheckIn chk1 = new CheckIn();
-		CheckIn chk2 = new CheckIn();
-		chk1 = pr.parseLine(line);
-		line = br.readLine();
-		chk2 = pr.parseLine(line);
-		
-		CheckInList chkList1 = new CheckInList();
-		CheckInList chkList2 = new CheckInList();
-		
-		chkList1.getCheckInList().add(chk1);
-		chkList1.getCheckInList().add(chk2);
-		byte[] bytes = chkList1.getBytes();
-		
-		chkList2.parseBytes(bytes);
-		System.out.println(chkList2.toString());
-	}
 }

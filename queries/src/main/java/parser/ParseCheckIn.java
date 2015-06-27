@@ -11,12 +11,13 @@ public class ParseCheckIn {
 	public CheckIn parseLine(String line) {
 		double lat = 0, lng = 0;
 		long timestamp;
-		int travel;
+		int travel, userId;
 		String title, address, rating, revTitle, review;
 		
 		String[] splt = line.split("\t");
 		
-		if (splt[3].equals("false")) travel = 0; else travel = 1;
+		userId = Integer.parseInt(splt[0].substring(0, splt[0].length()-1));
+		if (splt[3].contains("false")) travel = 0; else travel = 1;
 		timestamp = Long.parseLong(splt[6].substring(2, splt[6].length()-2));
 		
 		String[] coords = splt[1].split(", ");
@@ -31,7 +32,7 @@ public class ParseCheckIn {
 		review = splt[9].substring(2, splt[9].length()-1);
 		Review rev = new Review(rating, revTitle, review);
 		
-		CheckIn chk = new CheckIn(timestamp, travel, p, rev);
+		CheckIn chk = new CheckIn(userId, timestamp, travel, p, rev);
 		
 		return chk;
 	}
