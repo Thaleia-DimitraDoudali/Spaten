@@ -41,11 +41,11 @@ public class AlterGraph {
 		return null;
 	}
 
-	public void alter(BufferedReader br, BufferedWriter bw) throws IOException {
+	public void alter(BufferedReader br, BufferedWriter bw, int limit) throws IOException {
 
 		String line = null, out = null;
 		line = br.readLine();
-		int new_user_id = 1, new_friend = 0;
+		int new_user_id = 1, new_friend = 0, user_id = 0;
 		int old_user = 0, old_friend = 0, keep_old_user = 0;
 		String[] line_nums;
 
@@ -65,12 +65,13 @@ public class AlterGraph {
 			}
 
 			// left column
-			out = new_user_id + "\t";
+			user_id = new_user_id % limit;
+			out = user_id + "\t";
 			// right column
-			new_friend = old_friend % 100;
+			new_friend = old_friend % limit;
 			out += new_friend + "\n";
 
-			System.out.println(out);
+			System.out.print(out);
 			bw.write(out);
 			line = br.readLine();
 			// parse line
@@ -92,7 +93,7 @@ public class AlterGraph {
 		BufferedReader br = gr.createReader(args[0]);
 
 		try {
-			gr.alter(br, bw);
+			gr.alter(br, bw, Integer.parseInt(args[1]));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
