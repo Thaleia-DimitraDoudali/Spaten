@@ -115,15 +115,21 @@ public class CheckIn implements Serializable {
 		String line = br.readLine();
 		line = br.readLine();
 		
-		//Checking serialization and deserialization
+		//Checking serialization and deserialition
 		CheckIn chk1 = new CheckIn();
 		CheckIn chk2 = new CheckIn();
 		chk1 = pr.parseLine(line);
-		System.out.println(chk1.toString());
-		byte[] bytes = chk1.getBytes();
+		line = br.readLine();
+		chk2 = pr.parseLine(line);
 		
-		chk2.parseBytes(bytes);
-		System.out.println(chk2.toString());
-
+		CheckInList chkList1 = new CheckInList();
+		CheckInList chkList2 = new CheckInList();
+		
+		chkList1.getCheckInList().add(chk1);
+		chkList1.getCheckInList().add(chk2);
+		byte[] bytes = chkList1.getBytes();
+		
+		chkList2.parseBytes(bytes);
+		System.out.println(chkList2.toString());
 	}
 }
