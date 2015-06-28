@@ -1,7 +1,5 @@
 package containers;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -9,8 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.hadoop.hbase.util.Bytes;
-
-import parser.ParseCheckIn;
 
 public class CheckIn implements Serializable {
 

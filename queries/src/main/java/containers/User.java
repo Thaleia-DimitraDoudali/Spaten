@@ -8,6 +8,15 @@ public class User implements Serializable {
 	private long userId;
 	
 	public User() {}
+	
+	public User(int id) {
+		this.userId = id;
+	}
+	
+	@Override
+	public String toString() {
+		return  this.userId + "";
+	}
 
 	public long getUserId() {
 		return userId;

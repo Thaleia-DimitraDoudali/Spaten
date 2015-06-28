@@ -14,10 +14,16 @@ import java.util.zip.Inflater;
 public class UserList implements Serializable, Compressible{
 	
 	private static final int COMPRESSION_LEVEL = 4;
+	private int userId;
 	private List<User> userList;
 	
 	public UserList() {
         this.userList = new LinkedList<User>();
+	}
+	
+	public UserList(int id) {
+        this.userList = new LinkedList<User>();
+        this.userId = id;
 	}
 
 	public List<User> getUserList() {
@@ -35,6 +41,14 @@ public class UserList implements Serializable, Compressible{
 			res += usr.getUserId() + " ";
 		}
 		return res;
+	}
+	
+	public void print() {
+		System.out.println(toString());
+	}
+	
+	public void add(User usr) {
+		this.userList.add(usr);
 	}
 
 	public byte[] getCompressedBytes() {
@@ -140,6 +154,14 @@ public class UserList implements Serializable, Compressible{
             buffer.put(bytesPoi);
         }
         return bytes;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 
 }

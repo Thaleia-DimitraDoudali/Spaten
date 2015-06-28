@@ -1,6 +1,9 @@
 package hbase_schema;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -13,6 +16,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import parser.ParseCheckIn;
+import parser.ParseFriend;
 import containers.User;
 import containers.UserList;
 
@@ -100,42 +105,40 @@ public class FriendsTable implements QueriesTable{
 		fr.createTable();
 		System.out.println("...done");
 		
+		ParseFriend pr = new ParseFriend();	
+		FileReader flr = new FileReader(args[0]);
+		BufferedReader br = new BufferedReader(flr);
+		
+		String line = br.readLine();
+		UserList userList = pr.parseLine(line);
+		
 		//put a friend of user 1
-		User usr = new User();
-		usr.setUserId(1);
-		User friend = new User();
-		friend.setUserId(2);
-		System.out.println("Put friend with user id " + friend.getUserId() + " of user " + usr.getUserId());
-		fr.putSingle(usr.getBytes(), friend.getBytes(), friend.getBytes());
+		fr.putSingle(Bytes.toBytes(userList.getUserList().get(0).getUserId()), 
+				Bytes.toBytes(userList.getUserList().get(1).getUserId()),
+				Bytes.toBytes(userList.getUserList().get(1).getUserId()));
 		
 		//get a specific friend of user 1
-		System.out.println("Get friend with user id " + friend.getUserId() + " of user " + usr.getUserId());
-		fr.getSingle(usr.getBytes(), friend.getBytes());
+		fr.getSingle(userList.getUserList().get(0).getBytes(), userList.getUserList().get(1).getBytes());
 		
 		//put a list of friends for user 1
-		UserList usrList = new UserList();
-		User fr1 = new User();
-		fr1.setUserId(3);
-		usrList.getUserList().add(fr1);
-		User fr2 = new User();
-		fr2.setUserId(4);
-		usrList.getUserList().add(fr2);
-		User fr3 = new User();
-		fr3.setUserId(5);
-		usrList.getUserList().add(fr3);
-		System.out.println("Put friend list of user " + usr.getUserId());
-		fr.putList(usr.getBytes(), Bytes.toBytes(1), usrList.getBytes());
+		line = br.readLine();
+		UserList usrList = pr.parseLine(line);
+		
+		UserList usrl = new UserList(1);
+		usrl.add(userList.getUserList().get(1));
+		usrl.add(usrList.getUserList().get(1));
+
+		
+		fr.putList(Bytes.toBytes(usrl.getUserId()), Bytes.toBytes(usrl.getUserId()), 
+				usrl.getBytes());
 		
 		//Get this list
-		System.out.println("Get friend list of user " + usr.getUserId());
-		fr.getList(usr.getBytes(), Bytes.toBytes(1));		
+		fr.getList(Bytes.toBytes(usrl.getUserId()), Bytes.toBytes(usrl.getUserId()));		
 		
 		//Put compressed
-		System.out.println("Put friend list of user " + usr.getUserId());
-		fr.putList(usr.getBytes(), Bytes.toBytes(1), usrList.getCompressedBytes());
+		fr.putList(Bytes.toBytes(usrl.getUserId()), Bytes.toBytes(usrl.getUserId()), usrl.getCompressedBytes());
 		
 		//Get this list
-		System.out.println("Get friend list of user " + usr.getUserId());
-		fr.getListCompressed(usr.getBytes(), Bytes.toBytes(1));
+		fr.getListCompressed(Bytes.toBytes(usrl.getUserId()), Bytes.toBytes(usrl.getUserId()));
 	}
 }
