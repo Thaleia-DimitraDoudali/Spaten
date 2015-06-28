@@ -1,8 +1,6 @@
 package containers;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -13,29 +11,19 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import parser.ParseCheckIn;
-
-public class CheckInList implements Serializable, Compressible {
+public class GPStraceList implements Serializable, Compressible {
 
 	private static final int COMPRESSION_LEVEL = 4;
 	int userId;
-	private List<CheckIn> checkInList;
+	private List<GPStrace> traceList;
 
-	public CheckInList() {
-		this.checkInList = new LinkedList<CheckIn>();
+	public GPStraceList() {
+		this.traceList = new LinkedList<GPStrace>();
 	}
 
-	public CheckInList(int id) {
-		this.checkInList = new LinkedList<CheckIn>();
+	public GPStraceList(int id) {
 		this.userId = id;
-	}
-
-	public List<CheckIn> getCheckInList() {
-		return checkInList;
-	}
-
-	public void setCheckInList(List<CheckIn> checkInList) {
-		this.checkInList = checkInList;
+		this.traceList = new LinkedList<GPStrace>();
 	}
 
 	public int getUserId() {
@@ -46,13 +34,29 @@ public class CheckInList implements Serializable, Compressible {
 		this.userId = userId;
 	}
 
+	public List<GPStrace> getTraceList() {
+		return traceList;
+	}
+
+	public void setTraceList(List<GPStrace> traceList) {
+		this.traceList = traceList;
+	}
+	
+	public void add(GPStrace tr) {
+		this.traceList.add(tr);
+	}
+	
 	@Override
 	public String toString() {
-		String res = this.userId + " ";
-		for (CheckIn chk : checkInList) {
-			res += chk.toString() + "\n";
+		String res = "User no." + this.userId + "\n";
+		for (GPStrace tr: traceList) {
+			res += tr.toString() + "\n";
 		}
 		return res;
+	}
+	
+	public void print() {
+		System.out.println(toString());
 	}
 
 	public byte[] getCompressedBytes() {
@@ -115,74 +119,51 @@ public class CheckInList implements Serializable, Compressible {
 
 	public void parseBytes(byte[] bytes) throws Exception {
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		this.checkInList = new LinkedList<CheckIn>();
+		this.traceList = new LinkedList<GPStrace>();
 		this.userId = buffer.getInt();
 		int sizeOfList = buffer.getInt();
 		for (int i = 0; i < sizeOfList; i++) {
 			int byteSize = buffer.getInt();
-			byte[] chkSerial = new byte[byteSize];
-			buffer.get(chkSerial, 0, byteSize);
-			CheckIn chk = new CheckIn();
-			chk.parseBytes(chkSerial);
-			this.checkInList.add(chk);
+			byte[] trSerial = new byte[byteSize];
+			buffer.get(trSerial, 0, byteSize);
+			GPStrace tr = new GPStrace();
+			tr.parseBytes(trSerial);
+			this.traceList.add(tr);
 		}
 	}
 
 	public byte[] getBytes() throws Exception {
-		// Sort check ins based on timestamp, before serializing them
-		Collections.sort(this.checkInList, new Comparator<CheckIn>() {
+		// Sort gps traces based on timestamp, before serializing them
+		Collections.sort(this.traceList, new Comparator<GPStrace>() {
 
-			public int compare(CheckIn chk1, CheckIn chk2) {
-				if (chk1.getTimestamp() > chk2.getTimestamp()) {
+			public int compare(GPStrace tr1, GPStrace tr2) {
+				if (tr1.getTimestamp() > tr2.getTimestamp()) {
 					return 1;
-				} else if (chk1.getTimestamp() < chk2.getTimestamp()) {
+				} else if (tr1.getTimestamp() < tr2.getTimestamp()) {
 					return -1;
 				} else {
 					return 0;
 				}
 			}
 		});
-		// number of checkIns stored
 		int numberOfBytes = Integer.SIZE / 8; // user id
 		numberOfBytes += Integer.SIZE / 8; // list length
-		for (CheckIn chk : this.checkInList) {
+		for (GPStrace tr : this.traceList) {
 			numberOfBytes += Integer.SIZE / 8;
-			numberOfBytes += chk.getBytes().length;
+			numberOfBytes += tr.getBytes().length;
 		}
 
 		byte[] bytes = new byte[numberOfBytes];
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
 		buffer.putInt(this.userId);
-		buffer.putInt(this.checkInList.size());
-		for (CheckIn chk : this.checkInList) {
-			byte[] bytesChk = chk.getBytes();
-			buffer.putInt(bytesChk.length);
-			buffer.put(bytesChk);
+		buffer.putInt(this.traceList.size());
+		for (GPStrace tr : this.traceList) {
+			byte[] bytesTr = tr.getBytes();
+			buffer.putInt(bytesTr.length);
+			buffer.put(bytesTr);
 		}
 		return bytes;
 	}
 
-	public static void main(String[] args) throws Exception {
-		ParseCheckIn pr = new ParseCheckIn();
-		FileReader fr = new FileReader(args[0]);
-		BufferedReader br = new BufferedReader(fr);
-
-		String line = br.readLine();
-		line = br.readLine();
-
-		// Checking serialization and deserialition
-		CheckIn chk1 = new CheckIn();
-		CheckIn chk2 = new CheckIn();
-		chk1 = pr.parseLine(line);
-		line = br.readLine();
-		chk2 = pr.parseLine(line);
-		CheckInList chkList1 = new CheckInList(1);
-		CheckInList chkList2 = new CheckInList(1);
-		chkList1.getCheckInList().add(chk1);
-		chkList1.getCheckInList().add(chk2);
-		byte[] bytes = chkList1.getBytes();
-		chkList2.parseBytes(bytes);
-		System.out.println(chkList2.toString());
-	}
 }

@@ -123,14 +123,14 @@ public class CheckInsTable {
 		chkList1.getCheckInList().add(chk1);
 		chkList1.getCheckInList().add(chk2);
 
-		//byte[] bytes = chk1.getBytes();
-		//chkTable.putSingle(Bytes.toBytes(chk1.getUserId()), Bytes.toBytes(chk1.getTimestamp()), bytes);
-		//chkTable.getSingle(Bytes.toBytes(chk1.getUserId()), Bytes.toBytes(chk1.getTimestamp()));
-		//bytes = chk2.getBytes();
-		//chkTable.putSingle(Bytes.toBytes(chk2.getUserId()), Bytes.toBytes(chk2.getTimestamp()), bytes);
-		//chkTable.getSingle(Bytes.toBytes(chk2.getUserId()), Bytes.toBytes(chk2.getTimestamp()));
+		byte[] bytes = chk1.getBytes();
+		chkTable.putSingle(Bytes.toBytes(chk1.getUserId()), Bytes.toBytes(chk1.getTimestamp()), bytes);
+		chkTable.getSingle(Bytes.toBytes(chk1.getUserId()), Bytes.toBytes(chk1.getTimestamp()));
+		bytes = chk2.getBytes();
+		chkTable.putSingle(Bytes.toBytes(chk2.getUserId()), Bytes.toBytes(chk2.getTimestamp()), bytes);
+		chkTable.getSingle(Bytes.toBytes(chk2.getUserId()), Bytes.toBytes(chk2.getTimestamp()));
 		
-		byte[] bytes = chkList1.getCompressedBytes();
+		bytes = chkList1.getCompressedBytes();
 		chkTable.putList(Bytes.toBytes(chkList1.getUserId()), Bytes.toBytes(chkList1.getCheckInList().get(0).getTimestamp()), bytes);
 		chkTable.getListCompressed(Bytes.toBytes(chkList1.getUserId()), Bytes.toBytes(chkList1.getCheckInList().get(0).getTimestamp()));
 
