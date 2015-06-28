@@ -46,10 +46,10 @@ public class CheckInsTable {
         this.table = new HTable(hbaseConf, this.tableName);
     }
 	
-	public void putSingle(byte[] row, byte[] chk_qualifier, byte[] data) throws IOException {		
+	public void putSingle(byte[] row, byte[] qualifier, byte[] data) throws IOException {		
 		Put p = new Put(row);
-		//qualifier will be data, which contains just the friend id
-		p.add(Bytes.toBytes("checkIns"), chk_qualifier, data);
+		//qualifier will be the timestamp
+		p.add(Bytes.toBytes("checkIns"), qualifier, data);
 		System.out.println("...single check-in inserted.");
 	    this.table.put(p);
 	}
