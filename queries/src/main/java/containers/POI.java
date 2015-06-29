@@ -93,7 +93,7 @@ public class POI implements Serializable{
         
 	}
 
-	public byte[] getBytes() throws Exception {
+	public byte[] getDataBytes() throws Exception {
 		try {
 			totalSize = Integer.SIZE / 8											//totalSize 
 					+ Double.SIZE / 8												//latitude
@@ -117,6 +117,14 @@ public class POI implements Serializable{
             Logger.getLogger(POI.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+	}
+
+	public byte[] getQualifierBytes() throws Exception {
+		return null;
+	}
+
+	public byte[] getKeyBytes() throws Exception {
+		return null;
 	}
 
 }

@@ -67,7 +67,7 @@ public class Review implements Serializable{
         this.review = new String(bytes, index, bytesOnReview);
 	}
 
-	public byte[] getBytes() throws Exception {
+	public byte[] getDataBytes() throws Exception {
 		try {
 			int totalSize =  Integer.SIZE / 8 + this.rating.getBytes("UTF-8").length	//rating string size + string
 					+ Integer.SIZE / 8 + this.revTitle.getBytes("UTF-8").length			//revTitle string size + string
@@ -88,6 +88,14 @@ public class Review implements Serializable{
             Logger.getLogger(POI.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+	}
+
+	public byte[] getQualifierBytes() throws Exception {
+		return null;
+	}
+
+	public byte[] getKeyBytes() throws Exception {
+		return null;
 	}
 
 }

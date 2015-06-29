@@ -31,9 +31,23 @@ public class User implements Serializable {
         this.userId = buffer.getLong();		
 	}
 
-	public byte[] getBytes() throws Exception {
+	
+	
+	public byte[] getDataBytes() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.putLong(this.userId);
         return buffer.array();	
     }
+
+	public byte[] getQualifierBytes() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.putLong(this.userId);
+        return buffer.array();
+	}
+
+	public byte[] getKeyBytes() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.putLong(this.userId);
+        return buffer.array();
+	}
 }

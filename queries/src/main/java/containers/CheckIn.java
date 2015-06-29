@@ -92,27 +92,35 @@ public class CheckIn implements Serializable {
 		this.review.parseBytes(Arrays.copyOfRange(bytes, index, bytes.length));
 	}
 
-	public byte[] getBytes() throws Exception {
+	public byte[] getDataBytes() throws Exception {
 		try {
 			int totalSize = Integer.SIZE / 8 //user id 
 					+ Long.SIZE / 8 // timestamp
 					+ Integer.SIZE / 8 // travel
-					+ this.poi.getBytes().length // poi bytes length
-					+ this.review.getBytes().length; // review bytes length
+					+ this.poi.getDataBytes().length // poi bytes length
+					+ this.review.getDataBytes().length; // review bytes length
 
 			byte[] serializable = new byte[totalSize];
 			ByteBuffer buffer = ByteBuffer.wrap(serializable);
 			buffer.put(Bytes.toBytes(this.userId));
 			buffer.put(Bytes.toBytes(this.timestamp));
 			buffer.put(Bytes.toBytes(this.travel));
-			buffer.put(this.poi.getBytes());
-			buffer.put(this.review.getBytes());
+			buffer.put(this.poi.getDataBytes());
+			buffer.put(this.review.getDataBytes());
 
 			return serializable;
 		} catch (UnsupportedEncodingException ex) {
 			Logger.getLogger(POI.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return null;
+	}
+
+	public byte[] getQualifierBytes() throws Exception {
+		return Bytes.toBytes(this.timestamp);
+	}
+
+	public byte[] getKeyBytes() throws Exception {
+		return Bytes.toBytes(this.userId);
 	}
 
 }

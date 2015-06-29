@@ -1,25 +1,16 @@
 package parser;
 
-import containers.User;
-import containers.UserList;
-
 public class ParseFriend {
 
-	public UserList parseLine(String line) {
+	public int[] parseLine(String line) {
 		
-		int id1, id2;
-		UserList userList = new UserList();
+		int[] id = new int[2];
 		
 		String splt[] = line.split("\t");
-		id1 = Integer.parseInt(splt[0]);
-		id2 = Integer.parseInt(splt[1]);
-		
-		User usr1 = new User(id1);
-		userList.add(usr1);
-		User usr2 = new User(id2);
-		userList.add(usr2);
-		
-		return userList;
+		id[0] = Integer.parseInt(splt[0]);
+		id[1] = Integer.parseInt(splt[1]);
+	
+		return id;
 	}
 
 }
