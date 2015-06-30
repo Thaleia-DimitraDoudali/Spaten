@@ -124,7 +124,9 @@ public class CheckIn implements Serializable {
 	}
 
 	public byte[] getKeyBytes() throws Exception {
-		return Bytes.toBytes(this.userId);
-	}
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+        buffer.putInt(this.userId);
+        return buffer.array();	
+    }
 
 }

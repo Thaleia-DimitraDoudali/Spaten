@@ -2,10 +2,12 @@ package containers;
 
 import java.nio.ByteBuffer;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
 
 public class User implements Serializable {
 
-	private long userId;
+	private int userId;
 	
 	public User() {}
 	
@@ -17,35 +19,39 @@ public class User implements Serializable {
 	public String toString() {
 		return  this.userId + "";
 	}
+	
+	public void print() {
+		System.out.println(toString());
+	}
 
-	public long getUserId() {
+	public int getUserId() {
 		return userId;
 	}
 
-	public void setUserId(long userId) {
+	public void setUserId(int userId) {
 		this.userId = userId;
 	}
 
 	public void parseBytes(byte[] bytes) throws Exception {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        this.userId = buffer.getLong();		
+        this.userId = buffer.getInt();		
 	}
 	
 	public byte[] getDataBytes() throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(this.userId);
-        return buffer.array();	
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+        buffer.putInt(this.userId);
+        return buffer.array();
     }
 
 	public byte[] getQualifierBytes() throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(this.userId);
-        return buffer.array();
-	}
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+        buffer.putInt(this.userId);
+        return buffer.array();	
+    }
 
 	public byte[] getKeyBytes() throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(this.userId);
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+        buffer.putInt(this.userId);
         return buffer.array();
-	}
+    }
 }

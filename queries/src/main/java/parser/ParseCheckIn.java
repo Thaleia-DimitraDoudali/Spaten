@@ -11,7 +11,8 @@ public class ParseCheckIn {
 	public CheckIn parseLine(String line) {
 		double lat = 0, lng = 0;
 		long timestamp;
-		int travel, userId;
+		int travel;
+		int userId;
 		String title, address, rating, revTitle, review;
 		
 		String[] splt = line.split("\t");

@@ -1,8 +1,12 @@
 package client;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.hadoop.hbase.HRegionLocation;
 
 import containers.User;
 import containers.UserList;
@@ -22,22 +26,20 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	}
 
     public void executeSerializedQuery() throws Exception {
-    	UserList friendsList = new UserList(this.user.getUserId());
+    	friendList = new UserList(this.user.getUserId());
     	this.executionTime = System.currentTimeMillis();
 		System.out.println("Getting friends of user no." + this.user.getUserId());
 
         FriendsProtocol prot = this.table.coprocessorProxy(FriendsProtocol.class, this.user.getKeyBytes());
         try {
-        	friendsList.parseCompressedBytes(prot.getFriends(this.user.getKeyBytes())); 
+        	friendList.parseCompressedBytes(prot.getFriends(this.user.getKeyBytes())); 
         } catch (IOException ex) {
         	Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }             
         this.executionTime = System.currentTimeMillis() - this.executionTime;
         
         System.out.println("Query executed in " + this.executionTime/1000 + "s");
-        friendsList.print();
     }
-    
     
 
 	public User getUser() {
@@ -85,6 +87,7 @@ public class GetFriendsQuery extends AbstractQueryClient{
         client.setUser(new User(1));
         client.openConnection("friends");
         client.executeSerializedQuery();
+        client.friendList.print();
         client.closeConnection();
     }
 }

@@ -13,32 +13,38 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import parser.ParseCheckIn;
 import containers.CheckIn;
+import containers.User;
 
 public class CheckInsTable {
 
 	protected String tableName;
     protected HTable table;
+    private int regionsNo, usersNo;
 	
-	public CheckInsTable(String nm) {
+	public CheckInsTable(String nm, int r, int u) {
     	this.tableName = nm;
+    	this.regionsNo = r;
+    	this.usersNo = u;
 	}
 
 	public void createTable() throws Exception {
 		
-        Configuration hbaseConf = HBaseConfiguration.create();
+       Configuration hbaseConf = HBaseConfiguration.create();
         HBaseAdmin admin = new HBaseAdmin(hbaseConf);
-        /*if (admin.tableExists(this.tableName)) {
+        if (admin.tableExists(this.tableName)) {
             admin.disableTable(this.tableName);
             admin.deleteTable(this.tableName);
-        }*/
+        }
         HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
         descriptor.addFamily(new HColumnDescriptor("checkIns"));
 
-       // admin.createTable(descriptor);
+        admin.createTable(descriptor, this.getSplitKeys());
         admin.close();
         this.table = new HTable(hbaseConf, this.tableName);
     }
@@ -62,13 +68,41 @@ public class CheckInsTable {
 		}
 	}
 	
+	public void scan() throws Exception {
+		Scan scan = new Scan();
+		scan.addFamily("checkIns".getBytes());
+	    ResultScanner scanner = table.getScanner(scan);
+	    
+	    for (Result result = scanner.next(); result != null; result = scanner.next()) {
+	    	  byte[] key = result.getRow();
+	    	  System.out.print(key + " ");
+	    	  User usr = new User();
+	    	  usr.parseBytes(key);
+	    	  usr.print();
+	    }
+	    
+	}
+	
+	public byte[][] getSplitKeys() {
+		int keyNo = usersNo / regionsNo;
+		byte[][] keys = new byte[regionsNo][Integer.SIZE];
+		
+		int c = 1;
+		for (int i = 0; i < regionsNo; i++) {
+			System.out.println(c);
+			keys[i] = Bytes.toBytes(c);
+			c += keyNo;
+		}
+		return keys;
+	}
+	
 	public static void main(String[] args) throws Exception {
 		
 		String line;
 		CheckIn chk;
 		byte[] row, qualifier, data;
 		
-		CheckInsTable chkTable = new CheckInsTable("check-ins");		
+		CheckInsTable chkTable = new CheckInsTable("check-ins", 2, 14);		
 		System.out.println("Creating HBase checkIns table...");
 		chkTable.createTable();
 		System.out.println("...done");
@@ -86,7 +120,7 @@ public class CheckInsTable {
 			data = chk.getDataBytes();
 			
 			chkTable.putSingle(row, qualifier, data);
-			//chkTable.getSingle(row, qualifier);
+			chkTable.getSingle(row, qualifier);
 			
 			line = br.readLine();
 		}

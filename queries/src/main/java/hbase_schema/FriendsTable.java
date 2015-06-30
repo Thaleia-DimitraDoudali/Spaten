@@ -31,14 +31,14 @@ public class FriendsTable implements QueriesTable {
 
 		Configuration hbaseConf = HBaseConfiguration.create();
 		HBaseAdmin admin = new HBaseAdmin(hbaseConf);
-		if (admin.tableExists(this.tableName)) {
+		/*if (admin.tableExists(this.tableName)) {
 			admin.disableTable(this.tableName);
 			admin.deleteTable(this.tableName);
-		}
+		}*/
 		HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
 		descriptor.addFamily(new HColumnDescriptor("friends"));
 
-		admin.createTable(descriptor);
+		//admin.createTable(descriptor);
 		admin.close();
 		this.table = new HTable(hbaseConf, this.tableName);
 	}
@@ -91,7 +91,7 @@ public class FriendsTable implements QueriesTable {
 			qualifier = usr2.getQualifierBytes();
 			data = usr2.getDataBytes();
 			fr.putSingle(row, qualifier, data);
-			//fr.getSingle(row, qualifier);
+			fr.getSingle(row, qualifier);
 			
 			line = br.readLine();
 

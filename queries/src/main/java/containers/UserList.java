@@ -14,14 +14,14 @@ import java.util.zip.Inflater;
 public class UserList implements Serializable, Compressible{
 	
 	private static final int COMPRESSION_LEVEL = 4;
-	private long userId;
+	private int userId;
 	private List<User> userList;
 	
 	public UserList() {
         this.userList = new LinkedList<User>();
 	}
 	
-	public UserList(long id) {
+	public UserList(int id) {
         this.userList = new LinkedList<User>();
         this.userId = id;
 	}
@@ -156,7 +156,7 @@ public class UserList implements Serializable, Compressible{
         return bytes;
 	}
 
-	public long getUserId() {
+	public int getUserId() {
 		return userId;
 	}
 
