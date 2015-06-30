@@ -22,12 +22,13 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	}
 
     public void executeSerializedQuery() throws Exception {
-    	UserList friendsList = new UserList();
+    	UserList friendsList = new UserList(this.user.getUserId());
     	this.executionTime = System.currentTimeMillis();
-    	
+		System.out.println("Getting friends of user no." + this.user.getUserId());
+
         FriendsProtocol prot = this.table.coprocessorProxy(FriendsProtocol.class, this.user.getKeyBytes());
         try {
-        	friendsList.parseCompressedBytes(prot.getFriends(this.user)); 
+        	friendsList.parseCompressedBytes(prot.getFriends(this.user.getKeyBytes())); 
         } catch (IOException ex) {
         	Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }             
