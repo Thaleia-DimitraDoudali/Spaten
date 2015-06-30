@@ -31,14 +31,14 @@ public class CheckInsTable {
 		
         Configuration hbaseConf = HBaseConfiguration.create();
         HBaseAdmin admin = new HBaseAdmin(hbaseConf);
-        if (admin.tableExists(this.tableName)) {
+        /*if (admin.tableExists(this.tableName)) {
             admin.disableTable(this.tableName);
             admin.deleteTable(this.tableName);
-        }
+        }*/
         HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
         descriptor.addFamily(new HColumnDescriptor("checkIns"));
 
-        admin.createTable(descriptor);
+       // admin.createTable(descriptor);
         admin.close();
         this.table = new HTable(hbaseConf, this.tableName);
     }
@@ -46,7 +46,7 @@ public class CheckInsTable {
 	public void putSingle(byte[] row, byte[] qualifier, byte[] data) throws IOException {		
 		Put p = new Put(row);
 		p.add(Bytes.toBytes("checkIns"), qualifier, data);
-		System.out.println("...single check-in inserted.");
+		//System.out.println("...single check-in inserted.");
 	    this.table.put(p);
 	}
 	
@@ -76,16 +76,19 @@ public class CheckInsTable {
 		ParseCheckIn pr = new ParseCheckIn();
 		FileReader fr = new FileReader(args[0]);
 		BufferedReader br = new BufferedReader(fr);
-		
-		for (int i = 0; i < 2; i++) {
-			line = br.readLine();
+
+		line = br.readLine();
+		while (line != null) {
 			chk = pr.parseLine(line);
+			chk.print();
 			row  = chk.getKeyBytes();
 			qualifier = chk.getQualifierBytes();
 			data = chk.getDataBytes();
 			
 			chkTable.putSingle(row, qualifier, data);
-			chkTable.getSingle(row, qualifier);
+			//chkTable.getSingle(row, qualifier);
+			
+			line = br.readLine();
 		}
 	
 	}

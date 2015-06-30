@@ -12,7 +12,7 @@ import containers.GPStrace;
 public class ParseGPStrace {
 
 	public GPStrace parseLine(String line) {
-		int id;		
+		int id = -1;		
 		double x, y;
 		String date;
 		long t;

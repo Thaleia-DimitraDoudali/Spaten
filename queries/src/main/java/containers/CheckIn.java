@@ -34,6 +34,10 @@ public class CheckIn implements Serializable {
 		return  this.userId + " - " + this.timestamp + " - " + this.travel + " - " + this.poi.toString()
 				+ " " + this.review.toString();
 	}
+	
+	public void print() {
+		System.out.println(toString());
+	}
 
 	public long getTimestamp() {
 		return timestamp;

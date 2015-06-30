@@ -81,18 +81,20 @@ public class FriendsTable implements QueriesTable {
 		FileReader flr = new FileReader(args[0]);
 		BufferedReader br = new BufferedReader(flr);
 
-		for (int i = 0; i < 2; i++) {
-
-			line = br.readLine();
+		line = br.readLine();
+		while (line != null) {
 			friends = pr.parseLine(line);
 			usr1 = new User(friends[0]);
 			usr2 = new User(friends[1]);
-
+			System.out.println(line);
 			row = usr1.getKeyBytes();
 			qualifier = usr2.getQualifierBytes();
 			data = usr2.getDataBytes();
 			fr.putSingle(row, qualifier, data);
-			fr.getSingle(row, qualifier);
+			//fr.getSingle(row, qualifier);
+			
+			line = br.readLine();
+
 		}
 	}
 

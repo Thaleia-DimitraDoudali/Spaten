@@ -31,14 +31,14 @@ public class GPStracesTable implements QueriesTable {
 	public void createTable() throws Exception {
 		Configuration hbaseConf = HBaseConfiguration.create();
 		HBaseAdmin admin = new HBaseAdmin(hbaseConf);
-		if (admin.tableExists(this.tableName)) {
+		/*if (admin.tableExists(this.tableName)) {
 			admin.disableTable(this.tableName);
 			admin.deleteTable(this.tableName);
-		}
+		}*/
 		HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
 		descriptor.addFamily(new HColumnDescriptor("gpsTraces"));
 
-		admin.createTable(descriptor);
+		//admin.createTable(descriptor);
 		admin.close();
 		this.table = new HTable(hbaseConf, this.tableName);
 	}
@@ -78,14 +78,19 @@ public class GPStracesTable implements QueriesTable {
 		FileReader fr = new FileReader(args[0]);
 		BufferedReader br = new BufferedReader(fr);
 
-		for (int i = 0; i < 2; i++) {
+		line = br.readLine();
+		while (line != null){
+			
+			if (!line.equals(" ")) {
+				tr = pr.parseLine(line);
+				tr.print();
+				data = tr.getDataBytes();
+				qualifier = tr.getQualifierBytes();
+				row = tr.getKeyBytes();
+				trTable.putSingle(row, qualifier, data);
+				//trTable.getSingle(row, qualifier);
+			}
 			line = br.readLine();
-			tr = pr.parseLine(line);
-			data = tr.getDataBytes();
-			qualifier = tr.getQualifierBytes();
-			row = tr.getKeyBytes();
-			trTable.putSingle(row, qualifier, data);
-			trTable.getSingle(row, qualifier);
 		}
 		
 	}

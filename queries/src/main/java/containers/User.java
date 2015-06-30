@@ -30,8 +30,6 @@ public class User implements Serializable {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         this.userId = buffer.getLong();		
 	}
-
-	
 	
 	public byte[] getDataBytes() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(8);
