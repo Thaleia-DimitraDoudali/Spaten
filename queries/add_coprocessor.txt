@@ -6,3 +6,11 @@ alter 'friends', METHOD => 'table_att', 'coprocessor' => '/home/thaleia/Desktop/
 alter 'friends', METHOD => 'table_att', 'coprocessor' => '/home/thaleia/Desktop/thesis/queries/target/thesis-queries-0.0.1-SNAPSHOT.jar | coprocessors.FriendsProtocol |'
 enable 'friends'
 describe 'friends'
+
+
+describe 'check-ins'
+disable 'check-ins'
+alter 'check-ins', METHOD => 'table_att', 'coprocessor' => '/home/thaleia/Desktop/thesis/queries/target/thesis-queries-0.0.1-SNAPSHOT.jar | coprocessors.MostVisitedPOIEndpoint |'
+alter 'check-ins', METHOD => 'table_att', 'coprocessor' => '/home/thaleia/Desktop/thesis/queries/target/thesis-queries-0.0.1-SNAPSHOT.jar | coprocessors.MostVisitedPOIProtocol |'
+enable 'check-ins'
+describe 'check-ins'

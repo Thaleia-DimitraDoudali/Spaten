@@ -45,6 +45,7 @@ public class CheckInsTable {
         descriptor.addFamily(new HColumnDescriptor("checkIns"));
 
         admin.createTable(descriptor, this.getSplitKeys());
+        //admin.createTable(descriptor);;
         admin.close();
         this.table = new HTable(hbaseConf, this.tableName);
     }
@@ -89,7 +90,6 @@ public class CheckInsTable {
 		
 		int c = 1;
 		for (int i = 0; i < regionsNo; i++) {
-			System.out.println(c);
 			keys[i] = Bytes.toBytes(c);
 			c += keyNo;
 		}
@@ -102,7 +102,7 @@ public class CheckInsTable {
 		CheckIn chk;
 		byte[] row, qualifier, data;
 		
-		CheckInsTable chkTable = new CheckInsTable("check-ins", 2, 14);		
+		CheckInsTable chkTable = new CheckInsTable("check-ins", 3, 14);
 		System.out.println("Creating HBase checkIns table...");
 		chkTable.createTable();
 		System.out.println("...done");

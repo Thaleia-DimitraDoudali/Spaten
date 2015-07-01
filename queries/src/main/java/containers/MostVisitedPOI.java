@@ -38,7 +38,7 @@ public class MostVisitedPOI {
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
 		this.user.parseBytes(bytes);
-		index += Long.SIZE / 8;
+		index += this.user.getDataBytes().length;
 
 		this.poi.parseBytes(Arrays.copyOfRange(bytes, index, bytes.length));
 		index += this.poi.getTotalSize();

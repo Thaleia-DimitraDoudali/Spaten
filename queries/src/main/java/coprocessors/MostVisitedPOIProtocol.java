@@ -5,5 +5,5 @@ import org.apache.hadoop.hbase.ipc.CoprocessorProtocol;
 
 public interface MostVisitedPOIProtocol extends CoprocessorProtocol{
 	
-	public byte[] getMostVisitedPOI(byte[] row) throws IOException;
+	public byte[] getMostVisitedPOI(byte[] row) throws Exception;
 }
