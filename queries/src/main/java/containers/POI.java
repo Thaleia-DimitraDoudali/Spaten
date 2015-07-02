@@ -27,7 +27,7 @@ public class POI implements Serializable{
 	
 	@Override
 	public String toString() {
-		return "(" + this.latitude + ", " + this.longitude + ") " + this.title + " - " + this.address;
+		return "(" + this.latitude + ", " + this.longitude + ")\t" + this.title + "\t" + this.address + "\t";
 	}
 	
 	public double getLatitude() {

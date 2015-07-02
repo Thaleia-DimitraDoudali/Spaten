@@ -3,6 +3,7 @@ package client;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 
@@ -40,6 +41,6 @@ public abstract class AbstractQueryClient {
         this.table = table;
     }
     
-    public abstract void executeQuery();
+    public abstract void executeQuery() throws Exception;
     
 }

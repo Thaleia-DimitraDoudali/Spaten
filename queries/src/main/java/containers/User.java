@@ -17,7 +17,7 @@ public class User implements Serializable {
 	
 	@Override
 	public String toString() {
-		return  this.userId + "";
+		return  "User no." + this.userId + "";
 	}
 	
 	public void print() {

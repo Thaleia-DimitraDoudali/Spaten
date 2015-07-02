@@ -19,7 +19,10 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
     private long executionTime;
 	
-	
+	public GetFriendsQuery(User usr) {
+		this.user = usr;
+	}
+    
 	@Override
 	public void executeQuery() {
 		
@@ -82,7 +85,7 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	}
 
     public static void main(String[] args) throws Exception {
-    	GetFriendsQuery client = new GetFriendsQuery();
+    	GetFriendsQuery client = new GetFriendsQuery(new User(1));
         client.setProtocol(FriendsProtocol.class);
         client.setUser(new User(1));
         client.openConnection("friends");

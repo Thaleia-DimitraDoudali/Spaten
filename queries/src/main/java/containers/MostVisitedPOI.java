@@ -26,7 +26,7 @@ public class MostVisitedPOI {
 	}
 	
 	public String toString() {
-		return user.toString() + " " + poi.toString() + " " + counter;
+		return user.toString() + "\t" + poi.toString() + "\t" + counter;
 	}
 	
 	public void print() {

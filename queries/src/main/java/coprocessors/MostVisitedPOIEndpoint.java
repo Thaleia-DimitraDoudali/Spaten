@@ -64,10 +64,9 @@ public class MostVisitedPOIEndpoint extends BaseEndpointCoprocessor implements
 					finalMVP = entry.getValue();
 				}
 			}
-			finalMVP.print();
 			mvpList.add(finalMVP);
 		}
-		result = mvpList.getDataBytes();
+		result = mvpList.getCompressedBytes();
 		return result;
 	}
 
