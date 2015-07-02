@@ -29,10 +29,10 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 
 	}
 	
-	public MostVisitedPOI callCoprocessor(UserList list) throws Exception {
+	public MostVisitedPOIList callCoprocessor(UserList list) throws Exception {
 		System.out.println("Getting the most visited POIs of friends of user no." + this.user.getUserId());
     	this.executionTime = System.currentTimeMillis();
-    	MostVisitedPOI resultsLocal = new MostVisitedPOI();
+    	MostVisitedPOIList resultsLocal = new MostVisitedPOIList();
 		MostVisitedPOIProtocol prot = this.table.coprocessorProxy(MostVisitedPOIProtocol.class, list.getUserList().get(0).getKeyBytes());
         try {
         	resultsLocal.parseBytes(prot.getMostVisitedPOI(list.getDataBytes()));
@@ -58,7 +58,7 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		client.closeConnection();
 		this.friendList.print();
 
-        List<MostVisitedPOI> intermediateResults = new LinkedList<MostVisitedPOI>();
+        List<MostVisitedPOIList> intermediateResults = new LinkedList<MostVisitedPOIList>();
 		
 		UserList regionKeys = this.getRegionsKeys();
 		//add the last friend id + 1 as region key, in order to determine the end
