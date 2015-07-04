@@ -59,6 +59,11 @@ public class GPStrace implements Serializable {
 				+ " @ (" + this.latitude + ", " + this.longitude + ") on " + this.timestamp;
 	}
 	
+	public String toPOIString() {
+		return "GPS trace of user no." + this.userId 
+				+ " @ (" + this.latitude + ", " + this.longitude + ")";
+	}
+	
 	public void print() {
 		System.out.println(this.toString());
 	}
@@ -91,8 +96,10 @@ public class GPStrace implements Serializable {
 	}
 	
 	public byte[] getKeyBytes() throws Exception {
-		return Bytes.toBytes(this.userId);
-	}
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+        buffer.putInt(this.userId);
+        return buffer.array();
+    }
 
 	public byte[] getDataBytes() throws Exception {
 		int totalSize = Integer.SIZE / 8 // user id
