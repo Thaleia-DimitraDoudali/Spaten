@@ -24,39 +24,39 @@ import containers.User;
 public class CheckInsTable {
 
 	protected String tableName;
-    protected HTable table;
-    private int regionsNo, usersNo;
-	
-	public CheckInsTable(String nm, int r, int u) {
-    	this.tableName = nm;
-    	this.regionsNo = r;
-    	this.usersNo = u;
+	protected HTable table;
+	private int regionsNo, usersNo;
+
+	public CheckInsTable(String nm, String u, String r) {
+		this.tableName = nm;
+		this.regionsNo = Integer.parseInt(r);
+		this.usersNo = Integer.parseInt(u);
 	}
 
 	public void createTable() throws Exception {
-		
-       Configuration hbaseConf = HBaseConfiguration.create();
-        HBaseAdmin admin = new HBaseAdmin(hbaseConf);
-        if (admin.tableExists(this.tableName)) {
-            admin.disableTable(this.tableName);
-            admin.deleteTable(this.tableName);
-        }
-        HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
-        descriptor.addFamily(new HColumnDescriptor("checkIns"));
 
-        admin.createTable(descriptor, this.getSplitKeys());
-        //admin.createTable(descriptor);;
-        admin.close();
-        this.table = new HTable(hbaseConf, this.tableName);
-    }
-	
-	public void putSingle(byte[] row, byte[] qualifier, byte[] data) throws IOException {		
+		Configuration hbaseConf = HBaseConfiguration.create();
+		HBaseAdmin admin = new HBaseAdmin(hbaseConf);
+		if (admin.tableExists(this.tableName)) {
+			admin.disableTable(this.tableName);
+			admin.deleteTable(this.tableName);
+		}
+		HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
+		descriptor.addFamily(new HColumnDescriptor("checkIns"));
+
+		admin.createTable(descriptor, this.getSplitKeys());
+		admin.close();
+		this.table = new HTable(hbaseConf, this.tableName);
+	}
+
+	public void putSingle(byte[] row, byte[] qualifier, byte[] data)
+			throws IOException {
 		Put p = new Put(row);
 		p.add(Bytes.toBytes("checkIns"), qualifier, data);
-		//System.out.println("...single check-in inserted.");
-	    this.table.put(p);
+		// System.out.println("...single check-in inserted.");
+		this.table.put(p);
 	}
-	
+
 	public void getSingle(byte[] row, byte[] chk_qualifier) throws Exception {
 		Get g = new Get(row);
 		Result rs = table.get(g);
@@ -68,26 +68,27 @@ public class CheckInsTable {
 			System.out.println("...single check-in retrieved.");
 		}
 	}
-	
+
 	public void scan() throws Exception {
 		Scan scan = new Scan();
 		scan.addFamily("checkIns".getBytes());
-	    ResultScanner scanner = table.getScanner(scan);
-	    
-	    for (Result result = scanner.next(); result != null; result = scanner.next()) {
-	    	  byte[] key = result.getRow();
-	    	  System.out.print(key + " ");
-	    	  User usr = new User();
-	    	  usr.parseBytes(key);
-	    	  usr.print();
-	    }
-	    
+		ResultScanner scanner = table.getScanner(scan);
+
+		for (Result result = scanner.next(); result != null; result = scanner
+				.next()) {
+			byte[] key = result.getRow();
+			System.out.print(key + " ");
+			User usr = new User();
+			usr.parseBytes(key);
+			usr.print();
+		}
+
 	}
-	
+
 	public byte[][] getSplitKeys() {
 		int keyNo = usersNo / regionsNo;
 		byte[][] keys = new byte[regionsNo][Integer.SIZE];
-		
+
 		int c = 1;
 		for (int i = 0; i < regionsNo; i++) {
 			keys[i] = Bytes.toBytes(c);
@@ -95,18 +96,18 @@ public class CheckInsTable {
 		}
 		return keys;
 	}
-	
+
 	public static void main(String[] args) throws Exception {
-		
+
 		String line;
 		CheckIn chk;
 		byte[] row, qualifier, data;
-		
-		CheckInsTable chkTable = new CheckInsTable("check-ins", 3, 14);
+
+		CheckInsTable chkTable = new CheckInsTable("check-ins", args[1], args[2]);
 		System.out.println("Creating HBase checkIns table...");
 		chkTable.createTable();
 		System.out.println("...done");
-		
+
 		ParseCheckIn pr = new ParseCheckIn();
 		FileReader fr = new FileReader(args[0]);
 		BufferedReader br = new BufferedReader(fr);
@@ -115,15 +116,15 @@ public class CheckInsTable {
 		while (line != null) {
 			chk = pr.parseLine(line);
 			chk.print();
-			row  = chk.getKeyBytes();
+			row = chk.getKeyBytes();
 			qualifier = chk.getQualifierBytes();
 			data = chk.getDataBytes();
-			
+
 			chkTable.putSingle(row, qualifier, data);
 			chkTable.getSingle(row, qualifier);
-			
+
 			line = br.readLine();
 		}
-	
+		br.close();
 	}
 }

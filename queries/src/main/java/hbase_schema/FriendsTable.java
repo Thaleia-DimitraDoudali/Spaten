@@ -22,9 +22,12 @@ public class FriendsTable implements QueriesTable {
 
 	protected String tableName;
 	protected HTable table;
+	private int regionsNo, usersNo;
 
-	public FriendsTable(String nm) {
+	public FriendsTable(String nm, String u, String r) {
 		this.tableName = nm;
+		this.regionsNo = Integer.parseInt(r);
+		this.usersNo = Integer.parseInt(u);
 	}
 
 	public void createTable() throws Exception {
@@ -38,7 +41,7 @@ public class FriendsTable implements QueriesTable {
 		HTableDescriptor descriptor = new HTableDescriptor(this.tableName);
 		descriptor.addFamily(new HColumnDescriptor("friends"));
 
-		admin.createTable(descriptor);
+		admin.createTable(descriptor, this.getSplitKeys());
 		admin.close();
 		this.table = new HTable(hbaseConf, this.tableName);
 	}
@@ -64,6 +67,18 @@ public class FriendsTable implements QueriesTable {
 			System.out.println("...single friend retrieved.");
 		}
 	}
+	
+	public byte[][] getSplitKeys() {
+		int keyNo = usersNo / regionsNo;
+		byte[][] keys = new byte[regionsNo][Integer.SIZE];
+
+		int c = 1;
+		for (int i = 0; i < regionsNo; i++) {
+			keys[i] = Bytes.toBytes(c);
+			c += keyNo;
+		}
+		return keys;
+	}
 
 	public static void main(String[] args) throws Exception {
 
@@ -72,7 +87,7 @@ public class FriendsTable implements QueriesTable {
 		String line;
 		User usr1, usr2;
 
-		FriendsTable fr = new FriendsTable("friends");
+		FriendsTable fr = new FriendsTable("friends", args[1], args[2]);
 		System.out.println("Creating HBase friends table...");
 		fr.createTable();
 		System.out.println("...done");
@@ -92,10 +107,9 @@ public class FriendsTable implements QueriesTable {
 			data = usr2.getDataBytes();
 			fr.putSingle(row, qualifier, data);
 			fr.getSingle(row, qualifier);
-			
 			line = br.readLine();
-
 		}
+		br.close();
 	}
 
 }

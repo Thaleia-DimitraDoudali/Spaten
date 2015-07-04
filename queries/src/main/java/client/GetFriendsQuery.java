@@ -1,12 +1,9 @@
 package client;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.hadoop.hbase.HRegionLocation;
 
 import containers.User;
 import containers.UserList;
@@ -18,9 +15,11 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	private UserList friendList;
 	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
     private long executionTime;
+    private String outFile;
 	
-	public GetFriendsQuery(User usr) {
-		this.user = usr;
+	public GetFriendsQuery(String id) {
+		int usrId = Integer.parseInt(id);
+		this.user = new User(usrId);
 	}
     
 	@Override
@@ -29,22 +28,32 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	}
 
     public void executeSerializedQuery() throws Exception {
+    	
     	friendList = new UserList(this.user.getUserId());
+    	BufferedWriter bw = this.createWriter(this.outFile);
+    	
     	this.executionTime = System.currentTimeMillis();
-		System.out.println("Getting friends of user no." + this.user.getUserId());
+    	
+		bw.write("Getting friends of user no." + this.user.getUserId() + "\n");
 
         FriendsProtocol prot = this.table.coprocessorProxy(FriendsProtocol.class, this.user.getKeyBytes());
         try {
         	friendList.parseCompressedBytes(prot.getFriends(this.user.getKeyBytes())); 
         } catch (IOException ex) {
         	Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-        }             
-        this.executionTime = System.currentTimeMillis() - this.executionTime;
+        }    
         
-        System.out.println("Query executed in " + this.executionTime/1000 + "s");
+        this.executionTime = System.currentTimeMillis() - this.executionTime;
+        bw.write("Query executed in " + this.executionTime/1000 + "s\n");
+        
+        bw.write("Friends of user no." + this.user.getUserId() + " are:\n");
+        for (User usr: this.friendList.getUserList()) {
+        	bw.write(usr.getUserId() + " ");
+        }
+        bw.write("\n");
+        bw.close();
     }
     
-
 	public User getUser() {
 		return user;
 	}
@@ -83,14 +92,22 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	public void setExecutionTime(long executionTime) {
 		this.executionTime = executionTime;
 	}
+	
+
+	public String getOutFile() {
+		return outFile;
+	}
+
+	public void setOutFile(String outFile) {
+		this.outFile = outFile;
+	}
 
     public static void main(String[] args) throws Exception {
-    	GetFriendsQuery client = new GetFriendsQuery(new User(1));
+    	GetFriendsQuery client = new GetFriendsQuery(args[0]);
+    	client.setOutFile(args[1]);
         client.setProtocol(FriendsProtocol.class);
-        client.setUser(new User(1));
         client.openConnection("friends");
         client.executeSerializedQuery();
-        client.friendList.print();
         client.closeConnection();
     }
 }

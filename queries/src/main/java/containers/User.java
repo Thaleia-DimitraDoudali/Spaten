@@ -2,9 +2,6 @@ package containers;
 
 import java.nio.ByteBuffer;
 
-import org.apache.hadoop.hbase.util.Bytes;
-
-
 public class User implements Serializable {
 
 	private int userId;

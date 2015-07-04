@@ -1,7 +1,6 @@
 package coprocessors;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.hadoop.hbase.client.Get;
@@ -13,7 +12,6 @@ import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import containers.CheckIn;
 import containers.MostVisitedPOI;
 import containers.MostVisitedPOIList;
-import containers.POI;
 import containers.User;
 import containers.UserList;
 
@@ -24,8 +22,7 @@ public class MostVisitedPOIEndpoint extends BaseEndpointCoprocessor implements
 		byte[] result = null;
 		MostVisitedPOIList mvpList = new MostVisitedPOIList();
 		
-		HRegion region = ((RegionCoprocessorEnvironment) getEnvironment())
-				.getRegion();
+		HRegion region = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion();
 
 		UserList usrList = new UserList();
 		usrList.parseBytes(row);

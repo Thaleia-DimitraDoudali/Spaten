@@ -1,11 +1,7 @@
 package client;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,6 +23,7 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 	private UserList friendList;
 	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
 	private long executionTime;
+    private String outFile;
 
 	public GetMostVisitedPOIQuery(User usr) {
 		this.user = usr;
@@ -36,10 +33,11 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 	public void executeQuery() throws Exception {
 
 		List<RegionThreadMVPOI> threads = new LinkedList<RegionThreadMVPOI>();
+		BufferedWriter bw = this.createWriter(this.outFile);
+		
+		bw.write("Getting the most visited POIs of friends of user no."
+						+ this.user.getUserId() + "\n");
 
-		System.out
-				.println("Getting the most visited POIs of friends of user no."
-						+ this.user.getUserId());
 		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
@@ -62,11 +60,16 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 
 		MostVisitedPOIList mvpList = new MostVisitedPOIList();
 		mvpList = this.mergeResults(intermediateResults);
-		this.writeResults("mvpoi.txt", mvpList.toString());
 
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		System.out.println("Query executed in " + this.executionTime / 1000
-				+ "s");
+		bw.write("Query executed in " + this.executionTime / 1000 + "s\n");
+		
+		bw.write("The most visited POIs of the friends of user no." + this.user.getUserId() + " are:\n");
+		for (MostVisitedPOI p: mvpList.getMvpList()) {
+			bw.write(p.toString() + "\n");
+		}
+		
+		bw.close();
 	}
 
 	public MostVisitedPOIList callCoprocessor(UserList list) throws Exception {
@@ -96,9 +99,9 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 			intermediateResults.add(this.callCoprocessor(usrList));
 		}
 
+		@SuppressWarnings("unused")
 		MostVisitedPOIList mvpList = new MostVisitedPOIList();
 		mvpList = this.mergeResults(intermediateResults);
-		this.writeResults("mvpoi.txt", mvpList.toString());
 
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
 		System.out.println("Query executed in " + this.executionTime / 1000
@@ -181,20 +184,13 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		return null;
 	}
 
-	public void writeResults(String fileName, String result) {
-		try {
-			String workingDir = System.getProperty("user.dir");
-			File file = new File(workingDir + "/" + fileName);
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			FileWriter fw = new FileWriter(file.getAbsoluteFile());
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(result);
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+	public String getOutFile() {
+		return outFile;
+	}
+
+	public void setOutFile(String outFile) {
+		this.outFile = outFile;
 	}
 
 	public User getUser() {
@@ -231,18 +227,18 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 
 	public static void main(String[] args) throws Exception {
 
-		GetFriendsQuery clientFriend = new GetFriendsQuery(new User(1));
-		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(
-				clientFriend.getUser());
-
+		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
+		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(clientFriend.getUser());
+		
 		clientFriend.setProtocol(FriendsProtocol.class);
+    	clientFriend.setOutFile(args[1]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
-		clientMVP.friendList = clientFriend.getFriendList();
 		clientFriend.closeConnection();
-		clientMVP.friendList.print();
 
 		clientMVP.openConnection("check-ins");
+		clientMVP.friendList = clientFriend.getFriendList();
+		clientMVP.setOutFile(args[2]);
 		clientMVP.executeQuery();
 		clientMVP.closeConnection();
 	}
