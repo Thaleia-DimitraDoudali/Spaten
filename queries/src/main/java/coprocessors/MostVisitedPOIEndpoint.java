@@ -52,6 +52,8 @@ public class MostVisitedPOIEndpoint extends BaseEndpointCoprocessor implements
 						cache.put(key, mvp);
 					}
 				}
+			} else {
+				break;
 			}
 			//Go through the hash set and keep the most visited poi
 			MostVisitedPOI finalMVP = new MostVisitedPOI(null, null, 0);

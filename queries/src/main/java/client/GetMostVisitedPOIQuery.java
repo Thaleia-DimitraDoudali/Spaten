@@ -35,9 +35,16 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		List<RegionThreadMVPOI> threads = new LinkedList<RegionThreadMVPOI>();
 		BufferedWriter bw = this.createWriter(this.outFile);
 		
+	
 		bw.write("Getting the most visited POIs of friends of user no."
 						+ this.user.getUserId() + "\n");
 
+		if (this.friendList.getUserList().size() == 0) {
+			bw.write("User no." + this.user.getUserId() + " has no friends.\n");
+			bw.close();
+			return;
+		}
+		
 		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
