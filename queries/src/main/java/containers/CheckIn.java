@@ -3,6 +3,8 @@ package containers;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,10 +37,24 @@ public class CheckIn implements Serializable {
 				+ " " + this.review.toString();
 	}
 	
+	public String toNFstring() {
+		String result = this.getDate(timestamp) + "\t user no." + this.userId + " " + " travel: " + this.travel 
+				+ " " + this.poi.toString() + this.review.toString() + "\n";
+		return result;
+	}
+	
 	public void print() {
 		System.out.println(toString());
 	}
 
+	public Date getDate(long millis) {
+		Calendar calendar = Calendar.getInstance();
+		long h2 = 2*60*60*1000; 
+		calendar.setTimeInMillis(millis-h2);
+		Date dt = calendar.getTime();
+		return dt;
+	}
+	
 	public long getTimestamp() {
 		return timestamp;
 	}

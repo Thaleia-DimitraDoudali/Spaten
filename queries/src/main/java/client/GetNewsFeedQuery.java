@@ -2,40 +2,43 @@ package client;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.hadoop.hbase.HRegionLocation;
 
-import threads.RegionThreadMVTR;
-import containers.MostVisitedTrace;
-import containers.MostVisitedTraceList;
+import threads.RegionThreadNF;
+import containers.CheckIn;
+import containers.CheckInList;
 import containers.User;
 import containers.UserList;
 import coprocessors.FriendsProtocol;
-import coprocessors.MostVisitedTraceProtocol;
 
-public class GetMostVisitedTraceQuery extends AbstractQueryClient {
+public class GetNewsFeedQuery extends AbstractQueryClient {
 
 	private User user;
 	private UserList friendList;
-	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
 	private long executionTime;
+	private long timestamp;
     private String outFile;
-
-	public GetMostVisitedTraceQuery(User usr) {
+	
+	public GetNewsFeedQuery(User usr) {
 		this.user = usr;
 	}
 
 	@Override
 	public void executeQuery() throws Exception {
-
-		List<RegionThreadMVTR> threads = new LinkedList<RegionThreadMVTR>();
+		
+		List<RegionThreadNF> threads = new LinkedList<RegionThreadNF>();
 		BufferedWriter bw = this.createWriter(this.outFile);
 		
-		bw.write("Getting the most visited traces of friends of user no."
+		bw.write("Getting the newd feed of user no."
 						+ this.user.getUserId() + "\n");
 
 		if (this.friendList.getUserList().size() == 0) {
@@ -47,9 +50,9 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
-			RegionThreadMVTR thread = new RegionThreadMVTR();
-			thread.setProtocol(this.protocol);
+			RegionThreadNF thread = new RegionThreadNF();
 			thread.setUsrList(usrList);
+			thread.setDate(timestamp);
 			thread.setTable(this.table);
 			threads.add(thread);
 		}
@@ -58,62 +61,47 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 			t.start();
 		}
 
-		List<MostVisitedTraceList> intermediateResults = new LinkedList<MostVisitedTraceList>();
-		for (RegionThreadMVTR t : threads) {
+		List<CheckInList> intermediateResults = new LinkedList<CheckInList>();
+		for (RegionThreadNF t : threads) {
 			t.join();
 			intermediateResults.add(t.getResults());
 		}
 
-		MostVisitedTraceList mvtrList = new MostVisitedTraceList();
-		mvtrList = this.mergeResults(intermediateResults);
+		CheckInList chkList =  new CheckInList();
+		chkList = this.mergeResults(intermediateResults);
 		
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
 		bw.write("Query executed in " + this.executionTime / 1000 + "s\n");
 		
-		bw.write("The most visited trace of the friends of user no." + this.user.getUserId() + " are:\n");
-		for (MostVisitedTrace p: mvtrList.getMvtrList()) {
-			bw.write(p.toString() + "\n");
+		bw.write("The news feed of user no." + this.user.getUserId() + " are:\n");
+		for (CheckIn chk: chkList.getCheckInList()) {
+			bw.write(chk.toNFstring() + "\n");
 		}
 		
 		bw.close();
+		
 	}
-
-	public MostVisitedTraceList callCoprocessor(UserList list) throws Exception {
-		MostVisitedTraceList resultsLocal = new MostVisitedTraceList();
-		MostVisitedTraceProtocol prot = this.table.coprocessorProxy(
-				MostVisitedTraceProtocol.class, list.getUserList().get(0)
-						.getKeyBytes());
-		try {
-			resultsLocal.parseCompressedBytes(prot.getMostVisitedTrace(list
-					.getDataBytes()));
-		} catch (IOException ex) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null,
-					ex);
+	
+	public CheckInList mergeResults(List<CheckInList> chkll) {
+		CheckInList chkList =  new CheckInList();
+		for (CheckInList chkl: chkll) {
+			chkList.getCheckInList().addAll(chkl.getCheckInList());
 		}
-		return resultsLocal;
+		// Sort check ins based on timestamp
+		Collections.sort(chkList.getCheckInList(), new Comparator<CheckIn>() {
+			public int compare(CheckIn chk1, CheckIn chk2) {
+				if (chk1.getTimestamp() > chk2.getTimestamp()) {
+					return 1;
+				} else if (chk1.getTimestamp() < chk2.getTimestamp()) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		return chkList;
 	}
-
-	public void executeSerializedQuery() throws Exception {
-
-		List<MostVisitedTraceList> intermediateResults = new LinkedList<MostVisitedTraceList>();
-		System.out
-				.println("Getting the most visited traces of friends of user no."
-						+ this.user.getUserId());
-		this.executionTime = System.currentTimeMillis();
-
-		for (UserList usrList : this.getSplittedUserList()) {
-			intermediateResults.add(this.callCoprocessor(usrList));
-		}
-
-		@SuppressWarnings("unused")
-		MostVisitedTraceList mvtrList = new MostVisitedTraceList();
-		mvtrList = this.mergeResults(intermediateResults);
-
-		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		System.out.println("Query executed in " + this.executionTime / 1000
-				+ "s");
-	}
-
+	
 	public List<UserList> getSplittedUserList() throws Exception {
 		List<UserList> spltUserList = new LinkedList<UserList>();
 
@@ -153,17 +141,7 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 
 		return spltUserList;
 	}
-
-	public MostVisitedTraceList mergeResults(List<MostVisitedTraceList> mvpll) {
-		MostVisitedTraceList mvtrList = new MostVisitedTraceList();
-
-		for (MostVisitedTraceList mvtr : mvpll) {
-			mvtrList.getMvtrList().addAll(mvtr.getMvtrList());
-		}
-
-		return mvtrList;
-	}
-
+	
 	public UserList getRegionsKeys() throws Exception {
 		try {
 			byte[] firstKey = this.friendList.getUserList().get(0)
@@ -189,14 +167,23 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 		}
 		return null;
 	}
-
-
-	public String getOutFile() {
-		return outFile;
+	
+	public long convertToTimestamp(String date) {
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		// date will be in the format e.g. 04/29/1992
+		int month = Integer.parseInt(date.substring(0, 2)) - 1;
+		int day = Integer.parseInt(date.substring(3, 5));
+		int year = Integer.parseInt(date.substring(6, 10));
+		calendar.set(year, month, day, 0, 0, 0);
+		return calendar.getTimeInMillis();
+	}
+	
+	public long getTimestamp() {
+		return timestamp;
 	}
 
-	public void setOutFile(String outFile) {
-		this.outFile = outFile;
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	public User getUser() {
@@ -215,14 +202,6 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 		this.friendList = friendList;
 	}
 
-	public Class<FriendsProtocol> getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(Class<FriendsProtocol> protocol) {
-		this.protocol = protocol;
-	}
-
 	public long getExecutionTime() {
 		return executionTime;
 	}
@@ -231,21 +210,31 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 		this.executionTime = executionTime;
 	}
 
+	public String getOutFile() {
+		return outFile;
+	}
+
+	public void setOutFile(String outFile) {
+		this.outFile = outFile;
+	}
+	
 	public static void main(String[] args) throws Exception {
 
 		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
-		GetMostVisitedTraceQuery clientMVP = new GetMostVisitedTraceQuery(clientFriend.getUser());
+		GetNewsFeedQuery clientNF = new GetNewsFeedQuery(clientFriend.getUser());
 		
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(args[1]);
+    	clientFriend.setOutFile(args[2]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
 		clientFriend.closeConnection();
 
-		clientMVP.openConnection("gps-traces");
-		clientMVP.friendList = clientFriend.getFriendList();
-		clientMVP.setOutFile(args[2]);
-		clientMVP.executeQuery();
-		clientMVP.closeConnection();
+		clientNF.openConnection("check-ins");
+		clientNF.friendList = clientFriend.getFriendList();
+		clientNF.setTimestamp(clientNF.convertToTimestamp(args[1]));
+		clientNF.setOutFile(args[3]);
+		clientNF.executeQuery();
+		clientNF.closeConnection();
 	}
+
 }
