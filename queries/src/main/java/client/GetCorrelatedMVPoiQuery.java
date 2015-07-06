@@ -9,36 +9,35 @@ import java.util.logging.Logger;
 
 import org.apache.hadoop.hbase.HRegionLocation;
 
-import threads.RegionThreadMVPOI;
+import threads.RegionThreadCMVP;
 import containers.MostVisitedPOI;
 import containers.MostVisitedPOIList;
 import containers.User;
 import containers.UserList;
 import coprocessors.FriendsProtocol;
-import coprocessors.MostVisitedPOIProtocol;
 
-public class GetMostVisitedPOIQuery extends AbstractQueryClient {
-
+public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
+	
 	private User user;
 	private UserList friendList;
-	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
 	private long executionTime;
-    private String outFile;
-    private MostVisitedPOIList resultList;
+	private String outFile;
+	private MostVisitedPOI mvp;
+	private MostVisitedPOIList resultList;
 
-	public GetMostVisitedPOIQuery(User usr) {
+	public GetCorrelatedMVPoiQuery(User usr) {
 		this.user = usr;
 	}
-
+	
 	@Override
 	public void executeQuery() throws Exception {
-
-		List<RegionThreadMVPOI> threads = new LinkedList<RegionThreadMVPOI>();
-		BufferedWriter bw = this.createWriter(this.outFile);
 		
-	
-		bw.write("Getting the most visited POIs of friends of user no."
-						+ this.user.getUserId() + "\n");
+		List<RegionThreadCMVP> threads = new LinkedList<RegionThreadCMVP>();
+		BufferedWriter bw = this.createWriter(this.outFile);
+			
+		bw.write("Getting the visits of friends of user no."
+						+ this.user.getUserId() + " to his most visited poi: " 
+						+ this.getMvp().getPoi().toString() + "\n");
 
 		if (this.friendList.getUserList().size() == 0) {
 			bw.write("User no." + this.user.getUserId() + " has no friends.\n");
@@ -49,10 +48,10 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
-			RegionThreadMVPOI thread = new RegionThreadMVPOI();
-			thread.setProtocol(this.protocol);
+			RegionThreadCMVP thread = new RegionThreadCMVP();
 			thread.setUsrList(usrList);
 			thread.setTable(this.table);
+			thread.setMvp(this.mvp);
 			threads.add(thread);
 		}
 
@@ -61,7 +60,7 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		}
 
 		List<MostVisitedPOIList> intermediateResults = new LinkedList<MostVisitedPOIList>();
-		for (RegionThreadMVPOI t : threads) {
+		for (RegionThreadCMVP t : threads) {
 			t.join();
 			intermediateResults.add(t.getResults());
 		}
@@ -71,50 +70,54 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
 		bw.write("Query executed in " + this.executionTime / 1000 + "s\n");
 		
-		bw.write("The most visited POIs of the friends of user no." + this.user.getUserId() + " are:\n");
+		bw.write("The friends of user no." + this.user.getUserId() + " that have been to his most visited POI are:\n");
 		for (MostVisitedPOI p: this.resultList.getMvpList()) {
 			bw.write(p.toString() + "\n");
 		}
 		
-		bw.close();
+		bw.close();		
 	}
-
-	public MostVisitedPOIList callCoprocessor(UserList list) throws Exception {
-		MostVisitedPOIList resultsLocal = new MostVisitedPOIList();
-		MostVisitedPOIProtocol prot = this.table.coprocessorProxy(
-				MostVisitedPOIProtocol.class, list.getUserList().get(0)
-						.getKeyBytes());
-		try {
-			resultsLocal.parseCompressedBytes(prot.getMostVisitedPOI(list
-					.getDataBytes()));
-		} catch (IOException ex) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null,
-					ex);
-		}
-		return resultsLocal;
-	}
-
-	public void executeSerializedQuery() throws Exception {
-
-		List<MostVisitedPOIList> intermediateResults = new LinkedList<MostVisitedPOIList>();
-		System.out
-				.println("Getting the most visited POIs of friends of user no."
-						+ this.user.getUserId());
-		this.executionTime = System.currentTimeMillis();
-
-		for (UserList usrList : this.getSplittedUserList()) {
-			intermediateResults.add(this.callCoprocessor(usrList));
-		}
-
-		@SuppressWarnings("unused")
+	
+	public MostVisitedPOIList mergeResults(List<MostVisitedPOIList> mvpll) {
 		MostVisitedPOIList mvpList = new MostVisitedPOIList();
-		mvpList = this.mergeResults(intermediateResults);
 
-		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		System.out.println("Query executed in " + this.executionTime / 1000
-				+ "s");
+		for (MostVisitedPOIList mvpl : mvpll) {
+			for (MostVisitedPOI mvp: mvpl.getMvpList()) {
+				if (mvp.getCounter() > 0) {
+					mvpList.getMvpList().add(mvp);
+				}
+			}
+		}
+
+		return mvpList;
 	}
+	
+	public UserList getRegionsKeys() throws Exception {
+		try {
+			byte[] firstKey = this.friendList.getUserList().get(0)
+					.getKeyBytes();
+			byte[] lastKey = this.friendList.getUserList()
+					.get(this.friendList.getUserList().size() - 1)
+					.getKeyBytes();
 
+			List<HRegionLocation> regionsInRange = this.table
+					.getRegionsInRange(firstKey, lastKey);
+			UserList regionKeys = new UserList();
+
+			for (HRegionLocation loc : regionsInRange) {
+				byte[] startKey = loc.getRegionInfo().getStartKey();
+				User current = new User();
+				current.parseBytes(startKey);
+				regionKeys.add(current);
+			}
+			return regionKeys;
+		} catch (IOException ex) {
+			Logger.getLogger(GetMostVisitedPOIQuery.class.getName()).log(
+					Level.SEVERE, null, ex);
+		}
+		return null;
+	}
+	
 	public List<UserList> getSplittedUserList() throws Exception {
 		List<UserList> spltUserList = new LinkedList<UserList>();
 
@@ -154,58 +157,21 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 
 		return spltUserList;
 	}
-
-	public MostVisitedPOIList mergeResults(List<MostVisitedPOIList> mvpll) {
-		MostVisitedPOIList mvpList = new MostVisitedPOIList();
-
-		for (MostVisitedPOIList mvpl : mvpll) {
-			mvpList.getMvpList().addAll(mvpl.getMvpList());
-		}
-
-		return mvpList;
-	}
-
-	public UserList getRegionsKeys() throws Exception {
-		try {
-			byte[] firstKey = this.friendList.getUserList().get(0)
-					.getKeyBytes();
-			byte[] lastKey = this.friendList.getUserList()
-					.get(this.friendList.getUserList().size() - 1)
-					.getKeyBytes();
-
-			List<HRegionLocation> regionsInRange = this.table
-					.getRegionsInRange(firstKey, lastKey);
-			UserList regionKeys = new UserList();
-
-			for (HRegionLocation loc : regionsInRange) {
-				byte[] startKey = loc.getRegionInfo().getStartKey();
-				User current = new User();
-				current.parseBytes(startKey);
-				regionKeys.add(current);
-			}
-			return regionKeys;
-		} catch (IOException ex) {
-			Logger.getLogger(GetMostVisitedPOIQuery.class.getName()).log(
-					Level.SEVERE, null, ex);
-		}
-		return null;
-	}
-
-
-	public String getOutFile() {
-		return outFile;
-	}
-
-	public void setOutFile(String outFile) {
-		this.outFile = outFile;
-	}
-
-	public User getUser() {
+	
+    public User getUser() {
 		return user;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+	public MostVisitedPOI getMvp() {
+		return mvp;
+	}
+
+	public void setMvp(MostVisitedPOI mvp) {
+		this.mvp = mvp;
 	}
 
 	public UserList getFriendList() {
@@ -216,20 +182,20 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		this.friendList = friendList;
 	}
 
-	public Class<FriendsProtocol> getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(Class<FriendsProtocol> protocol) {
-		this.protocol = protocol;
-	}
-
 	public long getExecutionTime() {
 		return executionTime;
 	}
 
 	public void setExecutionTime(long executionTime) {
 		this.executionTime = executionTime;
+	}
+
+	public String getOutFile() {
+		return outFile;
+	}
+
+	public void setOutFile(String outFile) {
+		this.outFile = outFile;
 	}
 	
 	public MostVisitedPOIList getResultList() {
@@ -244,18 +210,28 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 
 		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
 		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(clientFriend.getUser());
+		GetCorrelatedMVPoiQuery clientCMVP = new GetCorrelatedMVPoiQuery(clientFriend.getUser());
+		
+		clientMVP.openConnection("check-ins");
+		UserList usrList = new UserList();
+		usrList.add(clientMVP.getUser());
+		clientMVP.setFriendList(usrList);
+		clientMVP.setOutFile(args[1]);
+		clientMVP.executeQuery();
+		clientMVP.closeConnection();
 		
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(args[1]);
+    	clientFriend.setOutFile(args[2]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
 		clientFriend.closeConnection();
-
-		clientMVP.openConnection("check-ins");
-		clientMVP.friendList = clientFriend.getFriendList();
-		clientMVP.setOutFile(args[2]);
-		clientMVP.executeQuery();
-		clientMVP.closeConnection();
+		
+		clientCMVP.setMvp(clientMVP.getResultList().getMvpList().get(0));
+		clientCMVP.openConnection("check-ins");
+		clientCMVP.setFriendList(clientFriend.getFriendList());
+		clientCMVP.setOutFile(args[3]);
+		clientCMVP.executeQuery();
+		clientCMVP.closeConnection();
 	}
 
 }

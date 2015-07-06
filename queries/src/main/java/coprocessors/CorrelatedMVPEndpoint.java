@@ -1,54 +1,58 @@
 package coprocessors;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
 
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.coprocessor.BaseEndpointCoprocessor;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
-import org.apache.hadoop.hbase.filter.ColumnRangeFilter;
 import org.apache.hadoop.hbase.regionserver.HRegion;
-import org.apache.hadoop.hbase.util.Bytes;
 
 import containers.CheckIn;
-import containers.CheckInList;
+import containers.MostVisitedPOI;
+import containers.MostVisitedPOIList;
 import containers.User;
 import containers.UserList;
 
-public class NewsFeedEndpoint extends BaseEndpointCoprocessor implements NewsFeedProtocol {
-	
-	public byte[] getNewsFeed(byte[] row, byte[] date) throws Exception {
-		byte[] result = null;
-		CheckInList chkList = new CheckInList();
+public class CorrelatedMVPEndpoint extends BaseEndpointCoprocessor implements CorrelatedMVPProtocol {
 
+	public byte[] getCorrelatedMVP(byte[] row, byte[] data) throws Exception {
+		byte[] result = null;
+		MostVisitedPOIList mvpList = new MostVisitedPOIList();
+		
 		HRegion region = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion();
 
+		MostVisitedPOI mvpoi = new MostVisitedPOI();
+		mvpoi.parseBytes(data);
+		
 		UserList usrList = new UserList();
 		usrList.parseBytes(row);
-		
-		ByteBuffer buffer = ByteBuffer.wrap(date);
-		long dateFrom = buffer.getLong();
-		long milPerDay = 1000*60*60*24;
-		long dateTo = dateFrom + milPerDay;
 
 		for (User usr : usrList.getUserList()) {
+			
 			Get g = new Get(usr.getKeyBytes());
-            g.setFilter(new ColumnRangeFilter(Bytes.toBytes(dateFrom), true, Bytes.toBytes(dateTo), false));
 			Result rs = region.get(g);
-			if (!rs.isEmpty() && (rs != null)) {
+			
+			MostVisitedPOI mvp = new MostVisitedPOI(usr, mvpoi.getPoi(), 0);
+
+			if (!rs.isEmpty() && (rs != null)) {								
 				for (Map.Entry<byte[], byte[]> e : rs.getFamilyMap("checkIns".getBytes()).entrySet()) {
 					CheckIn chk = new CheckIn();
 					chk.parseBytes(e.getValue());
-					chkList.add(chk);
+					boolean lat = (chk.getPoi().getLatitude() == mvpoi.getPoi().getLatitude());
+					boolean lng = (chk.getPoi().getLongitude() == mvpoi.getPoi().getLongitude());
+					
+					if (lat && lng) {
+						mvp.setCounter(mvp.getCounter()+1);
+					}
 				}
 			} else {
 				break;
 			}
+			mvpList.add(mvp);
 		}
-		
-		result = chkList.getCompressedBytes();
+		result = mvpList.getCompressedBytes();
 		return result;
 	}
-	
+
 }
