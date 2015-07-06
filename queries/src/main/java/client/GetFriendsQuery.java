@@ -43,7 +43,7 @@ public class GetFriendsQuery extends AbstractQueryClient{
         	friendList.parseCompressedBytes(prot.getFriends(this.user.getKeyBytes())); 
         } catch (IOException ex) {
         	Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-        }    
+        }   
         
         this.executionTime = System.currentTimeMillis() - this.executionTime;
         bw.write("Query executed in " + this.executionTime/1000 + "s\n");

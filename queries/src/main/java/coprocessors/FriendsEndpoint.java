@@ -16,6 +16,8 @@ public class FriendsEndpoint extends BaseEndpointCoprocessor implements FriendsP
 	public byte[] getFriends(byte[] row) throws Exception {
 		byte[] result = null;
 		UserList friendList = new UserList();
+		User user = new User();
+		user.parseBytes(row);
         HRegion region =  ((RegionCoprocessorEnvironment)getEnvironment()).getRegion();
 
         //Get friends of usr
@@ -25,7 +27,9 @@ public class FriendsEndpoint extends BaseEndpointCoprocessor implements FriendsP
 			for(Map.Entry<byte[], byte[]> e : rs.getFamilyMap("friends".getBytes()).entrySet()) {
 				User friend = new User();
 				friend.parseBytes(e.getValue());
-				friendList.add(friend);
+				if ((friend.getUserId() != 0 ) && (friend.getUserId() != user.getUserId())) {
+					friendList.add(friend);
+				}
 			}
 		}
 		result = friendList.getCompressedBytes();

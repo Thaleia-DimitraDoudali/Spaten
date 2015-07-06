@@ -121,7 +121,7 @@ public class CheckInsTable {
 			data = chk.getDataBytes();
 
 			chkTable.putSingle(row, qualifier, data);
-			chkTable.getSingle(row, qualifier);
+			//chkTable.getSingle(row, qualifier);
 
 			line = br.readLine();
 		}

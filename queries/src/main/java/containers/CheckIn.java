@@ -49,8 +49,7 @@ public class CheckIn implements Serializable {
 
 	public Date getDate(long millis) {
 		Calendar calendar = Calendar.getInstance();
-		long h2 = 2*60*60*1000; 
-		calendar.setTimeInMillis(millis-h2);
+		calendar.setTimeInMillis(millis);
 		Date dt = calendar.getTime();
 		return dt;
 	}

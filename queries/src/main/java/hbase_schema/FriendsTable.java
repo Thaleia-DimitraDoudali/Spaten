@@ -106,7 +106,7 @@ public class FriendsTable implements QueriesTable {
 			qualifier = usr2.getQualifierBytes();
 			data = usr2.getDataBytes();
 			fr.putSingle(row, qualifier, data);
-			fr.getSingle(row, qualifier);
+			//fr.getSingle(row, qualifier);
 			line = br.readLine();
 		}
 		br.close();
