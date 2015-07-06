@@ -25,6 +25,8 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 	private long executionTime;
     private String outFile;
 
+	public GetMostVisitedTraceQuery() {}
+    
 	public GetMostVisitedTraceQuery(User usr) {
 		this.user = usr;
 	}
@@ -230,22 +232,26 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 	public void setExecutionTime(long executionTime) {
 		this.executionTime = executionTime;
 	}
-
-	public static void main(String[] args) throws Exception {
-
-		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
+	
+	public void runQuery(String[] in) throws Exception {
+		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
 		GetMostVisitedTraceQuery clientMVP = new GetMostVisitedTraceQuery(clientFriend.getUser());
 		
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(args[1]);
+    	clientFriend.setOutFile(in[1]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
 		clientFriend.closeConnection();
 
 		clientMVP.openConnection("gps-traces");
 		clientMVP.friendList = clientFriend.getFriendList();
-		clientMVP.setOutFile(args[2]);
+		clientMVP.setOutFile(in[2]);
 		clientMVP.executeQuery();
 		clientMVP.closeConnection();
+	}
+
+	public static void main(String[] args) throws Exception {
+		GetMostVisitedTraceQuery clientMVP = new GetMostVisitedTraceQuery();
+		clientMVP.runQuery(args);
 	}
 }

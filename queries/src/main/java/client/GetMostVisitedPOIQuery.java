@@ -26,6 +26,8 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
     private String outFile;
     private MostVisitedPOIList resultList;
 
+	public GetMostVisitedPOIQuery() {}
+    
 	public GetMostVisitedPOIQuery(User usr) {
 		this.user = usr;
 	}
@@ -239,23 +241,27 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 	public void setResultList(MostVisitedPOIList resultList) {
 		this.resultList = resultList;
 	}
-
-	public static void main(String[] args) throws Exception {
-
-		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
+	
+	public void runQuery(String[] in) throws Exception {
+		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
 		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(clientFriend.getUser());
 		
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(args[1]);
+    	clientFriend.setOutFile(in[1]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
 		clientFriend.closeConnection();
 
 		clientMVP.openConnection("check-ins");
 		clientMVP.friendList = clientFriend.getFriendList();
-		clientMVP.setOutFile(args[2]);
+		clientMVP.setOutFile(in[2]);
 		clientMVP.executeQuery();
 		clientMVP.closeConnection();
+	}
+
+	public static void main(String[] args) throws Exception {
+		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery();
+		clientMVP.runQuery(args);
 	}
 
 }

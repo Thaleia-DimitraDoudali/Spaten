@@ -17,6 +17,8 @@ public class GetFriendsQuery extends AbstractQueryClient{
     private long executionTime;
     private String outFile;
 	
+	public GetFriendsQuery() {}
+    
 	public GetFriendsQuery(String id) {
 		int usrId = Integer.parseInt(id);
 		this.user = new User(usrId);
@@ -101,13 +103,18 @@ public class GetFriendsQuery extends AbstractQueryClient{
 	public void setOutFile(String outFile) {
 		this.outFile = outFile;
 	}
-
-    public static void main(String[] args) throws Exception {
-    	GetFriendsQuery client = new GetFriendsQuery(args[0]);
-    	client.setOutFile(args[1]);
+	
+	public void runQuery(String[] in) throws Exception {
+    	GetFriendsQuery client = new GetFriendsQuery(in[0]);
+    	client.setOutFile(in[1]);
         client.setProtocol(FriendsProtocol.class);
         client.openConnection("friends");
         client.executeSerializedQuery();
         client.closeConnection();
+	}
+
+    public static void main(String[] args) throws Exception {
+    	GetFriendsQuery client = new GetFriendsQuery();
+    	client.runQuery(args);
     }
 }

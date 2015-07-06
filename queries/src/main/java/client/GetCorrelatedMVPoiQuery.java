@@ -25,6 +25,8 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 	private MostVisitedPOI mvp;
 	private MostVisitedPOIList resultList;
 
+	public GetCorrelatedMVPoiQuery() {}
+	
 	public GetCorrelatedMVPoiQuery(User usr) {
 		this.user = usr;
 	}
@@ -205,10 +207,9 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 	public void setResultList(MostVisitedPOIList resultList) {
 		this.resultList = resultList;
 	}
-
-	public static void main(String[] args) throws Exception {
-
-		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
+	
+	public void runQuery(String[] in) throws Exception {
+		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
 		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(clientFriend.getUser());
 		GetCorrelatedMVPoiQuery clientCMVP = new GetCorrelatedMVPoiQuery(clientFriend.getUser());
 		
@@ -216,12 +217,12 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 		UserList usrList = new UserList();
 		usrList.add(clientMVP.getUser());
 		clientMVP.setFriendList(usrList);
-		clientMVP.setOutFile(args[1]);
+		clientMVP.setOutFile(in[1]);
 		clientMVP.executeQuery();
 		clientMVP.closeConnection();
 		
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(args[2]);
+    	clientFriend.setOutFile(in[2]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
 		clientFriend.closeConnection();
@@ -229,9 +230,14 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 		clientCMVP.setMvp(clientMVP.getResultList().getMvpList().get(0));
 		clientCMVP.openConnection("check-ins");
 		clientCMVP.setFriendList(clientFriend.getFriendList());
-		clientCMVP.setOutFile(args[3]);
+		clientCMVP.setOutFile(in[3]);
 		clientCMVP.executeQuery();
 		clientCMVP.closeConnection();
+	}
+
+	public static void main(String[] args) throws Exception {
+		GetCorrelatedMVPoiQuery clientCMVP = new GetCorrelatedMVPoiQuery();
+		clientCMVP.runQuery(args);
 	}
 
 }

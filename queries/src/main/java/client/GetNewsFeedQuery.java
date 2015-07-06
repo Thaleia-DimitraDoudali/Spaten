@@ -28,6 +28,8 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 	private long timestamp;
     private String outFile;
 	
+    public GetNewsFeedQuery() {}
+    
 	public GetNewsFeedQuery(User usr) {
 		this.user = usr;
 	}
@@ -218,23 +220,27 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 		this.outFile = outFile;
 	}
 	
-	public static void main(String[] args) throws Exception {
-
-		GetFriendsQuery clientFriend = new GetFriendsQuery(args[0]);
+	public void runQuery(String[] in) throws Exception{
+		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
 		GetNewsFeedQuery clientNF = new GetNewsFeedQuery(clientFriend.getUser());
 		
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(args[2]);
+    	clientFriend.setOutFile(in[2]);
 		clientFriend.openConnection("friends");
 		clientFriend.executeSerializedQuery();
 		clientFriend.closeConnection();
 
 		clientNF.openConnection("check-ins");
 		clientNF.friendList = clientFriend.getFriendList();
-		clientNF.setTimestamp(clientNF.convertToTimestamp(args[1]));
-		clientNF.setOutFile(args[3]);
+		clientNF.setTimestamp(clientNF.convertToTimestamp(in[1]));
+		clientNF.setOutFile(in[3]);
 		clientNF.executeQuery();
 		clientNF.closeConnection();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		GetNewsFeedQuery clientNF = new GetNewsFeedQuery();
+		clientNF.runQuery(args);
 	}
 
 }
