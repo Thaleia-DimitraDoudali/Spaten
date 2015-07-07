@@ -53,7 +53,7 @@ public class CheckInsTable {
 			throws IOException {
 		Put p = new Put(row);
 		p.add(Bytes.toBytes("checkIns"), qualifier, data);
-		// System.out.println("...single check-in inserted.");
+		System.out.println("...single check-in inserted.");
 		this.table.put(p);
 	}
 
@@ -119,7 +119,6 @@ public class CheckInsTable {
 			row = chk.getKeyBytes();
 			qualifier = chk.getQualifierBytes();
 			data = chk.getDataBytes();
-
 			chkTable.putSingle(row, qualifier, data);
 			//chkTable.getSingle(row, qualifier);
 

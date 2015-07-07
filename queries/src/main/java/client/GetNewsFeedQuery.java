@@ -26,30 +26,36 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 	private UserList friendList;
 	private long executionTime;
 	private long timestamp;
-    private String outFile;
-	
-    public GetNewsFeedQuery() {}
-    
+	private String outFile;
+	private boolean print;
+
+	public GetNewsFeedQuery() {
+	}
+
 	public GetNewsFeedQuery(User usr) {
 		this.user = usr;
 	}
 
 	@Override
 	public void executeQuery() throws Exception {
-		
-		List<RegionThreadNF> threads = new LinkedList<RegionThreadNF>();
-		BufferedWriter bw = this.createWriter(this.outFile);
-		
-		bw.write("Getting the newd feed of user no."
-						+ this.user.getUserId() + "\n");
 
+		List<RegionThreadNF> threads = new LinkedList<RegionThreadNF>();
+
+		BufferedWriter bw = null;
+		if (print) {
+			bw = this.createWriter(this.outFile);
+
+			bw.write("Getting the newd feed of user no."
+					+ this.user.getUserId() + "\n");
+		}
 		if (this.friendList.getUserList().size() == 0) {
-			bw.write("User no." + this.user.getUserId() + " has no friends.\n");
-			bw.close();
+			if (print) {
+				bw.write("User no." + this.user.getUserId()
+						+ " has no friends.\n");
+				bw.close();
+			}
 			return;
 		}
-		
-		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
 			RegionThreadNF thread = new RegionThreadNF();
@@ -69,24 +75,24 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 			intermediateResults.add(t.getResults());
 		}
 
-		CheckInList chkList =  new CheckInList();
+		CheckInList chkList = new CheckInList();
 		chkList = this.mergeResults(intermediateResults);
-		
-		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		bw.write("Query executed in " + this.executionTime / 1000 + "s\n");
-		
-		bw.write("The news feed of user no." + this.user.getUserId() + " are:\n");
-		for (CheckIn chk: chkList.getCheckInList()) {
-			bw.write(chk.toNFstring() + "\n");
+
+		if (print) {
+			bw.write("The news feed of user no." + this.user.getUserId()
+					+ " are:\n");
+			for (CheckIn chk : chkList.getCheckInList()) {
+				bw.write(chk.toNFstring() + "\n");
+			}
+
+			bw.close();
 		}
-		
-		bw.close();
-		
+
 	}
-	
+
 	public CheckInList mergeResults(List<CheckInList> chkll) {
-		CheckInList chkList =  new CheckInList();
-		for (CheckInList chkl: chkll) {
+		CheckInList chkList = new CheckInList();
+		for (CheckInList chkl : chkll) {
 			chkList.getCheckInList().addAll(chkl.getCheckInList());
 		}
 		// Sort check ins based on timestamp
@@ -103,7 +109,7 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 		});
 		return chkList;
 	}
-	
+
 	public List<UserList> getSplittedUserList() throws Exception {
 		List<UserList> spltUserList = new LinkedList<UserList>();
 
@@ -143,7 +149,7 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 
 		return spltUserList;
 	}
-	
+
 	public UserList getRegionsKeys() throws Exception {
 		try {
 			byte[] firstKey = this.friendList.getUserList().get(0)
@@ -169,7 +175,7 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 		}
 		return null;
 	}
-	
+
 	public long convertToTimestamp(String date) {
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		// date will be in the format e.g. 04/29/1992
@@ -179,7 +185,7 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 		calendar.set(year, month, day, 0, 0, 0);
 		return calendar.getTimeInMillis();
 	}
-	
+
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -194,6 +200,14 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public boolean isPrint() {
+		return print;
+	}
+
+	public void setPrint(boolean print) {
+		this.print = print;
 	}
 
 	public UserList getFriendList() {
@@ -219,25 +233,43 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 	public void setOutFile(String outFile) {
 		this.outFile = outFile;
 	}
-	
-	public void runQuery(String[] in) throws Exception{
-		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
-		GetNewsFeedQuery clientNF = new GetNewsFeedQuery(clientFriend.getUser());
-		
-		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(in[2]);
-		clientFriend.openConnection("friends");
-		clientFriend.executeSerializedQuery();
-		clientFriend.closeConnection();
 
-		clientNF.openConnection("check-ins");
-		clientNF.friendList = clientFriend.getFriendList();
-		clientNF.setTimestamp(clientNF.convertToTimestamp(in[1]));
-		clientNF.setOutFile(in[3]);
-		clientNF.executeQuery();
-		clientNF.closeConnection();
+	public boolean parsePrint(String in) {
+		if (in.equals("1"))
+			return true;
+		else if (in.equals("0"))
+			return false;
+		return false;
 	}
 	
+	public void runQuery(String[] in) throws Exception {
+		boolean pr = this.parsePrint(in[4]);
+		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
+		
+		this.executionTime = System.currentTimeMillis();
+
+		clientFriend.openConnection("friends");
+		this.openConnection("check-ins");
+		
+		clientFriend.setPrint(pr);
+		clientFriend.setProtocol(FriendsProtocol.class);
+		clientFriend.setOutFile(in[2]);
+		clientFriend.executeSerializedQuery();
+
+		this.setUser(clientFriend.getUser());
+		this.setPrint(pr);
+		this.friendList = clientFriend.getFriendList();
+		this.setTimestamp(this.convertToTimestamp(in[1]));
+		this.setOutFile(in[3]);
+		this.executeQuery();
+				
+		clientFriend.closeConnection();
+		this.closeConnection();
+		
+		this.executionTime = System.currentTimeMillis() - this.executionTime;
+		System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
+	}
+
 	public static void main(String[] args) throws Exception {
 		GetNewsFeedQuery clientNF = new GetNewsFeedQuery();
 		clientNF.runQuery(args);

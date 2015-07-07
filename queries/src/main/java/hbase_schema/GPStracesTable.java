@@ -100,6 +100,7 @@ public class GPStracesTable implements QueriesTable {
 				data = tr.getDataBytes();
 				qualifier = tr.getQualifierBytes();
 				row = tr.getKeyBytes();
+				
 				trTable.putSingle(row, qualifier, data);
 				//trTable.getSingle(row, qualifier);
 			}

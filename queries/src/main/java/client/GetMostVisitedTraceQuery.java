@@ -23,10 +23,12 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 	private UserList friendList;
 	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
 	private long executionTime;
-    private String outFile;
+	private String outFile;
+	private boolean print;
 
-	public GetMostVisitedTraceQuery() {}
-    
+	public GetMostVisitedTraceQuery() {
+	}
+
 	public GetMostVisitedTraceQuery(User usr) {
 		this.user = usr;
 	}
@@ -35,18 +37,20 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 	public void executeQuery() throws Exception {
 
 		List<RegionThreadMVTR> threads = new LinkedList<RegionThreadMVTR>();
-		BufferedWriter bw = this.createWriter(this.outFile);
-		
-		bw.write("Getting the most visited traces of friends of user no."
-						+ this.user.getUserId() + "\n");
-
+		BufferedWriter bw = null;
+		if (print) {
+			bw = this.createWriter(this.outFile);
+			bw.write("Getting the most visited traces of friends of user no."
+					+ this.user.getUserId() + "\n");
+		}
 		if (this.friendList.getUserList().size() == 0) {
-			bw.write("User no." + this.user.getUserId() + " has no friends.\n");
-			bw.close();
+			if (print) {
+				bw.write("User no." + this.user.getUserId()
+						+ " has no friends.\n");
+				bw.close();
+			}
 			return;
 		}
-		
-		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
 			RegionThreadMVTR thread = new RegionThreadMVTR();
@@ -68,16 +72,16 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 
 		MostVisitedTraceList mvtrList = new MostVisitedTraceList();
 		mvtrList = this.mergeResults(intermediateResults);
-		
-		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		bw.write("Query executed in " + this.executionTime / 1000 + "s\n");
-		
-		bw.write("The most visited trace of the friends of user no." + this.user.getUserId() + " are:\n");
-		for (MostVisitedTrace p: mvtrList.getMvtrList()) {
-			bw.write(p.toString() + "\n");
+
+		if (print) {
+			bw.write("The most visited trace of the friends of user no."
+					+ this.user.getUserId() + " are:\n");
+			for (MostVisitedTrace p : mvtrList.getMvtrList()) {
+				bw.write(p.toString() + "\n");
+			}
+
+			bw.close();
 		}
-		
-		bw.close();
 	}
 
 	public MostVisitedTraceList callCoprocessor(UserList list) throws Exception {
@@ -192,13 +196,20 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 		return null;
 	}
 
-
 	public String getOutFile() {
 		return outFile;
 	}
 
 	public void setOutFile(String outFile) {
 		this.outFile = outFile;
+	}
+
+	public boolean isPrint() {
+		return print;
+	}
+
+	public void setPrint(boolean print) {
+		this.print = print;
 	}
 
 	public User getUser() {
@@ -233,21 +244,39 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient {
 		this.executionTime = executionTime;
 	}
 	
-	public void runQuery(String[] in) throws Exception {
-		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
-		GetMostVisitedTraceQuery clientMVP = new GetMostVisitedTraceQuery(clientFriend.getUser());
-		
-		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(in[1]);
-		clientFriend.openConnection("friends");
-		clientFriend.executeSerializedQuery();
-		clientFriend.closeConnection();
+	public boolean parsePrint(String in) {
+		if (in.equals("1"))
+			return true;
+		else if (in.equals("0"))
+			return false;
+		return false;
+	}
 
-		clientMVP.openConnection("gps-traces");
-		clientMVP.friendList = clientFriend.getFriendList();
-		clientMVP.setOutFile(in[2]);
-		clientMVP.executeQuery();
-		clientMVP.closeConnection();
+	public void runQuery(String[] in) throws Exception {
+		boolean pr = this.parsePrint(in[3]);
+		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
+
+		this.executionTime = System.currentTimeMillis();
+		
+		clientFriend.openConnection("friends");
+		this.openConnection("gps-traces");
+
+		clientFriend.setPrint(pr);
+		clientFriend.setProtocol(FriendsProtocol.class);
+		clientFriend.setOutFile(in[1]);
+		clientFriend.executeSerializedQuery();
+
+		this.setPrint(pr);
+		this.setUser(clientFriend.getUser());
+		this.friendList = clientFriend.getFriendList();
+		this.setOutFile(in[2]);
+		this.executeQuery();
+		
+		clientFriend.closeConnection();
+		this.closeConnection();
+		
+		this.executionTime = System.currentTimeMillis() - this.executionTime;
+		System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
 	}
 
 	public static void main(String[] args) throws Exception {

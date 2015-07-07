@@ -16,38 +16,44 @@ import containers.User;
 import containers.UserList;
 import coprocessors.FriendsProtocol;
 
-public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
-	
+public class GetCorrelatedMVPoiQuery extends AbstractQueryClient {
+
 	private User user;
 	private UserList friendList;
 	private long executionTime;
 	private String outFile;
 	private MostVisitedPOI mvp;
 	private MostVisitedPOIList resultList;
+	private boolean print;
 
-	public GetCorrelatedMVPoiQuery() {}
-	
+	public GetCorrelatedMVPoiQuery() {
+	}
+
 	public GetCorrelatedMVPoiQuery(User usr) {
 		this.user = usr;
 	}
-	
+
 	@Override
 	public void executeQuery() throws Exception {
-		
-		List<RegionThreadCMVP> threads = new LinkedList<RegionThreadCMVP>();
-		BufferedWriter bw = this.createWriter(this.outFile);
-			
-		bw.write("Getting the visits of friends of user no."
-						+ this.user.getUserId() + " to his most visited poi: " 
-						+ this.getMvp().getPoi().toString() + "\n");
 
+		List<RegionThreadCMVP> threads = new LinkedList<RegionThreadCMVP>();
+
+		BufferedWriter bw = null;
+		if (print) {
+			bw = this.createWriter(this.outFile);
+
+			bw.write("Getting the visits of friends of user no."
+					+ this.user.getUserId() + " to his most visited poi: "
+					+ this.getMvp().getPoi().toString() + "\n");
+		}
 		if (this.friendList.getUserList().size() == 0) {
-			bw.write("User no." + this.user.getUserId() + " has no friends.\n");
-			bw.close();
+			if (print) {
+				bw.write("User no." + this.user.getUserId()
+						+ " has no friends.\n");
+				bw.close();
+			}
 			return;
 		}
-		
-		this.executionTime = System.currentTimeMillis();
 
 		for (UserList usrList : this.getSplittedUserList()) {
 			RegionThreadCMVP thread = new RegionThreadCMVP();
@@ -68,23 +74,22 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 		}
 
 		this.resultList = this.mergeResults(intermediateResults);
+		if (print) {
+			bw.write("The friends of user no." + this.user.getUserId()
+					+ " that have been to his most visited POI are:\n");
+			for (MostVisitedPOI p : this.resultList.getMvpList()) {
+				bw.write(p.toString() + "\n");
+			}
 
-		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		bw.write("Query executed in " + this.executionTime / 1000 + "s\n");
-		
-		bw.write("The friends of user no." + this.user.getUserId() + " that have been to his most visited POI are:\n");
-		for (MostVisitedPOI p: this.resultList.getMvpList()) {
-			bw.write(p.toString() + "\n");
+			bw.close();
 		}
-		
-		bw.close();		
 	}
-	
+
 	public MostVisitedPOIList mergeResults(List<MostVisitedPOIList> mvpll) {
 		MostVisitedPOIList mvpList = new MostVisitedPOIList();
 
 		for (MostVisitedPOIList mvpl : mvpll) {
-			for (MostVisitedPOI mvp: mvpl.getMvpList()) {
+			for (MostVisitedPOI mvp : mvpl.getMvpList()) {
 				if (mvp.getCounter() > 0) {
 					mvpList.getMvpList().add(mvp);
 				}
@@ -93,7 +98,7 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 
 		return mvpList;
 	}
-	
+
 	public UserList getRegionsKeys() throws Exception {
 		try {
 			byte[] firstKey = this.friendList.getUserList().get(0)
@@ -119,7 +124,7 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 		}
 		return null;
 	}
-	
+
 	public List<UserList> getSplittedUserList() throws Exception {
 		List<UserList> spltUserList = new LinkedList<UserList>();
 
@@ -159,21 +164,29 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 
 		return spltUserList;
 	}
-	
-    public User getUser() {
+
+	public User getUser() {
 		return user;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
 	public MostVisitedPOI getMvp() {
 		return mvp;
 	}
 
 	public void setMvp(MostVisitedPOI mvp) {
 		this.mvp = mvp;
+	}
+
+	public boolean isPrint() {
+		return print;
+	}
+
+	public void setPrint(boolean print) {
+		this.print = print;
 	}
 
 	public UserList getFriendList() {
@@ -199,7 +212,7 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 	public void setOutFile(String outFile) {
 		this.outFile = outFile;
 	}
-	
+
 	public MostVisitedPOIList getResultList() {
 		return resultList;
 	}
@@ -207,32 +220,56 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient{
 	public void setResultList(MostVisitedPOIList resultList) {
 		this.resultList = resultList;
 	}
-	
+
+	public boolean parsePrint(String in) {
+		if (in.equals("1"))
+			return true;
+		else if (in.equals("0"))
+			return false;
+		return false;
+	}
+
 	public void runQuery(String[] in) throws Exception {
+
+		boolean pr = this.parsePrint(in[4]);
+
 		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
-		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(clientFriend.getUser());
-		GetCorrelatedMVPoiQuery clientCMVP = new GetCorrelatedMVPoiQuery(clientFriend.getUser());
-		
+		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(
+				clientFriend.getUser());
+
+		this.executionTime = System.currentTimeMillis();
+
 		clientMVP.openConnection("check-ins");
+		this.openConnection("check-ins");
+		clientFriend.openConnection("friends");
+
 		UserList usrList = new UserList();
 		usrList.add(clientMVP.getUser());
+		clientMVP.setPrint(pr);
 		clientMVP.setFriendList(usrList);
 		clientMVP.setOutFile(in[1]);
 		clientMVP.executeQuery();
-		clientMVP.closeConnection();
-		
+
 		clientFriend.setProtocol(FriendsProtocol.class);
-    	clientFriend.setOutFile(in[2]);
-		clientFriend.openConnection("friends");
+		clientFriend.setOutFile(in[2]);
+		clientFriend.setPrint(pr);
 		clientFriend.executeSerializedQuery();
+
+		this.setUser(clientFriend.getUser());
+		this.setPrint(pr);
+		this.setMvp(clientMVP.getResultList().getMvpList().get(0));
+		this.setFriendList(clientFriend.getFriendList());
+		this.setOutFile(in[3]);
+		this.executeQuery();
+
 		clientFriend.closeConnection();
-		
-		clientCMVP.setMvp(clientMVP.getResultList().getMvpList().get(0));
-		clientCMVP.openConnection("check-ins");
-		clientCMVP.setFriendList(clientFriend.getFriendList());
-		clientCMVP.setOutFile(in[3]);
-		clientCMVP.executeQuery();
-		clientCMVP.closeConnection();
+		clientMVP.closeConnection();
+		this.closeConnection();
+
+		this.executionTime = System.currentTimeMillis() - this.executionTime;
+		System.out.println("\n\nQuery executed in " + this.executionTime / 1000
+				+ "s\n\n");
+
 	}
 
 	public static void main(String[] args) throws Exception {
