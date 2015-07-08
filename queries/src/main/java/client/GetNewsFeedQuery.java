@@ -20,11 +20,9 @@ import containers.User;
 import containers.UserList;
 import coprocessors.FriendsProtocol;
 
-public class GetNewsFeedQuery extends AbstractQueryClient {
+public class GetNewsFeedQuery extends AbstractQueryClient implements Runnable{
 
-	private User user;
 	private UserList friendList;
-	private long executionTime;
 	private long timestamp;
 	private String outFile;
 	private boolean print;
@@ -242,37 +240,41 @@ public class GetNewsFeedQuery extends AbstractQueryClient {
 		return false;
 	}
 	
-	public void runQuery(String[] in) throws Exception {
-		boolean pr = this.parsePrint(in[4]);
-		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
+	public void runQuery() throws Exception {
+		GetFriendsQuery clientFriend = new GetFriendsQuery();
 		
 		this.executionTime = System.currentTimeMillis();
 
 		clientFriend.openConnection("friends");
 		this.openConnection("check-ins");
 		
-		clientFriend.setPrint(pr);
+		clientFriend.setUser(this.getUser());
+		clientFriend.setPrint(this.isPrint());
 		clientFriend.setProtocol(FriendsProtocol.class);
-		clientFriend.setOutFile(in[2]);
+		clientFriend.setOutFile(this.getOutFile());
 		clientFriend.executeSerializedQuery();
 
-		this.setUser(clientFriend.getUser());
-		this.setPrint(pr);
 		this.friendList = clientFriend.getFriendList();
-		this.setTimestamp(this.convertToTimestamp(in[1]));
-		this.setOutFile(in[3]);
 		this.executeQuery();
 				
 		clientFriend.closeConnection();
 		this.closeConnection();
 		
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
+		//System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
 	}
 
 	public static void main(String[] args) throws Exception {
 		GetNewsFeedQuery clientNF = new GetNewsFeedQuery();
-		clientNF.runQuery(args);
+		clientNF.runQuery();
+	}
+
+	public void run() {
+		try {
+			this.runQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 	}
 
 }

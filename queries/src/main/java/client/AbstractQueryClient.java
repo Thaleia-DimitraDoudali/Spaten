@@ -4,11 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
+
+import containers.User;
 
 /**
  *
@@ -18,8 +21,36 @@ import org.apache.hadoop.hbase.client.HTable;
 public abstract class AbstractQueryClient {
     
     protected HTable table;
+	protected long executionTime;
+	protected User user;
+	
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	protected String type;
     
-    public void openConnection(String tableName) {
+    public long getExecutionTime() {
+		return executionTime;
+	}
+
+	public void setExecutionTime(long executionTime) {
+		this.executionTime = executionTime;
+	}
+
+	public void openConnection(String tableName) {
         try {
             Thread.currentThread().setContextClassLoader(HBaseConfiguration.class.getClassLoader());
             this.table = new HTable(HBaseConfiguration.create(), tableName);
@@ -41,9 +72,6 @@ public abstract class AbstractQueryClient {
 		try {
 			String workingDir = System.getProperty("user.dir");
 			File file = new File(workingDir + "/" + fileName);
-			if (!file.exists()) {
-				file.createNewFile();
-			}
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
 			return bw;

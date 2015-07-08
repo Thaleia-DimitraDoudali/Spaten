@@ -3,6 +3,7 @@ package hbase_schema;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -91,7 +92,9 @@ public class CheckInsTable {
 
 		int c = 1;
 		for (int i = 0; i < regionsNo; i++) {
-			keys[i] = Bytes.toBytes(c);
+	        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+	        buffer.put(Bytes.toBytes(c));
+	        keys[i] = buffer.array();
 			c += keyNo;
 		}
 		return keys;

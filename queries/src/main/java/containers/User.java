@@ -2,6 +2,8 @@ package containers;
 
 import java.nio.ByteBuffer;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
 public class User implements Serializable {
 
 	private int userId;
@@ -30,7 +32,8 @@ public class User implements Serializable {
 	}
 
 	public void parseBytes(byte[] bytes) throws Exception {
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE);
+        buffer = ByteBuffer.wrap(bytes);
         this.userId = buffer.getInt();		
 	}
 	

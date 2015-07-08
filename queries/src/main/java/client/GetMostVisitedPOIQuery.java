@@ -17,12 +17,10 @@ import containers.UserList;
 import coprocessors.FriendsProtocol;
 import coprocessors.MostVisitedPOIProtocol;
 
-public class GetMostVisitedPOIQuery extends AbstractQueryClient {
+public class GetMostVisitedPOIQuery extends AbstractQueryClient implements Runnable{
 
-	private User user;
 	private UserList friendList;
 	private Class<FriendsProtocol> protocol = FriendsProtocol.class;
-	private long executionTime;
 	private String outFile;
 	private MostVisitedPOIList resultList;
 	private boolean print;
@@ -260,36 +258,41 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient {
 		return false;
 	}
 
-	public void runQuery(String[] in) throws Exception {
-		boolean pr = this.parsePrint(in[3]);
-		GetFriendsQuery clientFriend = new GetFriendsQuery(in[0]);
+	public void runQuery() throws Exception {
+		GetFriendsQuery clientFriend = new GetFriendsQuery();
 
 		this.executionTime = System.currentTimeMillis();
 		
 		this.openConnection("check-ins");
 		clientFriend.openConnection("friends");
 		
-		clientFriend.setPrint(pr);
+		clientFriend.setOutFile(this.getOutFile());
+		clientFriend.setPrint(this.isPrint());
+		clientFriend.setUser(this.getUser());
 		clientFriend.setProtocol(FriendsProtocol.class);
-		clientFriend.setOutFile(in[1]);
 		clientFriend.executeSerializedQuery();
 
-		this.setPrint(pr);
-		this.setUser(clientFriend.getUser());		
 		this.friendList = clientFriend.getFriendList();
-		this.setOutFile(in[2]);
 		this.executeQuery();
 				
 		clientFriend.closeConnection();
 		this.closeConnection();
 		
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
+		//System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
 	}
 
 	public static void main(String[] args) throws Exception {
 		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery();
-		clientMVP.runQuery(args);
+		clientMVP.runQuery();
+	}
+
+	public void run() {
+		try {
+			this.runQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
