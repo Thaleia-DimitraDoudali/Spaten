@@ -122,6 +122,8 @@ Hadoop project and runs on top of HDFS. The Hadoop Distributed File System (HDFS
 HDFS is highly fault-tolerant and is designed to be deployed on low-cost hardware. HDFS provides high throughput access to application data and is suitable 
 for applications that have large data sets. HDFS relaxes a few POSIX requirements to enable streaming access to file system data. 
 
+\subsection{Data model}
+
 HBase works best for sparse data sets, which are common in many Big Data use cases. Unlike relational database systems, HBase does not support a 
 structured query language like SQL; in fact, HBase isn’t a relational data store at all. HBase  is a column-oriented database and follows a 
 key/value data storage model. The main characteristics if the data model are the following: 
@@ -149,6 +151,8 @@ For example, a table in HBase can be the following:
   \caption{A table in HBase consisting of two column families}
 \end{figure}
 
+\subsection{Architecture components}
+
 HBase has the following three major architecture components:
 
 \begin{itemize}
@@ -161,6 +165,24 @@ HBase has the following three major architecture components:
  fault tolerance. More specifically, ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed 
  synchronization, and providing group services.
 \end{itemize}
+
+\subsection{Coprocessors}
+
+HBase coprocessors enable distributed computation directly within the HBase server processes on the server's local data.
+The idea of HBase Coprocessors was inspired by Google’s BigTable coprocessors. Coprocessors can be loaded globally on all tables and regions hosted 
+by the region server, these are known as system coprocessors; or the administrator can specify which coprocessors should be loaded on all regions for a table on 
+a per-table basis, these are known as table coprocessors. There are two categories of HBase coprocessors, the observer and the 
+endpoint coprocessors. The idea behind observers is that we can insert user code by overriding upcall methods provided by the coprocessor framework. 
+The callback functions are executed from core HBase code when certain events occur. 
+Endpoints, on the other hand, are more powerful, resembling stored procedures. One can invoke an endpoint at any time from the client. The endpoint implementation 
+will then be executed remotely at the target region or regions, and results from those executions will be returned to the client. \\
+
+Endpoint is an interface for dynamic RPC extension. The endpoint implementation is installed on the server side and can then be invoked with HBase RPC. 
+The client library provides convenience methods for invoking such dynamic interfaces. The application code client side performs a batch call. 
+This initiates parallel RPC invocations of the registered dynamic protocol on every target table region. The results of those invocations are returned 
+as they become available. The client library manages this parallel communication on behalf of the application, messy details such as dealing with retries 
+and errors, until all results are returned (or in the event of an unrecoverable error). Then the client library rolls up the responses into a Map and hands 
+it over to the application. If an unrecoverable error occurs, then an exception will be thrown for the application code to catch and take action.
 
 
 \section{Google Maps Directions API}

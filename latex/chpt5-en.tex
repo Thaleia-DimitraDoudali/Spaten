@@ -1,0 +1,93 @@
+\chapter{Queries}
+
+After the insertion of all available data into the HBase cluster, we implemented several queries over those data. These queries can be imposed to any 
+social networking service that contains data about user check-ins and GPS traces. As HBase is a NoSQL database and doesn't have a query execution language like SQL, 
+the implementation of the queries was done using HBase coprocessors. In this way the computation of intermediate results and other complex calculations is 
+transfered to the region servers that contain the respective data, decongesting the client from a heavy computational load.
+
+\section{Most visited POI query}
+
+This query contains the following question to the available data:
+\begin{center}
+ "Get the most visited points of interest of a certain user's friends"
+\end{center}
+
+The query is implemented in the following steps:
+
+\begin{enumerate}
+ \item The client calls the coprocessor that returns the friends of the specified user. The coprocessor runs on the region server that contains 
+ the row of the table 'friends' that has as key the user id of the desired user. The client receives back a list of user id's that 
+ represent his friends.
+ \item The client splits the list of friends into sections according to the initial split of the 'check-ins' table into 32 regions. In this way, 
+ each splitted friends list will contain row keys that belong to only one region server.
+ \item The client issues a call to the coprocessor that calculates the most visited POIs for every splitted friend list. 
+ More specifically, the client starts a new thread that is responsible for calling the coprocessor and getting the result back. 
+ In this way, the client issues parallel calls to the coprocessor and the calculations to the respective region servers are done simultaneously.
+ \item The coprocessor that runs on each region server gets from the 'check-ins' table the rows that include all the check-ins of the user friends 
+ that are assigned to this region. He then iterates over each row in order to store and count how many times the user's friend has visited each POI. 
+ The POIs are stored into a hash table for faster calculations. At the end, he iterates over the hash table in order to get the POI that the 
+ specific friend visited the most times.
+ \item Finally, the client merges the results that he got back from each coprocessor call and forms the final result, which contains the place and how many times 
+ each of his friends went their most visited POI.
+\end{enumerate}
+
+\section{News Feed query}
+
+This query contains the following question to the available data:
+\begin{center}
+ "Get the check-ins of all the friends of a specific user for a certain day into chronological order - Get a user's news feed for a specific day"
+\end{center}
+
+The query is implemented in the following steps:
+
+\begin{enumerate}
+ \item The client calls the coprocessor that returns the friends of the specified user. The coprocessor runs on the region server that contains 
+ the row of the table 'friends' that has as key the user id of the desired user. The client receives back a list of user id's that 
+ represent his friends.
+ \item The client splits the list of friends into sections according to the initial split of the 'check-ins' table into 32 regions. In this way, 
+ each splitted friends list will contain row keys that belong to only one region server.
+ \item The client issues a call to the coprocessor that calculates the news feed for every splitted friend list. 
+ More specifically, the client starts a new thread that is responsible for calling the coprocessor and getting the result back. 
+ In this way, the client issues parallel calls to the coprocessor and the calculations to the respective region servers are done simultaneously.
+ \item The coprocessor that runs on each region server gets from the 'check-ins' table the rows that have as key the friend's ids. Moreover, 
+ there are certain columns that are selected from each row. These are the ones that are between two certain timestamps, as the columns have 
+ as qualifiers the timestamp of the check-in. The start timestamp is the one that corresponds to the UTC timestamp conversion of the start of the 
+ specific day at 12 am and the end timestamp corresponds to the end of the day at 12 am of the next day. In this way, the coprocessor returns 
+ only the check-ins of every friend that were made the intended day.
+ \item The client merges the the resuls that he got back from the multiple coprocessor calls into one list of user check-ins. Finally, 
+ the client sorts this list in order to present the check-ins of the user's friends into chronological order.
+\end{enumerate}
+
+\section{Correlated Most Visited POI query}
+
+This query contains the following question to the available data:
+\begin{center}
+ "Get the number of times that a user's friends have visited the user's most visited POI"
+\end{center}
+
+The query is implemented in the following steps:
+
+\begin{enumerate}
+ \item The client calls the coprocessor that returns the friends of the specified user. The coprocessor runs on the region server that contains 
+ the row of the table 'friends' that has as key the user id of the desired user. The client receives back a list of user id's that 
+ represent his friends.
+ \item The client splits the list of friends into sections according to the initial split of the 'check-ins' table into 32 regions. In this way, 
+ each splitted friends list will contain row keys that belong to only one region server.
+ \item The client calls the most visited POI coprocessor in order to get the most visited POI of the specific user.
+ \item The client issues a call to the coprocessor that calculates the correlated most visited POI for every splitted friend list. 
+ More specifically, the client starts a new thread that is responsible for calling the coprocessor and getting the result back. 
+ In this way, the client issues parallel calls to the coprocessor and the calculations to the respective region servers are done simultaneously.
+ \item The coprocessor that runs on each region server gets from the 'check-ins' table the rows with the check-ins of all the friends that are 
+ on that region. Then he iterates over every check-in and checks whether it's location is the same with the location of the most visited POI 
+ of the original user. In this way it counts how many times each friend went to that place and returns that counter as a result.
+ \item The client merges the the resuls that he got back from the multiple coprocessor calls and presents to the user which friends of him went 
+ to his most visited POI and how many times they visited that place.
+
+ \end{enumerate}
+
+
+
+
+
+
+
