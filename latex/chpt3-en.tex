@@ -249,19 +249,19 @@ The generator uses a static map in order to depict the user's daily route, by is
 The points where a user checked in during the day are distinctly visible on the map with markers. These markers are also named using capital 
 letters of the alphabet in order to show the order that the user visited them. The generator uses the stored polylines, as they were extracted by the json 
 response file, in order to define the path that the map will indicate using a blue continuous line. The image of the map is accessible through the URL that 
-forms the http request to the API.
+forms the http request to the API. The generator stores the URLs created at the corresponding output file (outMaps), so that the image of the map can 
+be accessible by the users of the generator.
+
 For example, a request to Google Static Maps API, 
 as it is created by the generator, can be the following:
 \begin{center}
- %https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000&markers=label:A|25.08429,-80.442&markers=label:B|25.0947,-80.44&markers=label:C|25.09264,-80.4382&path=color:blue|enc:ygbxCni~iNY??k@??\{ACo@Aq@@s@Ai@AcN?_A?sACkA@iACM@gCAsCCsCAaBBK?C?C?C@A@CBABA@AB?B?F?D@R??QKIGMESIaBw@SK??GQGIOOk@m@UYa@c@OOu@y@e@m@EE??e@m@k@q@o@u@??b@_@nAyAj@m@hAmA??jDzD
+\url{https://maps.googleapis.com/maps/api/staticmap?&size=1000x1000&markers=label:A|44.7698,-69.7215&markers=label:B|44.7651,-69.7189&markers=label:C|44.7639,-69.7196&markers=label:D|44.7656,-69.717&path=color:blue|enc:gbgpGjnphL@FZKtE_BxEeB`Bk@z@[bA]tBo@HG~Ai@JMFG?A@A?A@C?C?E?C?EAE?I??M_@??L^??Tj@Vl@LNDFDDFDDDB@DBD@HBLBRBB?H@JAF?DAFAHCFCDCBCDEDGNU??OTEFEDCBEBGBIBG@E@G?K@IAC?SCMCICEAECCAEEGEEEEGMO??Wm@Uk@cAyCs@_C??bA_A}
 \end{center}
 The map that corresponds to the above URL is:
 
-The generator stores the URLs created at the corresponding output file (outMaps), so that the image of the map can be accessible by the users of the generator.
-
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{figures/map.png}
+  \includegraphics[width=0.7\textwidth]{figures/staticmap.png}
   \caption{Example of static map image}
 \end{figure}
 
