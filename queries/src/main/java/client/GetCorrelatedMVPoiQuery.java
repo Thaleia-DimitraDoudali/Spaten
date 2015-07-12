@@ -16,7 +16,8 @@ import containers.User;
 import containers.UserList;
 import coprocessors.FriendsProtocol;
 
-public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements Runnable{
+public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements
+		Runnable {
 
 	private UserList friendList;
 	private String outFile;
@@ -230,7 +231,8 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements Runn
 	public void runQuery() throws Exception {
 
 		GetFriendsQuery clientFriend = new GetFriendsQuery();
-		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(this.getUser());
+		GetMostVisitedPOIQuery clientMVP = new GetMostVisitedPOIQuery(
+				this.getUser());
 
 		this.executionTime = System.currentTimeMillis();
 
@@ -252,16 +254,18 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements Runn
 		clientFriend.setProtocol(FriendsProtocol.class);
 		clientFriend.executeSerializedQuery();
 
-		this.setMvp(clientMVP.getResultList().getMvpList().get(0));
-		this.setFriendList(clientFriend.getFriendList());
-		this.executeQuery();
-
+		if (clientMVP.getResultList().getMvpList().size() > 0) {
+			this.setMvp(clientMVP.getResultList().getMvpList().get(0));
+			this.setFriendList(clientFriend.getFriendList());
+			this.executeQuery();
+		}
 		clientFriend.closeConnection();
 		clientMVP.closeConnection();
 		this.closeConnection();
 
 		this.executionTime = System.currentTimeMillis() - this.executionTime;
-		//System.out.println("\n\nQuery executed in " + this.executionTime / 1000 + "s\n\n");
+		// System.out.println("\n\nQuery executed in " + this.executionTime /
+		// 1000 + "s\n\n");
 
 	}
 
@@ -275,7 +279,7 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements Runn
 			this.runQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 
 }
