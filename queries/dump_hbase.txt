@@ -1,0 +1,22 @@
+1. hbase org.apache.hadoop.hbase.mapreduce.Export 'test' /root/test_dmp
+'test' is the hbase table and 'root/test_dump' is the path on the HDFS
+
+2. hadoop fs -ls /root/
+ensure that test_dump was created on HDFS
+
+3. hadoop fs -copyToLocal /root/test_dump /root/
+Copy the test_dump file on HDFS to the local file system
+
+4. On hbase shell:
+	disable 'test'
+	drop 'test'
+	create 'test', 't'
+
+   Create the same table, with the same column family
+
+5. hbase org.apache.hadoop.hbase.mapreduce.Driver import 'test' /root/test_dump/
+where the path is on HDFS
+
+5. On hbase shell:
+	scan 'test' or count 'test'
+   in order to ensure that everything is ok
