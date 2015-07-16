@@ -1,6 +1,6 @@
 \chapter{Dataset}
 
-\section{Generator usage}
+\section{Generator input parameters}
 
 We were able to create a large dataset using the generator. More specifically, we set the input parameters of the generator to the following values:
 
@@ -37,19 +37,32 @@ Each user will visit the first place of the day at 9 am. Moreover, the last dail
 The generator will produce daily routes for the time period between the 1st of January 2015 and the 1st of March 2015. \\
 
 Therefore, the generator run with the specific input parameters in order to create a large dataset of users and their respective daily routes. 
-Respecting the request restrictions for the users of the free Google Directions API to 2500 requests per day to the API, the generator run 
-once a day for a significant period of time. At the end of the generator's run period, we were able to have 9464 users and their 2 months daily routes. 
+
+\section{Generator execution architecture}
+
+Respecting the request restrictions for the users of the free Google Directions API to 2500 requests per day to the API, the generator could run 
+once a day creating 14 users at a time for the specific input parameters. Therefore, we set up a cluster of 31 Virtual Machines (VMs) in order to be able to create a much 
+bigger number of users per day. Each VM of the cluster had 1 CPU, 1 GB RAM and 10 GB disk. The cluster used recourses located at the Computing 
+Systems Laboratory at NTUA. The PostgreSQL database, where the source data were stored, was set up in a different VM where the 
+generator run as well. This specific VM had 2 CPU, 4 GB RAM and 40 GB disk in order to be able to store the source data. When the generator was running 
+on the cluster VMs, a remote connection to the PostgreSQL database was established in order to gain access to the source data as well. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/gen_arch.png}
+  \caption{Generator execution architecture}
+\end{figure}
+
+In this way, we were able to run the generator on each VM collecting 448 users per day, creating 14 users per VM with the specified input parameters. 
+At the end of the generator's run period, we were able to have 9464 users and their 2 months daily routes. 
 The created dataset was available in the generator's two output files, one that stored the user's daily check-ins and another one having the user's total 
-gps traces indicating the daily trajectories. 
+gps traces indicating the daily trajectories.
 
-\newpage
-
-\section{Dataset storage}
+\section{Dataset storage model}
 
 The dataset created by the generator consists of 641 MB data of check-ins and 2.4 GB data of GPS traces. We also had available a 14 GB friend graph which 
 we adjusted in order to match the number of 9464 users created by the generator. The overall dataset of check-ins, GPS traces and friends was stored 
-into an HBase distributed database consisting of 1 master and 32 region servers. All data were splitted into 32 parts, so that they are 
-distributed equally into the region servers when the following tables were created. 
+into an HBase distributed database using the following data model.
 
 \subsection{Friends Table}
 
@@ -126,8 +139,18 @@ The user's GPS traces are parsed from the corresponding generator's output file 
 \caption{Example of HBase Table 'gps-traces'}
 \end{table}
 
+\section{Dataset storage architecture}
 
+The overall dataset was stored into an HBase distributed database. The HBase was set up over HDFS on a cluster of 32 VMs, consisting of 1 master and and 32 region servers 
+and 1 namenode and 32 datanodes. All different types of data were splitted into 32 parts, so that they are distributed equally into the region servers when the 
+following tables were created. More specifically, when we created the table of 'friends' in HBase, we predefined the keys where the total table would be splitted 
+into the region servers. Thus, the table was pre-splitted into 32 regions so that the data were equally divided into the region servers. The split into 32 parts was 
+also done for the tables of 'check-ins' and 'gps-traces'. The master VM which contains the HBase master as well as the namenode has 2 CPU, 4GB RAM and 40 GB disk. 
+The master is at the same time a region server and a datanode. The other 31 VMs holding the rest region servers and datanodes have 1 CPU, 2 GB RAM and 10 GB disk. 
 
-
-
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/hbase_cluster.jpg}
+  \caption{HBase cluster architecture}
+\end{figure}
 

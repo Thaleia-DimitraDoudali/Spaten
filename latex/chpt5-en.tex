@@ -1,11 +1,17 @@
 \chapter{Queries}
 
-After the insertion of all available data into the HBase cluster, we implemented several queries over those data. These queries can be imposed to any 
-social networking service that contains data about user check-ins and GPS traces. As HBase is a NoSQL database and doesn't have a query execution language like SQL, 
+After the insertion of all available data into the HBase cluster, we implemented several queries over the tables of 'friends' and 'check-ins'. 
+These queries can be imposed to any 
+social networking service that contains data about users that check in to several locations and have as friends other users of the service. 
+As HBase is a NoSQL database and doesn't have a query execution language like SQL for example, 
 the implementation of the queries was done using HBase coprocessors. In this way the computation of intermediate results and other complex calculations is 
 transfered to the region servers that contain the respective data, decongesting the client from a heavy computational load.
 
-\section{Most visited POI query}
+\section{Query implementation}
+
+We implemented the following queries over the data of tables 'friends' and 'check-ins' using HBase coprocessors. 
+
+\subsection{Most visited POI query}
 
 This query contains the following question to the available data:
 \begin{center}
@@ -28,10 +34,10 @@ The query is implemented in the following steps:
  The POIs are stored into a hash table for faster calculations. At the end, he iterates over the hash table in order to get the POI that the 
  specific friend visited the most times.
  \item Finally, the client merges the results that he got back from each coprocessor call and forms the final result, which contains the place and how many times 
- each of his friends went their most visited POI.
+ each of his friends went to their most visited POI.
 \end{enumerate}
 
-\section{News Feed query}
+\subsection{News Feed query}
 
 This query contains the following question to the available data:
 \begin{center}
@@ -58,7 +64,7 @@ The query is implemented in the following steps:
  the client sorts this list in order to present the check-ins of the user's friends into chronological order.
 \end{enumerate}
 
-\section{Correlated Most Visited POI query}
+\subsection{Correlated Most Visited POI query}
 
 This query contains the following question to the available data:
 \begin{center}
@@ -80,12 +86,114 @@ The query is implemented in the following steps:
  \item The coprocessor that runs on each region server gets from the 'check-ins' table the rows with the check-ins of all the friends that are 
  on that region. Then he iterates over every check-in and checks whether it's location is the same with the location of the most visited POI 
  of the original user. In this way it counts how many times each friend went to that place and returns that counter as a result.
- \item The client merges the the resuls that he got back from the multiple coprocessor calls and presents to the user which friends of him went 
+ \item The client merges the resuls that he got back from the multiple coprocessor calls and presents to the user which friends of him went 
  to his most visited POI and how many times they visited that place.
-
  \end{enumerate}
 
+\section{Queries execution}
 
+\subsection{Workload}
+
+Using the above queries we created a workload in order to test the behavior of the HBase cluster to multiple requests. More specifically, the workload 
+consists of the three different type of queries, since they all refer to the same HBase tables. Moreover, the workload takes as input the number of queries 
+that will be executed. In addition, since all queries include the retrieval of the friends of one user, that user is chosen randomly. The user that 
+corresponds to each query is chosen using a generator of random numbers that follows a uniform distribution. 
+The range of this distribution if the total number of available users, which is 9464.
+
+Then, according to the number of queries, all types of queries participate in the workload in a cyclic assignment. 
+For example, if the client wants 5 queries to be executed then those will be 1. most visited POI, 2. news feed, 3. corellated most visited POI, 
+4. most visited POI, 5. news feed. Also, the queries are executed in parallel as different threads. In this way, the HBase cluster 
+receives simultaneously the query requests. The total execution time of the 
+workload will be the biggest execution time amongst the queries of the workload. 
+
+\subsection{Architecture}
+
+There is one client that according to the specified number of queries to be executed, creates the workload in the way described previously. This client is hosted 
+on a VM with 2 CPU, 4 GB RAM and 40 GB disk. The client is responsible to receive the number of queries to be executed and create the workload in the way 
+described previously. The queries arrive at the same time in the HBase cluster that was described in section 4.1.
+
+The workload is executed in the following setup:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/query_ex.png}
+  \caption{Query execution architecture}
+\end{figure}
+
+\subsection{Scalability testing}
+
+Using the above architecture we performed a scalability testing, in order to evaluate how HBase handles the above workload for the specified dataset storage model 
+in different cluster sizes. We calculated the latency and throughput of the system. More specifically, latency is the mean 
+execution time of the queries. Throughput is the number of queries executed per second. 
+
+\[latency = \frac{\text{total execution time of all queries}}{\text{number of queries}} sec\]
+\[throughput = \frac{\text{number of queries}}{\text{maximum query execution time}} queries/sec\]
+
+We calculated the latency and throughput of the system for an increasing number of concurrent queries. We started with the HBase cluster having 32 nodes, as 
+described previously. Then, we resized the cluster to 24, 16, 8 and 4 nodes in order to observer the variations in the latency and throughput. 
+The restructure of the cluster was achieved by decommissioning the datanodes and region servers to the desired number. Both HDFS and HBase offer 
+commands in order to achieve the resize of the cluster by moving data and regions into the remaining nodes, preventing data loss. 
+
+The scalability testing can be presented in the following tables and corresponding plots:
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Queries no. & 32 nodes & 24 nodes & 16 nodes & 8 nodes & 4 nodes \\ \hline
+5 & 2.4   & 2.8    & 2.4   & 2.6   & 3\\ \hline
+10 & 2.5  & 2.7    & 2.7   & 3.2   & 4.6\\ \hline
+15 & 3.2  & 3.06   & 3.6   & 3.73  & 5\\ \hline
+20 & 3.4  & 3.9    & 4.2   & 4     & 5.95\\ \hline
+25 & 5    & 5.32   & 5.56  & 5.76  & 6.56\\ \hline
+30 & 5.5  & 5.76   & 6.36  & 6.03  & 7.66\\ \hline
+35 & 6.37 & 6.08   & 7.06  & 7.51  & 9.91 \\ \hline
+40 & 6.97 & 7.52   & 8.05  & 8.35  & 10.725 \\ \hline
+45 & 7.55 & 8.31   & 9.02  & 10    & 10.86 \\ \hline
+50 & 8.34 & 9.02   & 10.32 & 11.2  & 13.6 \\ \hline
+55 & 8.96 & 10.14  & 11.21 & 11.45 & 13.85 \\ \hline
+60 & 10.26 & 10.88 & 11.3  & 12.58 & 15.98 \\ \hline
+\end{tabular}
+\end{center}
+\caption{Scalability testing - Latency}
+\end{table}
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/scalability_latency.png}
+  \caption{Scalability testing - Latency}
+\end{figure}
+
+
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Queries no. & 32 nodes & 24 nodes & 16 nodes & 8 nodes & 4 nodes \\ \hline
+5 & 1.66   & 1.66  & 1.66 & 1.66 & 1.25\\ \hline
+10 & 3.33  & 2.5   & 2    & 1.8  & 1.66\\ \hline
+15 & 3.75  & 3.45  & 3.2  & 2.9  & 2.54\\ \hline
+20 & 4     & 3.9   & 3.5  & 3    & 2.5\\ \hline
+25 & 4.46  & 3.77  & 3.46 & 3.47 & 2.77\\ \hline
+30 & 5     & 4.28  & 3.75 & 3.33 & 2.72\\ \hline
+35 & 5     & 4.375 & 3.9  & 3.78 & 2.6 \\ \hline
+40 & 5.2   & 4.44  & 4    & 3.63 & 2.85 \\ \hline
+45 & 5.425 & 4.5   & 4.09 & 3.75 & 2.8125 \\ \hline
+50 & 5.55  & 4.54  & 4.16 & 3.84 & 2.63 \\ \hline
+55 & 5.5   & 4.58  & 4.13 & 3.66 & 2.65 \\ \hline
+60 & 5.2   & 4.61  & 4    & 3.52 & 2.72 \\ \hline
+\end{tabular}
+\end{center}
+\caption{Scalability testing - Throughput}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/scalability_throughput.png}
+  \caption{Scalability testing - Throughput}
+\end{figure}
 
 
 

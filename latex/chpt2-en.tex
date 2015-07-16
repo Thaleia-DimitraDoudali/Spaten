@@ -114,6 +114,19 @@ PostGIS can use GiST index at a table attribute. When a table column is a geogra
 (R-tree-over-GiST scheme). PostgreSQL doesn't allow, at the most recent versions, the use of standard R-tree, because this type of index 
 cannot handle attributes with size bigger than 8K and fail when a geography column is null. 
 
+\section{HDFS}
+
+The Hadoop Distributed File System (HDFS) \cite{28} is a distributed file system designed to run on commodity hardware. HDFS is highly fault-tolerant and is 
+designed to be deployed on low-cost hardware. HDFS provides high throughput access to application data and is suitable for applications that have large data sets. 
+HDFS is designed to reliably store very large files across machines in a large cluster. It stores each file as a sequence of blocks; all blocks in a file except 
+the last block are the same size. The blocks of a file are replicated for fault tolerance.
+
+The NameNode is the centerpiece of an HDFS file system. It keeps the directory tree of all files in the file system, and tracks where across the cluster the file data 
+is kept. It does not store the data of these files itself. Client applications talk to the NameNode whenever they wish to locate a file, or when they want to 
+add/copy/move/delete a file. The NameNode responds the successful requests by returning a list of relevant DataNode servers where the data lives. A Datanode 
+stores data in the HDFS. Client applications can talk directly to a DataNode, once the NameNode has provided the location of the data. 
+The DataNodes also perform block creation, deletion, and replication upon instruction from the NameNode. 
+
 
 \section{HBase}
 
