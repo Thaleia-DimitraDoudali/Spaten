@@ -22,7 +22,16 @@ public abstract class AbstractQueryClient {
     protected HTable table;
 	protected long executionTime;
 	protected User user;
+	protected long mergeTime;
 	
+	public long getMergeTime() {
+		return mergeTime;
+	}
+
+	public void setMergeTime(long mergeTime) {
+		this.mergeTime = mergeTime;
+	}
+
 	public User getUser() {
 		return user;
 	}

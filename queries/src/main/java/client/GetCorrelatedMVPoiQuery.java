@@ -72,7 +72,12 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements
 			intermediateResults.add(t.getResults());
 		}
 
+		this.mergeTime = System.currentTimeMillis();
+		
 		this.resultList = this.mergeResults(intermediateResults);
+		
+		this.mergeTime = System.currentTimeMillis() - this.mergeTime;
+		
 		if (print) {
 			bw.write("The friends of user no." + this.user.getUserId()
 					+ " that have been to his most visited POI are:\n");

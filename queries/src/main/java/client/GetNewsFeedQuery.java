@@ -72,9 +72,13 @@ public class GetNewsFeedQuery extends AbstractQueryClient implements Runnable{
 			t.join();
 			intermediateResults.add(t.getResults());
 		}
+		
+		this.mergeTime = System.currentTimeMillis();
 
 		CheckInList chkList = new CheckInList();
 		chkList = this.mergeResults(intermediateResults);
+		
+		this.mergeTime = System.currentTimeMillis() - this.mergeTime;
 
 		if (print) {
 			bw.write("The news feed of user no." + this.user.getUserId()

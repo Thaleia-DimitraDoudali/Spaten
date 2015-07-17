@@ -68,8 +68,12 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient implements Runna
 			t.join();
 			intermediateResults.add(t.getResults());
 		}
+		
+		this.mergeTime = System.currentTimeMillis();
 
 		this.resultList = this.mergeResults(intermediateResults);
+		
+		this.mergeTime = System.currentTimeMillis() - this.mergeTime;
 
 		if (print) {
 			bw.write("The most visited POIs of the friends of user no."
