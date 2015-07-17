@@ -34,10 +34,11 @@ those found in well-known social networking services such as Facebook.
 \section{Thesis contribution}
 
 \begin{enumerate}
-  \item Design and implementation of an open source parameterized generator of spatio-temporal and textual social media data. 
+  \item Design and implementation of an open source\footnote{Code available at \url{https://github.com/Thaleia-DimitraDoudali/thesis}} parameterized 
+  generator of spatio-temporal and textual social media data. 
   \item Creation of a large dataset of such complex realistic social media data using the generator.
-  \item Insertion of the large dataset into a distributed storage system. 
-  \item Evaluation of the storage system's performance and scalability.
+  \item Insertion of the large dataset into an HBase distributed database system. 
+  \item Scalability testing of the HBase cluster for the specific data storage model of the dataset produced by the generator.
 \end{enumerate}
 
 \section{Chapter outline}
@@ -45,13 +46,19 @@ those found in well-known social networking services such as Facebook.
 In chapter 2 we present the theoretical background, which is important for someone to know, in order to understand concepts and terminologies used later on. 
 More specifically, we analyze the tools used in the implementation of the generator, such as the database for the source data,
 Google's services for the creation and presentation of user's routes and some mathematical concepts for the input parameters. Also,
-we include thw distributed storage and data management tools, which were used in order to store the dataset created by the generator. 
+we include the distributed storage and data management tools, which were used in order to store the dataset created by the generator. 
 
 In chapter 3 we describe in detail the design of the generator. We analyze the storage schema of the source data, we define the input parameters and 
 present thoroughly the attributes, the decision and complete function of the generator. 
 
-In chapter 5 we sum up the results of the evaluation of social media services. We, also, present related work and possible extensions of the current 
-diploma thesis.
+In chapter 4 we analyze the creation of a Big Data dataset using the generator and the data storage model according to which the dataset is stored into an 
+HBase cluster.
+
+In chapter 5 we present the implementation of several queries over the available dataset, as well as the creation of a workload consisting of these queries. Also, 
+we perform the scalability testing of the HBase cluster and present the corresponding results.
+
+In chapter 6 we sum up the conclusions from the above evaluation of the distributed storage and processing tools of the social media data. Finally, we 
+present related work and possible future work.
 
 \section{Brief generator description}
 

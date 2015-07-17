@@ -147,10 +147,11 @@ following tables were created. More specifically, when we created the table of '
 into the region servers. Thus, the table was pre-splitted into 32 regions so that the data were equally divided into the region servers. The split into 32 parts was 
 also done for the tables of 'check-ins' and 'gps-traces'. The master VM which contains the HBase master as well as the namenode has 2 CPU, 4GB RAM and 40 GB disk. 
 The master is at the same time a region server and a datanode. The other 31 VMs holding the rest region servers and datanodes have 1 CPU, 2 GB RAM and 10 GB disk. 
+The cluster is accomodated on a OpenStack managed cloud service located at Computing Systems Laboratory in NTUA.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{figures/hbase_cluster.jpg}
+  \includegraphics[width=0.6\textwidth]{figures/hbase_cluster_gray.png}
   \caption{HBase cluster architecture}
 \end{figure}
 

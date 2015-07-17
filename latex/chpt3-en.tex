@@ -34,8 +34,8 @@ the following attributes:
 \end{itemize}
 
 After storing all points of interest into the database, we create an B-tree index to the attribute poisId of the table pois and to the attribute revId of the table reviews, 
-as well. Additionally, er create a GiST index to the attibute location of the table pois. As location has a geographic data type, GiST will implement an 
-improved R-tree index, as described in section 2.2.2. In this way, searching points of interest accrding to their location or identifying number, can be done 
+as well. Additionally, we create a GiST index to the attibute location of the table pois. As location has a geographic data type, GiST will implement an 
+improved R-tree index, as described in section 2.2.2. In this way, searching points of interest according to their location or identifying number, can be done 
 fast and efficiently.
 
 \section{Generator attributes}
@@ -66,7 +66,7 @@ The user produced by the generator has the following fields:
 A check-in to a point of interest (POI) has the following fields:
 
 \begin{itemize}
- \item poi: the point of interest (Poi) where the check-in was made.
+ \item poi: the point of interest (POI) where the check-in was made.
  \item review: the review that the user made for the specfic POI on the check-in.
  \item timestamp: the time when the check-in was made, in representation of type long.
  \item travel: boolean value indicating whether the check-in was made during a user's trip.
@@ -166,7 +166,7 @@ The range of the distribution are the total number of source POIs stored in Post
 \subsection{Trip}
 
 A user created by the generator is capable to travel, so as to be able to visit places that are further than maxDist meters from his home. In this way, 
-routes one day in Greece and the next one in France make sense. However, there has to be defined a central point around which the user will walk during his trip. 
+routes one day in Greece and the next one in France make sense. However, a central point around which the user will walk during his trip has to be defined. 
 In the implementation of the generator, this point is chosen to be the first ever point that the user visits during the current trip. 
 The choice of that point is done using a generator of random number that follow a uniform distribution. The range of the distribution is the number 
 of available source POIs.

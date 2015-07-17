@@ -1,5 +1,15 @@
 \chapter{Conclusion}
 
+\section{Summary}
+
+In this diploma thesis we were able to create a generator of spatio-temporal and textual social media data. These data resemble real data found in well-known online 
+social networking services. The daily execution of the generator for a significant period of time resulted in the assemblance of a Big Data dataset of users with daily routes and 
+check-ins to points of interest. In this way, we were able to re-create realistic social media data that we couldn't have access to due to privacy restrictions imposed by 
+current social networking services. With these data available, we were able to evaluate the distributed storage system that HBase provides and is used by a significant 
+number of such social networking services. Therefore, we stored the created dataset into an HBase cluster and implemented several queries that are common to such 
+services. We, then, created a workload with these types of queries in order to test the scalability of the HBase cluster. After executing the scalability testing 
+we resulted that the system is scalable, therefore, HBase provides indeed good performance and storage for Big Data social media services. 
+
 \section{Related Work}
 
 There are already generators that produce social media data. One such generator is DATAGEN, which is a social network data generator, provided by LDBC-SNB 
@@ -11,7 +21,16 @@ scaling characteristics their benchmark requires and collecting real data can be
 Also, there is LFR-Benchmark generator \cite{27} which provides the network structure of a social network, being able to mimic some of the properties of real 
 social media. The LFR generator produces social network graphs with power-law degree distribution and with implanted communities within the network.
 
-\section{Summary}
 
 \section{Future Work}
 
+There are several ways in which the current diploma thesis could be extended. As fas the generator is concerned, the produced data could be enhanced by also adding more 
+textual data such as Facebook posts or Twitter tweets. Also, the generator could use a photo and video pool in order to simulate the upload of photos and videos, 
+which is a basic functionality of most social networking services. As far as the generator execution is concerned, the generator could be instantiated with other 
+values in order to create a more polymorphic dataset. Also, the usage of Google Maps API for Work enables 100000 directions requests per 24 hour period, which is 
+significantly more than the limit of 2500 daily requests for the users of the free API. Therefore, the generator can be used more efficiently for users 
+subscribed to the Google Work services. 
+
+Moreover, regarding the implemented queries, there are many more that can be implemented. Also, there could be queries over the data of GPS traces which are 
+created by the generator. In this way, the created workload can be more efficient into the scalability testing of the HBase cluster. Finally, other 
+distributed storage and management systems could be evaluated in a similar way, such as Hadoop. 

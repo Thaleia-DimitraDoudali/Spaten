@@ -116,7 +116,7 @@ The workload is executed in the following setup:
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{figures/query_ex.png}
+  \includegraphics[width=0.8\textwidth]{figures/query_ex_gray.png}
   \caption{Query execution architecture}
 \end{figure}
 
@@ -132,7 +132,8 @@ execution time of the queries. Throughput is the number of queries executed per 
 We calculated the latency and throughput of the system for an increasing number of concurrent queries. We started with the HBase cluster having 32 nodes, as 
 described previously. Then, we resized the cluster to 24, 16, 8 and 4 nodes in order to observer the variations in the latency and throughput. 
 The restructure of the cluster was achieved by decommissioning the datanodes and region servers to the desired number. Both HDFS and HBase offer 
-commands in order to achieve the resize of the cluster by moving data and regions into the remaining nodes, preventing data loss. 
+commands in order to achieve the resize of the cluster by moving data and regions into the remaining nodes, preventing data loss and ensuring that the 
+regions will be data balanced. 
 
 The scalability testing can be presented in the following tables and corresponding plots:
 
@@ -166,6 +167,18 @@ Queries no. & 32 nodes & 24 nodes & 16 nodes & 8 nodes & 4 nodes \\ \hline
 \end{figure}
 
 
+As it is shown in the above graph, the latency increases as the number of nodes of the HBase cluster decreases. Latency is the mean execution time of the queries. Thus, 
+it is expected that the latency will increase when there are fewer nodes in the cluster. In more details, when the cluster size reduces there are fewer servers to 
+handle the read requests and calculations that accompany the query. Therefore, the remaining HBase region servers have to handle more workload as opposed to when 
+the cluster size was bigger. More specifically, since the data on the tables 'friends' and 'check-ins' are splitted into 32 regions in order to be equally 
+distributed in the 32 nodes cluster, when we reduce the nodes, a region server can end up with more than one region from each table. In this way, the region 
+server will have to handle more coprocessor calls as he has to server calculations for more data than before. Consequently, the execution time of the queries 
+increases as there are fewer region servers and datanodes. Additionally, the latency increases as the client sends more concurrent queries. This happens due to the fact 
+that as the number of concurrent queries elevate the servers cannot resolve them simultaneously and many of them have to wait in the servers queues. Therefore, 
+there are queries that have additional waiting time to their total execution time. This waiting time becomes bigger when there are fewer servers to handle the 
+concurrent queries. On the same level, when there is a small number of concurrent queries on different cluster sizes, then the latency is approximately the same 
+due to the fact that there is no added waiting time. 
+
 
 \begin{table}[H]
 \begin{center}
@@ -194,6 +207,26 @@ Queries no. & 32 nodes & 24 nodes & 16 nodes & 8 nodes & 4 nodes \\ \hline
   \includegraphics[width=0.8\textwidth]{figures/scalability_throughput.png}
   \caption{Scalability testing - Throughput}
 \end{figure}
+
+Throughput is the number of queries executed per second. It is indicative of the performance of the system. For the current setup and workload, we observe that 
+the throughput increases as the size of the cluster becomes bigger. This is expected due to the fact that more servers can serve more concurrent queries. 
+When the number of servers increases the amount of work assigned to each server reduces, if the cluster is balanced. In our case, we ensure that the cluster 
+is balanced as far as the data are concerned, when we pre-split the data into 32 regions. Also, HBase runs a balancer that keeps the regions equally 
+distributed to the region servers. Therefore, when the cluster has 32 region servers, those have to run calculations over fewer data when the coprocessors are 
+called, as opposed to when the cluster has fewer nodes. Moreover, we can see that for a specific cluster size the throughput increases as the number of 
+concurrent queries elevate. This indicates that the system can handle a bigger load without dropping in performance. However, there is a certain limit to the 
+throughput that prevents it from increasing even more. In every real time system exists that limit and indicates that the system cannot handle more queries per 
+second for the specific cluster size. This limit is different according to the number of nodes, while a bigger cluster size can have bigger throughput. 
+Finally, we can see that this limit in the throughput is not a fixed value for every cluster size. This is due to the fact that the workload is not preset and 
+can variate according to the randomly selected user factor. Additionally, cache affects tremendously the performance. When data for a query are retrieved from 
+the server's cache, then the response time is noticeably less than getting the data from the datanode's disk. Also, the workload is executed on a real time system, 
+on a cluster of virtual machines whose performance can be affected by the rest users of the cloud service that accomodates the VMs. However, those variations to the 
+maximum value of the throughput are small and don't prevent us from seeing a stable limitation to the system's throughput.
+
+In conclusion, the HBase cluster that contains the social networking data produced by the generator and stored with the data model described previously, is 
+scalable as it has the expected behavior of common scalable systems. 
+The construction and execution of the workload that contains the three types of queries, allows as to test the scalability of the HBase cluster 
+by calculating the latency and throughput. 
 
 
 

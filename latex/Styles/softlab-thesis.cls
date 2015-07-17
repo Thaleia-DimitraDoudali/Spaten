@@ -1204,7 +1204,7 @@
     \chapter*{\listtablename
       \@mkboth{\listtablename}%
               {\listtablename}}%
-    \addcontentsline{toc}{chapter}{\listtablename}
+   % \addcontentsline{toc}{chapter}{\listtablename}
     \@starttoc{lot}%
     }
 \let\l@table\l@figure
