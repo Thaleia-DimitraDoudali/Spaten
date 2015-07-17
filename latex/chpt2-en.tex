@@ -141,13 +141,13 @@ key/value data storage model. The main characteristics if the data model are the
 
 \begin{itemize}
  \item Table: HBase organizes data into tables as most database systems.
- \item Row: Within a table, data is stored according to its row. Rows are uniquely identified by a key. Row keys are treated as byte arrays, thus they do not 
+ \item Row: Within a table, data are stored according to its row. Rows are uniquely identified by a key. Row keys are treated as byte arrays, thus they do not 
  have a specific data type.
  \item Column Family: Column families group data within a row, impacting their physical arrangement. They are stored together on disk, which is why 
  HBase is referred to as a column-oriented data store. Column families must be defined up front, during table creation. 
- \item Column Qualifier: Data within a column family is addressed via its column qualifier, or simply, column. Column qualifiers need not be consistent 
+ \item Column Qualifier: Data within a column family are addressed via its column qualifier, or simply, column. Column qualifiers need not be consistent 
  between rows. Like row keys, column qualifiers do not have a data type and are always treated as a byte array.
- \item Cell: A combination of row key, column family, and column qualifier uniquely identifies a cell. The data stored in a cell is 
+ \item Cell: A combination of row key, column family, and column qualifier uniquely identifies a cell. The data stored in a cell are 
  referred to as that cell’s value. Values also do not have a data type and are always treated as a byte array.
  \item Timestamp: Values within a cell are versioned. Versions are identified by their version number, which by default is the timestamp of when the cell was written. 
 If a timestamp is not specified during a write, the current timestamp is used. If the timestamp is not specified for a read, the latest one is returned. The number 
