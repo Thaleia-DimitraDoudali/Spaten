@@ -46,6 +46,21 @@ Durability means that once a transaction has been committed, it will remain so, 
 for instance, once a group of SQL statements execute, the results need to be stored permanently (even if the database crashes immediately thereafter). 
 To defend against power loss, transactions (or their effects) must be recorded in a non-volatile memory.
 
+\subsection{OLTP vs OLAP}
+
+\subsubsection{OLTP}
+
+Online transaction processing, or OLTP, is a class of information systems that facilitate and manage transaction-oriented applications, typically for 
+data entry and retrieval transaction processing. OLTP is characterized by a large number of short on-line transactions (INSERT, UPDATE, DELETE). 
+OLTP must possess ACID qualities to maintain data integrity and to ensure that transactions are correctly executed. 
+The main emphasis for OLTP systems is put on very fast query processing, maintaining data integrity in multi-access environments and an effectiveness 
+measured by number of transactions per second. In OLTP database there is detailed and current data, and the schema used to store transactional databases is the entity model.
+
+\subsubsection{OLAP}
+Online analytical processing, or OLAP, is characterized by relatively low volume of transactions. Queries are often very complex and involve aggregations. 
+For OLAP systems a response time is an effectiveness measure. OLAP applications are widely used by Data Mining techniques. 
+In OLAP database there is aggregated, historical data, stored in multi-dimensional schemas.
+
 \section{PostgreSQL}
 
 PostgreSQL \cite{11} is an open source object-relational database management system. It runs on all major operating systems, including Linux, UNIX (AIX, BSD, HP-UX, 
@@ -179,16 +194,18 @@ HBase has the following three major architecture components:
 
 \subsection{Coprocessors}
 
-HBase coprocessors enable distributed computation directly within the HBase server processes on the server's local data.
+HBase coprocessors \cite{30} enable distributed computation directly within the HBase server processes on the server's local data.
 The idea of HBase Coprocessors was inspired by Google’s BigTable coprocessors. Coprocessors can be loaded globally on all tables and regions hosted 
 by the region server, these are known as system coprocessors; or the administrator can specify which coprocessors should be loaded on all regions for a table on 
 a per-table basis, these are known as table coprocessors. There are two categories of HBase coprocessors, the observer and the 
 endpoint coprocessors. The idea behind observers is that we can insert user code by overriding upcall methods provided by the coprocessor framework. 
 The callback functions are executed from core HBase code when certain events occur. 
 Endpoints, on the other hand, are more powerful, resembling stored procedures. One can invoke an endpoint at any time from the client. The endpoint implementation 
-will then be executed remotely at the target region or regions, and results from those executions will be returned to the client. \\
+will then be executed remotely at the target region or regions, and results from those executions will be returned to the client. 
+In essence, coprocessors implement the idea of "move computation near the data", a method that google heavily utilizes to increase performance: it is much cheaper 
+to transfer a small piece of code to be executed in parallel in various servers instead of moving data where the code is installed.
 
-Endpoint is an interface for dynamic RPC extension. The endpoint implementation is installed on the server side and can then be invoked with HBase RPC. 
+The Endpoint is an interface for dynamic RPC extension. The endpoint implementation is installed on the server side and can then be invoked with an HBase RPC. 
 The client library provides convenience methods for invoking such dynamic interfaces. The application code client side performs a batch call. 
 This initiates parallel RPC invocations of the registered dynamic protocol on every target table region. The results of those invocations are returned 
 as they become available. The client library manages this parallel communication on behalf of the application, messy details such as dealing with retries 
@@ -251,7 +268,7 @@ fields:
 
 \begin{itemize}
  \item summary: a short textual description for the route, suitable for naming and disambiguating the route from alternatives.
- \item legs[]: an array which contains information about a leg of the route, between two locations within the given route. If there are no 
+ \item legs[]: an array which contains information about a leg (i.e. a part) of the route, between two locations within the given route. If there are no 
  waypoints defined, the array will include one element, which will be the total route. 
  \item waypoint\_order: an array indicating the order of any waypoints in the calculated route. 
  \item overview\_polyline: a single points object that holds an encoded polyline representation of the route. This polyline is an approximate 
@@ -381,7 +398,7 @@ For example:
 
 \subsection{Encoded Polyline Algorithm Format}
 
-JSON response file contains an encoded polyline as a representation of the route. This representation is the result of encoding 
+The JSON response file contains an encoded polyline as a representation of the route. This representation is the result of encoding 
 the geographical coordinates of the intermediate points of the route. Google Maps API follows a specific encoding algorithm \cite{17} of the latitude and longitude 
 of any point. The steps for encoding such a signed value indicating the latitude or longitude are specified below:
 
@@ -398,7 +415,8 @@ of any point. The steps for encoding such a signed value indicating the latitude
  \item Convert each value to its ASCII equivalent.
 \end{enumerate}
 
-Following these steps in reverse we can decode an encoded polyline into the appropriate list of geographical coordinates. 
+Following these steps in reverse we can decode an encoded polyline into the appropriate list of geographical coordinates 
+and extract the GPS traces that define the route. 
 
 \section{Google Maps Static Maps API}
 

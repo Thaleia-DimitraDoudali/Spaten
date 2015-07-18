@@ -41,7 +41,7 @@ The query is implemented in the following steps:
 
 This query contains the following question to the available data:
 \begin{center}
- "Get the check-ins of all the friends of a specific user for a certain day into chronological order - Get a user's news feed for a specific day"
+ "Get the check-ins of all the friends of a specific user for a certain day into chronological order"
 \end{center}
 
 The query is implemented in the following steps:
@@ -106,7 +106,7 @@ For example, if the client wants 5 queries to be executed then those will be 1. 
 receives simultaneously the query requests. The total execution time of the 
 workload will be the biggest execution time amongst the queries of the workload. 
 
-\subsection{Architecture}
+\subsection{Workload generation setup}
 
 There is one client that according to the specified number of queries to be executed, creates the workload in the way described previously. This client is hosted 
 on a VM with 2 CPU, 4 GB RAM and 40 GB disk. The client is responsible to receive the number of queries to be executed and create the workload in the way 
@@ -160,14 +160,7 @@ Queries no. & 32 nodes & 24 nodes & 16 nodes & 8 nodes & 4 nodes \\ \hline
 \end{table}
 
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[height=0.6\textwidth]{figures/scalability_latency.png}
-  \caption{Scalability testing - Latency}
-\end{figure}
-
-
-As it is shown in the above graph, the latency increases as the number of nodes of the HBase cluster decreases. Latency is the mean execution time of the queries. Thus, 
+The latency increases as the number of nodes of the HBase cluster decreases. Latency is the mean execution time of the queries. Thus, 
 it is expected that the latency will increase when there are fewer nodes in the cluster. In more details, when the cluster size reduces there are fewer servers to 
 handle the read requests and calculations that accompany the query. Therefore, the remaining HBase region servers have to handle more workload as opposed to when 
 the cluster size was bigger. More specifically, since the data on the tables 'friends' and 'check-ins' are splitted into 32 regions in order to be equally 
@@ -179,6 +172,11 @@ there are queries that have additional waiting time to their total execution tim
 concurrent queries. On the same level, when there is a small number of concurrent queries on different cluster sizes, then the latency is approximately the same 
 due to the fact that there is no added waiting time. 
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[height=0.6\textwidth]{figures/scalability_latency.png}
+  \caption{Scalability testing - Latency}
+\end{figure}
 
 \begin{table}[H]
 \begin{center}
@@ -202,12 +200,6 @@ Queries no. & 32 nodes & 24 nodes & 16 nodes & 8 nodes & 4 nodes \\ \hline
 \caption{Scalability testing - Throughput}
 \end{table}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[height=0.6\textwidth]{figures/scalability_throughput.png}
-  \caption{Scalability testing - Throughput}
-\end{figure}
-
 Throughput is the number of queries executed per second. It is indicative of the performance of the system. For the current setup and workload, we observe that 
 the throughput increases as the size of the cluster becomes bigger. This is expected due to the fact that more servers can serve more concurrent queries. 
 When the number of servers increases the amount of work assigned to each server reduces, if the cluster is balanced. In our case, we ensure that the cluster 
@@ -222,6 +214,12 @@ can variate according to the randomly selected user factor. Additionally, cache 
 the server's cache, then the response time is noticeably less than getting the data from the datanode's disk. Also, the workload is executed on a real time system, 
 on a cluster of virtual machines whose performance can be affected by the rest users of the cloud service that accomodates the VMs. However, those variations to the 
 maximum value of the throughput are small and don't prevent us from seeing a stable limitation to the system's throughput.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[height=0.6\textwidth]{figures/scalability_throughput.png}
+  \caption{Scalability testing - Throughput}
+\end{figure}
 
 In conclusion, the HBase cluster that contains the social networking data produced by the generator and stored with the data model described previously, is 
 scalable as it has the expected behavior of common scalable systems. 

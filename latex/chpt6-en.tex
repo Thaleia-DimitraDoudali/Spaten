@@ -2,13 +2,30 @@
 
 \section{Summary}
 
-In this diploma thesis we were able to create a generator of spatio-temporal and textual social media data. These data resemble real data found in well-known online 
-social networking services. The daily execution of the generator for a significant period of time resulted in the assemblance of a Big Data dataset of users with daily routes and 
-check-ins to points of interest. In this way, we were able to re-create realistic social media data that we couldn't have access to due to privacy restrictions imposed by 
-current social networking services. With these data available, we were able to evaluate the distributed storage system that HBase provides and is used by a significant 
-number of such social networking services. Therefore, we stored the created dataset into an HBase cluster and implemented several queries that are common to such 
-services. We, then, created a workload with these types of queries in order to test the scalability of the HBase cluster. After executing the scalability testing 
-we resulted that the system is scalable, therefore, HBase provides indeed good performance and storage for Big Data social media services. 
+In this diploma thesis we were able to create a generator of spatio-temporal and textual social media data. We used real points of interest and ratings and reviews 
+for these points as those were crawled by real users of the online travel service TripAdvisor. The utilization of these real points and the directions obtained 
+from Google Directions API resulted in the creation of realistic routes, check-ins and GPS traces. Also, the fact that the generator uses random factors in order 
+to take decisions about the place, duration and number of daily visits enhances the realistic aspect of the generated data. Additionally, most of these factors 
+are instantiated by the corresponding input parameters, so that the generator can produce datasets with characteristics that vary. Therefore, we were able to create 
+users that resemble real users found in well-known online 
+social networking services. 
+
+The daily execution of the generator for a significant period of time resulted in the assemblance of a Big Data dataset of users with daily routes and 
+check-ins to points of interest. More specifically, the generator created 9464 users, 1586537 check-ins and 38800019 GPS traces, which sum up to 3 GB data. 
+In this way, we were able to re-create realistic social media data that we couldn't have access to due to privacy restrictions imposed by 
+current social networking services. 
+
+With these data available, we were able to evaluate the distributed storage system that HBase provides and is used by a significant 
+number of such social networking services. For this reason, we stored the created dataset into an HBase cluster using an appropriate data model and by 
+ensuring that the cluster will be data balanced. Then, 
+we implemented several queries over the available data that are common to such 
+services. The queries were implemented using HBase coprocessors, which move the computation of intermediate results and other complex calculations 
+to the region servers that contain the respective data, decongesting the client from a heavy computational load. We, then, created a workload with these 
+types of queries in order to test the scalability of the HBase cluster. We measured the latency and throughput of 
+the HBase cluster while changing the number of concurrent queries and cluster size. We came to the conclusion that 
+the HBase cluster which contains the social networking data produced by the generator and stored with the specific data model, is 
+scalable as it has the expected behavior of common scalable systems. 
+Therefore, HBase provides indeed good performance and storage for Big Data social media services. 
 
 \section{Related Work}
 
