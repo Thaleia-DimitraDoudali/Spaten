@@ -1,0 +1,35 @@
+-----PostgreSQL VM------
+
+1. Add to /etc/environment
+	LC_ALL="en_US.UTF-8"
+	LANGUAGE="en_US.UTF-8"
+2. exit - login again to VM
+3. sudo apt-get update
+   sudo apt-get install -y postgresql postgresql-contrib
+4. pg_createcluster 9.3 main --start
+5. /etc/init.d/postgresql start
+6. sudo -u postgres createuser -P thaleia 
+	password: thaleia
+7. sudo -u postgres createdb -O thaleia datagen 
+8. psql -h localhost -U thaleia datagen
+9. \q
+10. sudo apt-get install -y postgis postgresql-9.3-postgis-2.1
+11. sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;" datagen
+
+-> Allow connections from all - edit pg_hba.conf postgres.conf
+
+-> Import Pois to DB
+/home/ubuntu:~$ nohup ./poisToDB/importPois data/items_attr.json &	
+
+-> Create indexes after all pois inserted to datagen database
+1. CREATE INDEX index_id ON pois(poisId);
+2. CREATE INDEX rev_id ON reviews(revId);
+3. CREATE INDEX point_idx ON pois USING GIST (location);
+4. VACUUM ANALYZE pois;
+5. cluster pois using point_idx;
+6. analyze pois;
+
+
+------Other VM---------
+Just jav installed
+Run generator with db ip the one of the postgres VM
