@@ -1,0 +1,38 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import *
+
+N = 5
+p32 = [4.63, 4.43, 4.69, 4.56, 5.14]
+p24 = [3.93, 4.25, 4.29, 4.1, 4.5]
+p16 = [3.64, 4.08, 4.05, 3.72, 3.94]
+p8 = [2.83, 3.4, 3.49, 3.72, 3.45]
+p4 = [2.5, 3, 3.19, 3.24, 3]
+
+width = 15        # the width of the bars
+ind = np.arange(100,600,100)  # the x locations for the groups
+
+fig, ax = plt.subplots()
+rects1 = ax.bar(ind-2*width, p32, width, color='cyan')
+rects2 = ax.bar(ind-width, p24, width, color='red')
+rects3 = ax.bar(ind, p16, width, color='green')
+rects4 = ax.bar(ind+width, p8, width, color='magenta')
+rects5 = ax.bar(ind+2*width, p4, width, color='blue')
+
+# add some text for labels, title and axes ticks
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+ax.set_ylabel('Latency (sec)')
+ax.set_xlabel('Concurrent queries')
+ax.set_xticks(ind+width)
+ax.set_xticklabels(('50', '100', '150', '200', '250'))
+
+#ax.legend( (rects1[0], rects2[0], rects3[0], rects4[0], rects5[0]), ('32 nodes', '24 nodes', '16 nodes', '8 nodes', '4 nodes'), loc='center left', bbox_to_anchor=(1, 0.5))
+ax.legend( (rects1[0], rects2[0], rects3[0], rects4[0], rects5[0]), ('32 nodes', '24 nodes', '16 nodes', '8 nodes', '4 nodes'), loc='upper left', fontsize='9')
+
+savefig('scalability_throughput.png')
+plt.show()
+
+
+
+
