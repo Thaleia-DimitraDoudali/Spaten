@@ -1,17 +1,17 @@
-Set up hadoop, hbase exactly according to instructions in pdf.
+Setup HBase 0.94.27 over Hadoop 1.2.1.
 SSH to VMs as root.
 
 When adding a new coprocessor:
-	1. on master edit: /home/ubuntu/hbase-0.94.27/conf/hbase-site.xml 
+	1. on master edit: /path/to/hbase-0.94.27/conf/hbase-site.xml 
 	   it should look sth like this:
  	   <property>
     	   <name>hbase.coprocessor.region.classes</name>
            <value>coprocessors.FriendsProtocol, coprocessors.FriendsEndpoint, coprocessors.MostVisitedPOIProtocol, coprocessors.MostVisitedPOIEndpoint</value>
        </property>
 
-	2. copy the jar with the coprocessor code in /home/ubuntu/hbase-0.94.27/lib/ which is included in the hbase classpath
+	2. copy the jar with the coprocessor code in /path/to/hbase-0.94.27/lib/ which is included in the hbase classpath
 
 	3. scp from the master the hbase-site.xml and the code jar into all the slaves
-		scp hbase-site.xml root@slave1:/home/ubuntu/hbase-0.94.27/conf/
-		scp thesis-queries-0.0.1-SNAPSHOT.jar root@slave1:/home/ubuntu/hbase-0.94.27/lib/
+		scp hbase-site.xml root@slave1:/path/to/hbase-0.94.27/conf/
+		scp code/queries/target/queries.jar root@slave1:/path/to/hbase-0.94.27/lib/
 

@@ -29,6 +29,8 @@
 5. cluster pois using point_idx;
 6. analyze pois;
 
+->Modify accordingly line 25 on code/generator/src/main/java/db/DBconnector.java with the IPv6 address of the PostgreSQL VM.
+->If IPv6 not available, then use IPv4 while removing -Djava.net.preferIPv6Addresses=true from scripts/run_generator.sh
 
 ------Other VM---------
 Just jav installed
