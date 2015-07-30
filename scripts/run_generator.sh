@@ -3,7 +3,7 @@
 
 [ -z "$LOCAL_CLS" ] && export LOCAL_CLS=$(echo lib/*.jar | tr ' ' ':')
 
-JAR_FILE="generator/thesis-maven-0.0.1-SNAPSHOT.jar"
+JAR_FILE="generator.jar"
 
 CLASSPATH=$LOCAL_CLS:$JAR_FILE
 
