@@ -6,3 +6,4 @@ public interface MostVisitedTraceProtocol extends CoprocessorProtocol{
 	
 	public byte[] getMostVisitedTrace(byte[] row) throws Exception;
 }
+

@@ -5,3 +5,4 @@ do
 	echo scp -r generator/ ubuntu@192.168.5.${ip}:/home/ubuntu/generator/
 	scp -r generator/ ubuntu@192.168.5.${ip}:/home/ubuntu/
 done
+

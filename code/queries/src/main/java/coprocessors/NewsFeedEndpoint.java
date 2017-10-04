@@ -52,3 +52,4 @@ public class NewsFeedEndpoint extends BaseEndpointCoprocessor implements NewsFee
 	}
 	
 }
+

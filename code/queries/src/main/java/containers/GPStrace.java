@@ -117,3 +117,4 @@ public class GPStrace implements Serializable {
 		return serializable;
 	}
 }
+

@@ -8,3 +8,4 @@ public interface Serializable {
 	public byte[] getKeyBytes() throws Exception;
 
 }
+

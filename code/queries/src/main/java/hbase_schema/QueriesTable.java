@@ -9,3 +9,4 @@ public interface QueriesTable {
 	public void getSingle(byte[] row, byte[] qualifier) throws Exception;
 
 }
+

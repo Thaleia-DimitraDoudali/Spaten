@@ -15,3 +15,4 @@ When adding a new coprocessor:
 		scp hbase-site.xml root@slave1:/path/to/hbase-0.94.27/conf/
 		scp code/queries/target/queries.jar root@slave1:/path/to/hbase-0.94.27/lib/
 
+

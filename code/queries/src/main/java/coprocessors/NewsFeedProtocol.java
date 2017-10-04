@@ -6,3 +6,4 @@ public interface NewsFeedProtocol extends CoprocessorProtocol{
 	
 	public byte[] getNewsFeed(byte[] row, byte[] date) throws Exception;
 }
+

@@ -8,3 +8,4 @@ do
 	scp -r ubuntu@192.168.5.${ip}:/home/ubuntu/output/daily-maps_* dataset/daily-maps/
 done
 
+

@@ -35,3 +35,4 @@
 ------Other VM---------
 Just jav installed
 Run generator with db ip the one of the postgres VM
+

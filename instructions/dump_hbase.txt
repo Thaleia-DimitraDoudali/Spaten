@@ -20,3 +20,4 @@ where the path is on HDFS
 5. On hbase shell:
 	scan 'test' or count 'test'
    in order to ensure that everything is ok
+

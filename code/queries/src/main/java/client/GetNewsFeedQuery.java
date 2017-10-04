@@ -282,3 +282,4 @@ public class GetNewsFeedQuery extends AbstractQueryClient implements Runnable{
 	}
 
 }
+

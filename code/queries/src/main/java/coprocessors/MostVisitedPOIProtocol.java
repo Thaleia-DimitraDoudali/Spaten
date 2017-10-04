@@ -6,3 +6,4 @@ public interface MostVisitedPOIProtocol extends CoprocessorProtocol{
 	
 	public byte[] getMostVisitedPOI(byte[] row) throws Exception;
 }
+

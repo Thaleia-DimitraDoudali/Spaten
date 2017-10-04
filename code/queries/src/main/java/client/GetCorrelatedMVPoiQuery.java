@@ -288,3 +288,4 @@ public class GetCorrelatedMVPoiQuery extends AbstractQueryClient implements
 	}
 
 }
+

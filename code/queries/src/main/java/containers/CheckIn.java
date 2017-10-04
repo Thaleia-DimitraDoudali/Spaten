@@ -145,3 +145,4 @@ public class CheckIn implements Serializable {
     }
 
 }
+

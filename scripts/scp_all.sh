@@ -6,3 +6,4 @@ do
 	scp -r ubuntu@192.168.5.${ip}:/home/ubuntu/output/ /media/thaleia/7ED0-4D4D/
 done
 
+

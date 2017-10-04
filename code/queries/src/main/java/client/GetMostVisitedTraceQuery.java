@@ -287,3 +287,4 @@ public class GetMostVisitedTraceQuery extends AbstractQueryClient implements Run
 		}		
 	}
 }
+

@@ -70,3 +70,4 @@ public class MostVisitedPOIEndpoint extends BaseEndpointCoprocessor implements
 	}
 
 }
+

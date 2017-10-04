@@ -53,3 +53,4 @@ public class User implements Serializable {
         return buffer.array();
     }
 }
+

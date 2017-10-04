@@ -69,3 +69,4 @@ public class MostVisitedTraceEndpoint extends BaseEndpointCoprocessor implements
 	}
 
 }
+

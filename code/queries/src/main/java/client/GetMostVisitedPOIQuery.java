@@ -300,3 +300,4 @@ public class GetMostVisitedPOIQuery extends AbstractQueryClient implements Runna
 	}
 
 }
+

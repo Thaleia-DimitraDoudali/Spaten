@@ -56,3 +56,4 @@ public class CorrelatedMVPEndpoint extends BaseEndpointCoprocessor implements Co
 	}
 
 }
+

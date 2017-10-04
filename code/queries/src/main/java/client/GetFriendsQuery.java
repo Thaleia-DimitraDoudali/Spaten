@@ -129,3 +129,4 @@ public class GetFriendsQuery extends AbstractQueryClient {
 		client.runQuery(args);
 	}
 }
+

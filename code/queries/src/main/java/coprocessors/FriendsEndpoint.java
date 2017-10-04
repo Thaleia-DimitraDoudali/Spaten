@@ -37,3 +37,4 @@ public class FriendsEndpoint extends BaseEndpointCoprocessor implements FriendsP
 	}
 
 }
+

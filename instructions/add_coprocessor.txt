@@ -35,3 +35,4 @@ alter 'gps-traces', METHOD => 'table_att', 'coprocessor' => '/home/thaleia/Deskt
 alter 'gps-traces', METHOD => 'table_att', 'coprocessor' => '/home/thaleia/Desktop/thesis/queries/target/thesis-queries-0.0.1-SNAPSHOT.jar | coprocessors.MostVisitedTraceProtocol |'
 enable 'gps-traces'
 describe 'gps-traces'
+

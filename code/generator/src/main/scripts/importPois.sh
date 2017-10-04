@@ -9,3 +9,4 @@ CLASSPATH=$LOCAL_CLS:$JAR_FILE
 
 ##echo $CLASSPATH
 java -cp $CLASSPATH db.PoisToDB $1
+

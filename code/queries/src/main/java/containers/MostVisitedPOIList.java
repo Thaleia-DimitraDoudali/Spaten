@@ -143,3 +143,4 @@ public class MostVisitedPOIList implements Serializable, Compressible{
 	}
 
 }
+
