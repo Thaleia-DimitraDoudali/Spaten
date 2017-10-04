@@ -3,7 +3,7 @@
 ##A Spatio-temporal and Textual Big Data generator
 
 ###Data:
-http://www.cslab.ntua.gr/~ikons/Spaten/
+http://research.cslab.ece.ntua.gr/datasets/ikons/Spaten/
 
 ###How to set up and run Spaten:
 1. Setup PostgreSQL according to the instructions/setup_vm.txt, importing Spaten's Source-Dataset
