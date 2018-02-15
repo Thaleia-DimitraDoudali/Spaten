@@ -14,3 +14,5 @@ http://research.cslab.ece.ntua.gr/datasets/ikons/Spaten/
 2. Import Spaten-Dataset according to scripts/inset\_\*.sh 
 5. Run mixed workload of concurrent queries scripts/chk-query.sh
 
+For further detail refer to:<br/>
+*Thaleia Dimitra Doudali, Ioannis Konstantinou, Nectarios Koziris. Spaten: a Spatio-temporal and Textual Big Data Generator. In proceedings of the 2017 Big Spatial Data Workshop (BSD 2017 in conjuction with IEEE BigData 2017), Boston, MA, USA December 11-14 2017, 6 pages.*
